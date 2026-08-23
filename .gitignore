@@ -1,0 +1,18 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node (only if tooling is ever added; the pack itself has no dependencies)
+node_modules/
+npm-debug.log*
+
+# Scratch / local working files — never commit these
+.tmp/
+tmp/
+*.local.*

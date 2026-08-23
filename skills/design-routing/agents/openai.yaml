@@ -1,0 +1,11 @@
+interface:
+  display_name: "Design Routing"
+  short_description: "Design a UI end to end — brief, directions, build, review"
+  default_prompt: "Use design-routing to take this brief through the full design process."
+
+policy:
+  # Implicit invocation is intentionally ENABLED. This is the pack's single entrance:
+  # there is exactly one skill, and it routes to its own references per step. The
+  # eleven references are deliberately not exposed as skills, so there is no second
+  # door to guard and no trigger surface to shrink.
+  allow_implicit_invocation: true
