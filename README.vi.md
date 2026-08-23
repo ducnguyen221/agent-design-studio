@@ -1,0 +1,164 @@
+# agent-design-studio
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**Agent của bạn đã biết viết UI. Đây là thứ dạy nó thiết kế.**
+
+Quy trình bảy bước để một AI coding agent chạy từ đầu đến cuối — tiếp nhận, chọn mức hoàn
+thiện, wireframe, ba hướng thiết kế thật, hệ token, chuyển động, rà soát. Mỗi bước để lại
+một hiện vật trên đĩa. Hai bước dừng lại chờ con người.
+
+🔗 **[ducnguyen221.github.io/agent-design-studio](https://ducnguyen221.github.io/agent-design-studio)** ·
+🇬🇧 **[English](README.md)**
+
+---
+
+## Vì sao có nó
+
+Bảo agent làm một trang landing, bạn nhận được đúng thứ đầu tiên nó nghĩ ra, trong đúng ba
+kiểu nó làm cho tất cả mọi người. Không phải vì mô hình thiếu gu — mà vì không có gì trong
+yêu cầu buộc nó phải *chọn*. Không brief, không phương án để loại bỏ, không sàn chất lượng
+để vượt, và không ai rà soát.
+
+Bộ này cung cấp cả bốn. Nó gồm một skill và mười một tài liệu tham chiếu: một router quyết
+định bước kế tiếp, và các playbook mang phần nghề thật sự — thứ tự ra quyết định, các
+ngưỡng cụ thể, giá trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại và
+đừng làm gì cả.
+
+**Nó tự chứa.** Mỗi năng lực là một "slot": nếu máy bạn đã có công cụ mạnh hơn cho một
+bước, router sẽ dùng nó; nếu không, playbook có sẵn sẽ chạy. Cài mỗi bộ này là đã đủ.
+
+## Bảy bước
+
+| Bước | Làm gì | Hiện vật |
+| --- | --- | --- |
+| **0** Chế độ đích | Sản phẩm tĩnh độc lập, hay một màn hình trong codebase thật. Điều này đổi nghĩa của chữ "xong" | — |
+| **1** Tiếp nhận | Chủ thể, người dùng, và việc duy nhất màn hình này phải làm. Đọc thứ đã có trước đã | `00-brief.md` |
+| **2** Mức hoàn thiện | Cần hoàn thiện tới đâu — quyết định thiết kế đầu tiên | `01-fidelity.md` |
+| **3** Wireframe | Chỉ cấu trúc, cố ý trông chưa xong. Khai báo trạng thái, viewport và luồng bàn phím ngay tại đây | `02-wireframe.html` + `.png` |
+| **4** Hướng thiết kế — **CỔNG** | Ba bản dựng khác nhau thật sự, dựng ra thật. Không bao giờ là một danh sách tính từ | `03-directions/{a,b,c}` + `03-direction-decision.md` |
+| **5** Hệ thiết kế + code | Màu lấy mẫu từ tài sản thật và giải thích được bằng một câu. Rồi mới code | `04-design-system/` + `05-implementation.md` |
+| **6** Chuyển động | Mọi hiệu ứng phải qua bốn cổng hoặc bị từ chối bằng văn bản. Phần bị từ chối cũng là kết quả | `06-motion-spec.md` |
+| **7** Rà soát — **CỔNG** | Chấm trên năm chiều so với sàn cứng. Sửa từng commit một, rồi kiểm lại | `07-uat-report.md` |
+
+Tất cả nằm trong `<dự-án>/design/<ngày>-<slug>/`.
+
+### Khác gì so với việc viết prompt
+
+- **Ba hướng, dựng ra thật.** Không phải ba tính từ để chọn. Ba trang được render thật, tạo
+  ra bởi ba logic cố ý không tương thích nhau để chúng không thể hội tụ, chụp màn hình rồi
+  đặt cạnh nhau. Sau đó quy trình *dừng lại* — chọn hướng nào là quyền của bạn.
+- **Màu được suy ra, không bịa.** Lấy mẫu từ tài sản thương hiệu, ảnh thật, hoặc từ chính
+  thế giới của chủ đề; hội tụ trong không gian màu đều theo cảm nhận; và giải thích bằng
+  một câu. Viết không nổi câu đó nghĩa là bạn đang chép công thức.
+- **Chuyển động phải tự giành lấy chỗ đứng.** Bốn cổng — tần suất, mục đích, tốc độ, chức
+  năng. Kết quả bao gồm cả những gì bị *từ chối* và vì sao. Ở hầu hết giao diện, danh sách
+  đó dài hơn danh sách được chấp nhận.
+- **Một sàn chất lượng không hạ.** Chữ nội dung ≥14px, nhãn ≥12px, tương phản ≥4.5:1, focus
+  nhìn thấy được, thao tác đầy đủ bằng bàn phím, tôn trọng reduced-motion, và mọi trạng
+  thái UI được khai báo ngay từ wireframe — không phải phát hiện lúc rà soát.
+- **Hai cổng mà chế độ tự động không thể lặng lẽ bỏ qua.** Mỗi cổng là một file ở một trong
+  ba trạng thái: `pending`, `human-approved`, hoặc `policy-auto-selected`. Một lần chạy
+  không người trực hoặc là có quyền được cấp và phải ghi rõ lý do, hoặc là dừng lại và nói
+  ra điều đó.
+
+## STATUS.md — trang dành cho tất cả những người còn lại
+
+Mỗi lần chạy đều duy trì một bảng theo dõi một trang: bước nào xong, bước nào đang chờ, chờ
+ai, và đường dẫn tới mọi hiện vật. Viết cho người trả tiền chứ không phải người làm, để
+không ai phải hỏi tiến độ.
+
+## Cài đặt
+
+**Claude Code**
+
+```
+/plugin marketplace add ducnguyen221/agent-design-studio
+/plugin install agent-design-studio
+```
+
+**Codex**
+
+```
+codex plugin marketplace add ducnguyen221/agent-design-studio
+codex plugin add agent-design-studio
+```
+
+**Bất kỳ agent nào đọc được `SKILL.md`**
+
+```bash
+git clone https://github.com/ducnguyen221/agent-design-studio
+cp -r agent-design-studio/skills/design-routing ~/.agents/skills/
+```
+
+Không phụ thuộc thư viện, không cần build, không gọi mạng khi chạy.
+
+## Dùng thế nào
+
+Yêu cầu làm nguyên một giao diện thì nó tự kích hoạt:
+
+> "Làm cho tôi một trang landing cho công cụ đặt lịch."
+> "Thiết kế lại cổng khách hàng — trông cũ quá rồi."
+> "Thiết kế màn hình onboarding trong app React của bọn mình, brief đây."
+
+Hoặc gọi thẳng: `design-routing`.
+
+Nó cố ý đứng ngoài các việc lẻ một bước — phê bình một trang có sẵn, chuyển một thiết kế đã
+duyệt thành HTML, chọn bảng màu, làm biểu đồ, hay dàn trang slide. Những việc đó có công cụ
+phù hợp hơn, và quy trình này sẽ là quá nặng.
+
+## Bên trong có gì
+
+```
+skills/design-routing/
+├── SKILL.md                    router: chế độ, slot, các bước, cổng duyệt, sàn chất lượng
+└── references/
+    ├── ownership-matrix.md     mỗi năng lực đúng một chủ, và bước tiếp nhận
+    ├── choosing-fidelity.md    wireframe / mockup / prototype / production
+    ├── wireframe-playbook.md   chỉ cấu trúc, và hợp đồng trạng thái + viewport
+    ├── prototype-playbook.md   mô hình hoá hành vi thật và trạng thái thật
+    ├── direction-gate.md       ba logic chống hội tụ + thư viện 40 phong cách
+    ├── brand-asset-protocol.md tìm logo và tài sản thật thay vì đoán
+    ├── color-protocol.md       lấy mẫu → hội tụ → lập luận, kèm bảng chroma
+    ├── taste-calibration.md    các lối mòn cần né, và chữ nghĩa là vật liệu thiết kế
+    ├── motion-playbook.md      trọn vòng đời chuyển động, và những gì phải từ chối
+    ├── library-selection.md    chọn thư viện, hoặc không thêm thư viện nào
+    └── uat-report-schema.md    bản rà soát có chấm điểm và sàn cứng
+```
+
+Router chỉ nạp đúng một tài liệu cho bước đang chạy, nên context luôn gọn.
+
+## Trang web này do chính quy trình thiết kế ra
+
+[`docs/index.html`](docs/index.html) được tạo ra bằng cách chạy đủ bảy bước — wireframe, ba
+hướng, một cổng duyệt, bảng màu suy ra được, một lượt chuyển động với tám lần từ chối, và
+một lượt rà soát tìm ra ba lỗi chặn rồi sửa chúng. Trang web trưng chính hiện vật của nó.
+
+Năm cải tiến trong v1.0 đến từ lần chạy đó: một thư viện phong cách đã hứa mà chưa có, một
+luật rằng chuyển động không bao giờ được chặn nội dung hiển thị, và ba chỗ làm rõ. Tự mình
+làm người dùng đầu tiên là cách rà soát rẻ nhất.
+
+## Đóng góp
+
+Hoan nghênh issue và pull request. Luật duy nhất đáng nhớ: **mỗi tài liệu tham chiếu là một
+playbook mà agent thi hành được** — thứ tự ra quyết định, checklist, ngưỡng, bảng biểu. Nếu
+một thay đổi đọc như bài luận, chỗ của nó ở nơi khác.
+
+## Ghi nhận
+
+Quy trình này chắt lọc ý tưởng từ bốn dự án mở. Không đoạn văn nào của họ được sao chép lại
+ở đây — phần lập luận đã được diễn đạt lại bằng ngôn ngữ của chúng tôi — nhưng món nợ là
+thật và cụ thể.
+
+| Dự án | Giấy phép | Đã dạy bộ này điều gì |
+| --- | --- | --- |
+| [emilkowalski/skills](https://github.com/emilkowalski/skills) | MIT | Nghề chuyển động: thứ tự ra quyết định, cổng tần suất, giá trị đường cong và thời lượng, spring và tính ngắt được, và chuẩn mực rằng sự chấp thuận phải giành lấy |
+| [anthropics/skills → `skills/frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) | Apache-2.0 | Hiệu chỉnh chống rập khuôn, phương pháp hai lượt lập-kế-hoạch-rồi-tự-phản-biện, sự tiết chế, và chữ nghĩa được coi là vật liệu thiết kế |
+| [plannotator/effective-html](https://github.com/plannotator/effective-html) | MIT | Chọn mức hoàn thiện trước tiên, wireframe cố ý để dở, prototype mô hình hoá trạng thái thật, và kiến trúc một-cửa-vào |
+| [alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design) | MIT | Cổng ba hướng, giao thức tài sản thương hiệu, phương pháp suy ra màu, và bản phê bình có chấm điểm |
+
+Cảm ơn các tác giả.
+
+## Giấy phép
+
+[MIT](LICENSE) © 2026 Duc Nguyen
