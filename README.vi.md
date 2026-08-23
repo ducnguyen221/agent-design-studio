@@ -81,7 +81,7 @@ không ai phải hỏi tiến độ.
 
 ```
 codex plugin marketplace add ducnguyen221/agent-design-studio
-codex plugin add agent-design-studio
+codex plugin add agent-design-studio@agent-design-studio
 ```
 
 **Bất kỳ agent nào đọc được `SKILL.md`**

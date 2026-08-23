@@ -81,7 +81,7 @@ than the one doing it, so nobody has to ask where things stand.
 
 ```
 codex plugin marketplace add ducnguyen221/agent-design-studio
-codex plugin add agent-design-studio
+codex plugin add agent-design-studio@agent-design-studio
 ```
 
 **Any other agent that reads `SKILL.md`**
