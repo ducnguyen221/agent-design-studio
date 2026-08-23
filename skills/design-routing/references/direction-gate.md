@@ -120,7 +120,11 @@ option, and merging two into one is the failure mode to watch for.
 - **White space must be composition, not absence.** A quiet direction still needs a
   visual anchor in the first screenful and somewhere for the eye to land. Restraint
   taken too far reads as a page that failed to load — a documented way to lose to a
-  plain baseline.
+  plain baseline. Judge each render's **first screenful alone**, not its full-page
+  capture: a direction that only becomes convincing once you have scrolled the whole
+  thing has not won the three seconds it will actually get. See *"Quiet is not bare"* in
+  `taste-calibration.md` for the one-invested-moment-per-viewport rule and the shipped
+  page that failed it.
 - Content-essential imagery uses real images, shared across all three (see the brand
   asset protocol). Only decorative or abstract elements may be CSS or SVG.
 - Self-contained files, saved under `03-directions/`, never in a temp folder.

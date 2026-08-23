@@ -96,6 +96,40 @@ flat — first run, empty states, completion.
 Keyboard-initiated actions are a disqualifier, not a judgment call. Something opened
 hundreds of times a day should open instantly; animation there reads as lag.
 
+**The marketing / showcase branch.** The table above is written for an interface someone
+*works in*. A surface seen **once per visitor** — a landing page, a marketing page, a
+portfolio, a launch page, a docs home — is the far end of the frequency scale, and the
+whole table inverts there:
+
+| | Product interface | Marketing / showcase surface |
+| --- | --- | --- |
+| Frequency | Dozens to hundreds of times | Once, maybe twice, ever |
+| Cost of motion | Paid again on every use | Paid once |
+| Default verdict | Reject unless it earns a place | **Eligible — this is where the delight budget lives** |
+| Entrance choreography | Usually noise | **The point.** A first visit that arrives dead is a wasted first impression |
+| Failure mode to fear | Motion that gets in the way | Motion so timid nobody notices the page moved |
+
+Two consequences worth stating plainly, because the restraint posture in this file is
+otherwise easy to over-apply:
+
+1. **Entrance choreography on a once-seen page is not a violation.** Staggered arrivals,
+   a headline that rises, an element that settles into place — these are legitimate on a
+   surface whose job is to be felt on the first scroll. Purpose-name them *explanation*
+   or *delight*; both are valid at the rare tier. The sub-300ms UI budget still governs
+   every **response to an interaction**, but a scroll entrance is not a response.
+
+2. **The product's own claims must be demonstrated, not stated.** If the page argues that
+   something is fast, smooth, interruptible, or well-crafted, a page that merely *says*
+   so in body copy has made the weaker version of its own argument. Build the live
+   example: the spring beside the linear, the press state you can press, the toggle you
+   can interrupt mid-travel. A demonstrative example is motion with a nameable purpose —
+   *explanation* — and it usually outperforms the paragraph it replaces.
+
+**Rule zero does not bend here, and neither does reduced motion.** The delight budget buys
+choreography, never a page whose words depend on an animation playing. A once-seen surface
+is precisely where a screenshot tool, a crawler, or a reader with reduced motion is most
+likely to be the visitor.
+
 **Gate 2 — Purpose.** Name it in one of these words: **feedback** · **spatial
 consistency** · **state indication** · **preventing a jarring change** · **explanation**
 (marketing and onboarding only) · **delight** (rare tier only). "It looks cool" is not on

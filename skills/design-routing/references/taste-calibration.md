@@ -144,6 +144,46 @@ Two related disciplines:
 Build to a quality floor without announcing it: responsive to mobile, visible keyboard
 focus, reduced motion respected.
 
+### Quiet is not bare
+
+Restraint is a discipline, not a budget cut. The two are easy to confuse because they
+produce similar-looking code and completely different pages: a restrained page has
+decided what to leave out, and a bare page has simply not put anything in.
+
+**The rule: a restrained direction still owes at least one invested, unmistakably
+designed moment per viewport.** Not per page — per *viewport*. Something in every screenful
+a visitor scrolls past has to be visibly the work of someone who cared: a real
+compositional idea, a piece of colour doing something, a considered image or object, type
+set at a size that took nerve, a detail that could not have been produced by a default
+stylesheet. Whitespace, hairlines, and a grid are the *frame* around that moment. They are
+not the moment.
+
+**The canonical failure.** A page whose skeleton was a bordered sheet divided into a grid
+of hairline cells, each holding a short paragraph, with generous white space between
+sections and almost no colour. Every measurable check passed. It scored respectably. Then
+its own owner looked at the live page and read it not as a designed website but as a
+wireframe someone had forgotten to finish — cells chopped into boxes, no colour, nothing
+that felt paid for. The grid was doing the work an idea should have been doing, and even
+spacing everywhere produced one flat rhythm with no accent in it.
+
+Three checks that catch it before a stranger does:
+
+- **Point at the moment.** For each viewport, name the one thing you invested in. If the
+  answer is "the spacing is nice" or "the type is clean" for three viewports running, the
+  page is bare.
+- **Vary the rhythm.** If every section is the same height, the same density, and the same
+  distance apart, the page has no emphasis — and a page with no emphasis reads as a
+  document. Composition means some things are bigger, closer, denser, louder.
+- **Emptiness must be composed.** Space is a design decision when something is placed
+  against it. Space around evenly-distributed small elements is just a page that has not
+  been filled in.
+
+A minimal direction is the *hardest* one to execute, not the cheapest — there is nothing
+to hide behind and every remaining decision is exposed. Choosing it commits you to more
+precision, not less effort. When a quiet direction cannot carry one invested moment per
+viewport, the honest conclusion is that the direction was wrong for this brief, not that
+the page needs another round of tightening.
+
 **Some directions cost more to make accessible. Choose them knowing that.** Fine-technical
 registers — drafting sheets, terminal interfaces, dense data displays, archival labels —
 get much of their character from very small monospace labels, 9 or 10 pixels, tightly

@@ -38,6 +38,32 @@ Declared at Step 3, verified here. Every row is checked at all three viewports.
 - [ ] Every named brand's real logo is present; no product drawn as a CSS silhouette.
 - [ ] Meaning never carried by color alone.
 
+### Perceived finish — public and marketing deliverables only
+
+One more floor row, and it is not measurable with a ruler. It applies whenever the
+deliverable is **public-facing**: a marketing page, a landing page, a portfolio, a docs
+home, anything a stranger will judge in the first second.
+
+- [ ] **The three-second test.** Show the **first viewport only** — not the full-page
+      capture — to a cold eye for three seconds, then take it away. Ask one question:
+      *did that read as an invested, finished product page, or as a document, a spec, or
+      an unfinished wireframe?* A "document" answer is a **fail**, and it blocks Gate 2
+      exactly like a contrast failure does.
+
+Capture the first-viewport frame at the real desktop height (roughly 1900×940, not a
+tall stitched screenshot) and look at that frame, because that is the only frame most
+visitors will ever see. A full-page render flatters a page: it shows the whole argument
+at once and hides the fact that the opening screen was thin.
+
+**A quiet direction must still pass this.** Restraint is not an exemption — see *"Quiet is
+not bare"* in the taste calibration reference. The failure this row exists to catch is a
+page that is correct on every measurable row, scores respectably, and still reads to its
+own owner as an unfinished draft.
+
+If you cannot get a cold eye, simulate one honestly: look at the first-viewport frame
+after doing something else, describe out loud what it *is* before what it *says*, and
+write the answer into the report verbatim — including when the answer is unflattering.
+
 A failure here blocks Gate 2 regardless of how well the design scores below.
 
 ## Six dimensions, scored 0–10
@@ -78,6 +104,12 @@ Equal spacing between equivalent elements. Controlled color count — one primar
 secondary, one accent, plus a neutral ramp. At most two type families, with variation
 carried by weight and size. Precise edge alignment.
 
+**Craft floor for public deliverables: below 8 blocks shipping.** Craft is where "correct
+but unfinished" shows up, and it is the dimension most easily waved through because
+nothing on the hard floor is red. On a public-facing surface a 7 means *known rhythm,
+spacing, or finish problems are going out the door where strangers will see them* — fix
+them or do not ship. Internal artifacts, wireframes, and working prototypes are exempt.
+
 **4. Function.** Every element earns its place: *remove it — is the design worse?* If not,
 remove it. The primary action sits where the eye lands first. Information density matches
 the medium and the viewing distance.
@@ -92,6 +124,12 @@ Overall is the weighted read, not a mean: **8.0+** excellent · **6.0–7.9** go
 **4.0–5.9** needs work · **below 4.0** not acceptable. Concept ≤5 caps it at 6.0
 regardless.
 
+Two blocks sit on top of the bands, and both apply only to public-facing work: the
+three-second test must pass, and **Craft must be 8 or higher**. A respectable overall
+score does not buy passage past either. Passing a deliverable *because the total looked
+fine* while its lowest dimension was the one a visitor sees first is the specific mistake
+these two rules exist to stop.
+
 ## The report
 
 ```markdown
@@ -102,13 +140,18 @@ regardless.
 ## Hard floor
 PASS / FAIL — <failing rows listed, each with file:line and viewport>
 
+## Three-second test  (public/marketing deliverables only)
+Frame judged: <first-viewport capture path, at the real desktop height>
+Cold-eye verdict: <"invested product page" | "document" | "wireframe"> — <one honest line>
+PASS / FAIL
+
 ## Scores
 | Dimension | Score | One-line evidence |
 |---|---|---|
 | Concept | /10 | <the idea, in one sentence — or the absence of one> |
 | Direction consistency | /10 | |
 | Visual hierarchy | /10 | |
-| Craft | /10 | |
+| Craft | /10 | <public deliverable? below 8 blocks shipping> |
 | Function | /10 | |
 | Originality | /10 | |
 | **Overall** | **/10** | <band, and whether the concept cap applied> |
