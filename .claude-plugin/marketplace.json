@@ -1,0 +1,21 @@
+{
+  "name": "agent-design-studio",
+  "description": "A design-studio process for AI coding agents — brief to reviewed interface in seven steps.",
+  "owner": {
+    "name": "Duc Nguyen",
+    "url": "https://ducnguyen.vn"
+  },
+  "plugins": [
+    {
+      "name": "agent-design-studio",
+      "description": "Seven-step UI/UX design process: intake, fidelity, wireframe, three real directions, design system, motion, review. One artifact per step, two human gates.",
+      "version": "1.0.0",
+      "source": "./",
+      "license": "MIT",
+      "author": {
+        "name": "Duc Nguyen",
+        "url": "https://ducnguyen.vn"
+      }
+    }
+  ]
+}
