@@ -1,20 +1,21 @@
 ---
 name: design-routing
-description: Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Not for narrow single-step asks: critiquing an existing page, converting an approved design to HTML, picking only a palette or font, charts and data visualizations, slide layout, or generating design images.
+description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Not for narrow single-step asks: critiquing an existing page, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, tuning the layout of an existing deck, or generating standalone images."
 ---
 
 # Design Routing
 
 The single entrance to a seven-step design process. This file is a router: it decides
-the mode, orders the steps, holds the two approval gates, and loads exactly one
-reference per step. The substance lives in `references/`.
+the mode, orders the steps, holds the two approval gates, and loads only the current
+step's references. The substance lives in `references/`.
 
 **Core rule: no step starts before the one before it produced its artifact.** Skipping
 forward is how interfaces end up beautiful and wrong, or correct and forgettable.
 
 ## Step 0 — Set the target mode
 
-Decide before anything else. It changes what "done" means.
+Decide before anything else. Step 0 is mode-setting preflight, not one of the seven
+steps — it changes what "done" means for all seven.
 
 | Mode | When | Deliverable |
 | --- | --- | --- |
@@ -42,11 +43,16 @@ and record the choice in `STATUS.md`.
 | `taste-canon` | Use it as the anti-generic authority for Step 5 | `references/taste-calibration.md` |
 | `visual-reviewer` | Use it to drive the Step 7 fix loop | `references/uat-report-schema.md` |
 | `static-lint` | Run it as a mechanical pre-pass in Step 7 | Skip; the manual checklist still applies |
-| `browser` | Screenshot and interact for every render step | Ask the user to open the file and describe or paste back |
+| `browser` | Screenshot and interact for every render step | Renders cannot be verified — mark the affected checks `unverified`, hold the gate at `pending`, and say so |
 
 **One owner per capability.** A second skill covering the same ground is a checker that
 reports findings, never a second author who edits. Two authors on one surface produce
 drift, not quality.
+
+**A verbal description is never visual verification.** With no browser or screenshot
+capability, asking the user what they see collects useful information but closes nothing:
+the render checks stay `unverified` and their gate stays `pending` until something
+actually looks at the rendered result.
 
 ## The seven steps
 
@@ -64,7 +70,8 @@ Do not preload references for later steps.
 | 7 | Review loop | `uat-report-schema.md` | `07-uat-report.md` |
 
 Step 2 may route to `prototype-playbook.md` instead of a wireframe when the open question
-is behavior rather than structure. Step 5 in `existing-product` mode also loads
+is behavior rather than structure; Step 3's artifact is then `02-prototype.html` + `.png`,
+replacing `02-wireframe`. Step 5 in `existing-product` mode also loads
 `library-selection.md` when a new dependency is on the table.
 
 All artifacts live in one folder: `<project>/design/<YYYY-MM-DD>-<slug>/`.
@@ -99,8 +106,8 @@ Declared at Step 3 and re-checked at every step after. Not a Step 7 afterthought
   Escape, and return focus to whatever opened them.
 - **Legibility.** Body text ≥14px, labels and captions ≥12px, text contrast ≥4.5:1.
   Never signal state with color alone.
-- **Reduced motion.** Honored wherever motion exists, as a gentler variant rather than
-  nothing.
+- **Reduced motion.** Honored wherever motion exists: reduce or remove non-essential
+  motion; preserve state feedback.
 
 A direction that only works by breaking this floor is not a direction; it is a defect.
 
@@ -116,7 +123,7 @@ Mode: static-artifact | existing-product · Updated: YYYY-MM-DD
 |---|---|---|---|
 | 1 Intake | done | 00-brief.md | — |
 | 2 Fidelity | done | 01-fidelity.md | — |
-| 3 Wireframe | done | 02-wireframe.png | — |
+| 3 Wireframe | done | 02-wireframe.png (or 02-prototype.png) | — |
 | 4 Direction | GATE 1: pending | 03-directions/ | your choice of A / B / C |
 | 5 System + build | not started | — | gate 1 |
 | 6 Motion | not started | — | step 5 |
@@ -137,6 +144,10 @@ Mode: static-artifact | existing-product · Updated: YYYY-MM-DD
 - Any gate file that does not exist while its step is marked done.
 
 ## Scope
+
+Designing a new deck, report, or infographic as a whole surface is in scope — it runs in
+`static-artifact` mode like any other one-off artifact. Polishing one that already exists
+is not.
 
 This process is for designing an interface. It is not a way to run a whole product
 discovery, and it does not replace engineering review of the code it produces. When the

@@ -24,9 +24,9 @@ This pack supplies all four. It is one skill and eleven references: a router tha
 what happens next, and playbooks that carry the actual craft — decision orders, thresholds,
 curve values, colour maths, and the parts that tell the agent to stop and build nothing.
 
-**It is self-contained.** Every capability is a slot: if your setup has a stronger
-specialist for a step, the router uses it; if not, the built-in playbook runs. Installing
-this pack alone is a complete setup.
+**Every capability is a slot.** If your setup has a stronger specialist for a step, the
+router uses it; if not, the built-in playbook runs. No second pack is required to get the
+whole process.
 
 ## The seven steps
 
@@ -39,7 +39,7 @@ this pack alone is a complete setup.
 | **4** Direction — **GATE** | Three genuinely different renders, built for real. Never a written menu of adjectives | `03-directions/{a,b,c}` + `03-direction-decision.md` |
 | **5** System + build | Colour sampled from real assets and justified in one sentence. Then the code | `04-design-system/` + `05-implementation.md` |
 | **6** Motion | Every animation passes four gates or is refused in writing. Refusals are part of the output | `06-motion-spec.md` |
-| **7** Review — **GATE** | Scored on five dimensions against a hard floor. Fixed one commit at a time, then verified | `07-uat-report.md` |
+| **7** Review — **GATE** | Scored on six dimensions against a hard floor. Fixed one commit at a time, then verified | `07-uat-report.md` |
 
 Everything lands in `<project>/design/<date>-<slug>/`.
 
@@ -91,21 +91,27 @@ git clone https://github.com/ducnguyen221/agent-design-studio
 cp -r agent-design-studio/skills/design-routing ~/.agents/skills/
 ```
 
-No dependencies, no build step, no network calls at runtime.
+No package dependencies and no build step. A browser is what turns renders into verified
+renders — without one, visual checks stay `unverified` and the gates stay `pending`. The
+process reaches the network in two places by design: verifying that a product or exemplar
+really exists, and downloading real brand assets instead of guessing at them.
 
 ## Using it
 
-Ask for a whole interface and it triggers on its own:
+On whole-interface asks it usually triggers on its own:
 
 > "Build me a landing page for our scheduling tool."
 > "Redesign the customer portal — it looks dated."
 > "Design the onboarding screen in our React app, here's the brief."
 
-Or invoke it directly: `design-routing`.
+When many design skills are installed, invoking `design-routing` directly is the reliable
+path.
 
 It deliberately stays out of narrow single-step work — critiquing an existing page,
-converting an approved design to HTML, picking a palette, charts, or slide layout. Those
-have better-suited tools, and this process would be overkill.
+converting an approved design to HTML, picking a palette, drawing charts, or tuning the
+layout of an existing deck. Those have better-suited tools, and this process would be
+overkill. Designing a new deck, report, or infographic as a whole surface is a different
+matter: that is in scope, and runs in static-artifact mode.
 
 ## What's inside
 
@@ -126,7 +132,7 @@ skills/design-routing/
     └── uat-report-schema.md    the scored review and the hard floor
 ```
 
-The router loads exactly one reference per step, so context stays lean.
+The router loads only the current step's references, so context stays lean.
 
 ## This site was designed by the process
 
@@ -146,8 +152,9 @@ change reads like an essay, it belongs somewhere else.
 
 ## Acknowledgments
 
-This process distils ideas from four open projects. None of their text is reproduced here —
-the reasoning was re-expressed in our own words — but the debt is real and specific.
+This process distils ideas from four open projects. The reasoning was re-expressed in our
+own words rather than copied; the specific thresholds and values we learned from them are
+used with gratitude. The debt is real and specific.
 
 | Project | License | What it taught this pack |
 | --- | --- | --- |

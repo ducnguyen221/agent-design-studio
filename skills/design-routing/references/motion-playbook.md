@@ -214,7 +214,8 @@ deliberately playful interaction.
 }
 ```
 
-Reduced motion means **fewer and gentler**, not zero. Two adjacent preferences deserve the
+Reduced motion means **reduce or remove non-essential motion; preserve state feedback** —
+never withhold the answer to what the user just did. Two adjacent preferences deserve the
 same care: reduced transparency (solid surfaces, no blur) and increased contrast
 (near-solid backgrounds, defined borders). Also avoid full-viewport moving backgrounds,
 slow looping oscillation near one cycle per five seconds, and abrupt brightness jumps.
@@ -306,7 +307,7 @@ regression.
 | Shorthand transform props under load | The full transform string |
 | A parent custom property driving child transforms | `transform` on the element itself |
 | Ungated `:hover` motion | Gate on fine pointer + real hover |
-| Missing reduced-motion handling | A gentler variant, not zero |
+| Missing reduced-motion handling | Reduce or remove non-essential motion; preserve state feedback |
 | Symmetric timing on press-and-hold | Slow the deliberate phase, snap the response |
 | Everything entering at once | 30–80ms stagger |
 

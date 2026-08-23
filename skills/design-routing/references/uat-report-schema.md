@@ -11,7 +11,7 @@ Output: `07-uat-report.md` (and `.json` when a machine will read it).
    that in the report; the manual checks below still apply.
 2. **Hard floor check.** The pass/fail list below. Any failure is a defect, not a
    suggestion.
-3. **Five-dimension critique.** Scored, with evidence.
+3. **Six-dimension critique.** Scored, with evidence.
 4. **Motion review.** Run the motion playbook's review bar against Step 6's output.
 5. **Fix, one issue at a time.** Each fix is its own commit with a before/after
    screenshot. Never batch unrelated fixes — when something regresses, you need to know
@@ -40,7 +40,7 @@ Declared at Step 3, verified here. Every row is checked at all three viewports.
 
 A failure here blocks Gate 2 regardless of how well the design scores below.
 
-## Five dimensions, scored 0–10
+## Six dimensions, scored 0–10
 
 Score with evidence, not adjectives. Every score cites something specific.
 

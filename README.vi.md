@@ -25,8 +25,8 @@ Bộ này cung cấp cả bốn. Nó gồm một skill và mười một tài li
 ngưỡng cụ thể, giá trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại và
 đừng làm gì cả.
 
-**Nó tự chứa.** Mỗi năng lực là một "slot": nếu máy bạn đã có công cụ mạnh hơn cho một
-bước, router sẽ dùng nó; nếu không, playbook có sẵn sẽ chạy. Cài mỗi bộ này là đã đủ.
+**Mỗi năng lực là một "slot".** Nếu máy bạn đã có công cụ mạnh hơn cho một bước, router sẽ
+dùng nó; nếu không, playbook có sẵn sẽ chạy. Không cần bộ thứ hai để có đủ quy trình.
 
 ## Bảy bước
 
@@ -39,7 +39,7 @@ bước, router sẽ dùng nó; nếu không, playbook có sẵn sẽ chạy. C�
 | **4** Hướng thiết kế — **CỔNG** | Ba bản dựng khác nhau thật sự, dựng ra thật. Không bao giờ là một danh sách tính từ | `03-directions/{a,b,c}` + `03-direction-decision.md` |
 | **5** Hệ thiết kế + code | Màu lấy mẫu từ tài sản thật và giải thích được bằng một câu. Rồi mới code | `04-design-system/` + `05-implementation.md` |
 | **6** Chuyển động | Mọi hiệu ứng phải qua bốn cổng hoặc bị từ chối bằng văn bản. Phần bị từ chối cũng là kết quả | `06-motion-spec.md` |
-| **7** Rà soát — **CỔNG** | Chấm trên năm chiều so với sàn cứng. Sửa từng commit một, rồi kiểm lại | `07-uat-report.md` |
+| **7** Rà soát — **CỔNG** | Chấm trên sáu chiều so với sàn cứng. Sửa từng commit một, rồi kiểm lại | `07-uat-report.md` |
 
 Tất cả nằm trong `<dự-án>/design/<ngày>-<slug>/`.
 
@@ -91,21 +91,27 @@ git clone https://github.com/ducnguyen221/agent-design-studio
 cp -r agent-design-studio/skills/design-routing ~/.agents/skills/
 ```
 
-Không phụ thuộc thư viện, không cần build, không gọi mạng khi chạy.
+Không phụ thuộc gói thư viện nào, không cần bước build. Trình duyệt mới là thứ biến bản
+dựng thành bản đã được kiểm chứng — không có nó, các mục kiểm tra thị giác nằm ở
+`unverified` và các cổng nằm ở `pending`. Quy trình có chủ đích gọi mạng ở hai chỗ: xác
+minh một sản phẩm hay ví dụ tham chiếu có thật, và tải tài sản thương hiệu thật thay vì
+đoán.
 
 ## Dùng thế nào
 
-Yêu cầu làm nguyên một giao diện thì nó tự kích hoạt:
+Với yêu cầu làm nguyên một giao diện, nó thường tự kích hoạt:
 
 > "Làm cho tôi một trang landing cho công cụ đặt lịch."
 > "Thiết kế lại cổng khách hàng — trông cũ quá rồi."
 > "Thiết kế màn hình onboarding trong app React của bọn mình, brief đây."
 
-Hoặc gọi thẳng: `design-routing`.
+Khi trong máy có nhiều skill thiết kế, gọi thẳng `design-routing` là đường chắc chắn nhất.
 
 Nó cố ý đứng ngoài các việc lẻ một bước — phê bình một trang có sẵn, chuyển một thiết kế đã
-duyệt thành HTML, chọn bảng màu, làm biểu đồ, hay dàn trang slide. Những việc đó có công cụ
-phù hợp hơn, và quy trình này sẽ là quá nặng.
+duyệt thành HTML, chọn bảng màu, vẽ biểu đồ, hay chỉnh bố cục một bộ slide đã có. Những
+việc đó có công cụ phù hợp hơn, và quy trình này sẽ là quá nặng. Thiết kế mới một bộ slide,
+một báo cáo hay một infographic như nguyên một sản phẩm thì lại khác: việc đó nằm trong
+phạm vi, và chạy ở chế độ static-artifact.
 
 ## Bên trong có gì
 
@@ -126,7 +132,7 @@ skills/design-routing/
     └── uat-report-schema.md    bản rà soát có chấm điểm và sàn cứng
 ```
 
-Router chỉ nạp đúng một tài liệu cho bước đang chạy, nên context luôn gọn.
+Router chỉ nạp tài liệu của bước đang chạy, nên context luôn gọn.
 
 ## Trang web này do chính quy trình thiết kế ra
 
@@ -146,9 +152,9 @@ một thay đổi đọc như bài luận, chỗ của nó ở nơi khác.
 
 ## Ghi nhận
 
-Quy trình này chắt lọc ý tưởng từ bốn dự án mở. Không đoạn văn nào của họ được sao chép lại
-ở đây — phần lập luận đã được diễn đạt lại bằng ngôn ngữ của chúng tôi — nhưng món nợ là
-thật và cụ thể.
+Quy trình này chắt lọc ý tưởng từ bốn dự án mở. Phần lập luận đã được diễn đạt lại bằng
+ngôn ngữ của chúng tôi chứ không sao chép; những ngưỡng và giá trị cụ thể học được từ họ
+thì được dùng với lòng biết ơn. Món nợ là thật và cụ thể.
 
 | Dự án | Giấy phép | Đã dạy bộ này điều gì |
 | --- | --- | --- |

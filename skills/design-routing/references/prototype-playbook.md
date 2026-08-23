@@ -4,6 +4,7 @@ Used at Step 3 instead of a wireframe when the open question is behavior, and ag
 Step 5 when the deliverable is an interactive artifact rather than production code.
 
 Output: a self-contained `.html` file plus screenshots, recorded in the step's artifact.
+At Step 3 that artifact is `02-prototype.html` + `.png`, replacing `02-wireframe`.
 
 ## Two modes, one skill
 

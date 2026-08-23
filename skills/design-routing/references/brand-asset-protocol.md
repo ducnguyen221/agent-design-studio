@@ -96,6 +96,15 @@ from a mockup generator.
 Verify each download is a real file: check the type, and confirm a supposed SVG actually
 begins with an SVG tag rather than an HTML error page.
 
+**Authenticity is not permission.** The orders above rank sources by how likely the asset
+is to be the *real* mark. They say nothing about the right to reuse it — an official press
+page settles authenticity and may still restrict redistribution, modification, or
+commercial use. When reuse rights are unclear, do not embed the asset: use a clearly
+marked placeholder in its place, and record the gap in `assets-manifest.md` under
+*Missing, and how it is handled*, naming what was found and what is unresolved. This
+pack's MIT license covers the pack itself, never third-party brand assets that end up in
+an output — those carry whatever terms their owner sets.
+
 ### 4 — Quality bar for everything except logos
 
 Logos are pass/fail: if one exists you use it, whatever its quality, because it is the
