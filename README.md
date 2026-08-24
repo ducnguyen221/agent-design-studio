@@ -98,6 +98,10 @@ really exists, and downloading real brand assets instead of guessing at them.
 
 ## Using it
 
+**→ [GUIDE.md](GUIDE.md) — how to brief it well**: the six inputs that matter,
+fill-in prompt templates, what to say at the two checkpoints, and where to find
+inspiration. Five minutes that change the quality of everything it builds for you.
+
 On whole-interface asks it usually triggers on its own:
 
 > "Build me a landing page for our scheduling tool."

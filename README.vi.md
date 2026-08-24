@@ -99,6 +99,10 @@ minh một sản phẩm hay ví dụ tham chiếu có thật, và tải tài s�
 
 ## Dùng thế nào
 
+**→ [GUIDE.vi.md](GUIDE.vi.md) — cách ra đề cho tốt**: sáu đầu vào quyết định
+chất lượng, mẫu prompt điền-vào-chỗ-trống, nói gì ở hai điểm chốt, và tìm cảm hứng
+ở đâu. Năm phút đọc đổi lấy chất lượng của mọi thứ nó dựng cho bạn.
+
 Với yêu cầu làm nguyên một giao diện, nó thường tự kích hoạt:
 
 > "Làm cho tôi một trang landing cho công cụ đặt lịch."
