@@ -1,0 +1,25 @@
+name: verify example
+
+# The published run at docs/example/ is a frozen fixture. This is what keeps it
+# frozen: any change to it has to prove the artifacts, links, images, path shape
+# and accessibility floor still hold.
+on:
+  push:
+    paths:
+      - 'docs/example/**'
+      - '.github/workflows/verify-example.yml'
+  pull_request:
+    paths:
+      - 'docs/example/**'
+      - '.github/workflows/verify-example.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify the example fixture
+        run: python docs/example/verify.py
