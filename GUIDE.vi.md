@@ -71,6 +71,12 @@ có trang tình trạng viết cho người không đọc code, và một file c
   [Mobbin](https://mobbin.com) cho pattern UI ứng dụng.
 - **Chính thế giới của chủ đề.** Hướng hay nhất thường đến từ đời thật của lĩnh vực —
   bao bì của hãng cà phê, giấy tờ của phòng khám, poster của lễ hội. Chỉ cho agent xem.
+- **Một lần chạy hoàn chỉnh của chính quy trình này** — [`docs/example/`](docs/example/),
+  công bố tại
+  [ducnguyen.vn/agent-design-studio/example](https://ducnguyen.vn/agent-design-studio/example/).
+  Hữu ích theo kiểu khác với gallery: nó cho thấy một bản brief, một quyết định chọn hướng
+  và một báo cáo rà soát khi viết tử tế thì trông ra sao — để bạn hình dung được dáng của
+  một câu trả lời tốt trước khi tự viết.
 
 Chọn một-hai tham chiếu thôi, đừng mười. Đống link trộn lại thành nhờ nhờ;
 một ví dụ bạn thật sự thích cho agent thứ để mổ xẻ.

@@ -148,6 +148,13 @@ Five improvements in v1.0 came from that run: a style catalogue that was promise
 missing, a rule that motion must never gate content availability, and three clarifications.
 Being the first user is the cheapest review there is.
 
+**The whole run is published**, including the version a person turned down:
+[**browse it**](https://ducnguyen.vn/agent-design-studio/example/), or read the files in
+[`docs/example/`](docs/example/). The brief, the wireframe, three directions that still
+run in a browser, the design system, the motion spec with its refusals, and three review
+reports — one of which passed a page that was rejected an hour later. Every change made
+before publishing is listed in [`docs/example/ABOUT.md`](docs/example/ABOUT.md).
+
 ## Contributing
 
 Issues and pull requests welcome. The one rule that matters: **every reference is a

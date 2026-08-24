@@ -74,6 +74,11 @@ and a file for every step.
 - **Your own field.** The best directions often come from the subject's real world —
   a coffee brand's packaging, a clinic's paperwork, a festival's posters. Point the
   agent at them.
+- **A finished run of this process** — [`docs/example/`](docs/example/), published at
+  [ducnguyen.vn/agent-design-studio/example](https://ducnguyen.vn/agent-design-studio/example/).
+  Useful in a different way from a gallery: it shows what a brief, a direction decision and
+  a review report actually look like when written well, so you can see the shape of a good
+  answer before you write your own.
 
 Pick one or two references, not ten. A pile of links averages into mush; one loved
 example gives the agent something to dissect.

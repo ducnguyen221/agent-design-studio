@@ -148,6 +148,13 @@ Năm cải tiến trong v1.0 đến từ lần chạy đó: một thư viện ph
 luật rằng chuyển động không bao giờ được chặn nội dung hiển thị, và ba chỗ làm rõ. Tự mình
 làm người dùng đầu tiên là cách rà soát rẻ nhất.
 
+**Toàn bộ lần chạy đã được công bố**, kể cả bản bị người duyệt từ chối:
+[**xem tại đây**](https://ducnguyen.vn/agent-design-studio/example/), hoặc đọc file trong
+[`docs/example/`](docs/example/). Bản brief, wireframe, ba phương án vẫn chạy được trong
+trình duyệt, hệ thiết kế, bản đặc tả chuyển động kèm những lần từ chối, và ba báo cáo rà
+soát — trong đó có một bản cho qua chính trang mà một giờ sau bị bác. Mọi thay đổi trước
+khi công bố đều liệt kê ở [`docs/example/ABOUT.md`](docs/example/ABOUT.md).
+
 ## Đóng góp
 
 Hoan nghênh issue và pull request. Luật duy nhất đáng nhớ: **mỗi tài liệu tham chiếu là một
