@@ -20,7 +20,7 @@ kiểu nó làm cho tất cả mọi người. Không phải vì mô hình thi�
 yêu cầu buộc nó phải *chọn*. Không brief, không phương án để loại bỏ, không sàn chất lượng
 để vượt, và không ai rà soát.
 
-Bộ này cung cấp cả bốn. Nó gồm một skill và mười một tài liệu tham chiếu: một router quyết
+Bộ này cung cấp cả bốn. Nó gồm một skill và mười hai tài liệu tham chiếu: một router quyết
 định bước kế tiếp, và các playbook mang phần nghề thật sự — thứ tự ra quyết định, các
 ngưỡng cụ thể, giá trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại và
 đừng làm gì cả.
@@ -129,6 +129,7 @@ skills/design-routing/
     ├── prototype-playbook.md   mô hình hoá hành vi thật và trạng thái thật
     ├── direction-gate.md       ba logic chống hội tụ + thư viện 40 phong cách
     ├── brand-asset-protocol.md tìm logo và tài sản thật thay vì đoán
+    ├── image-sourcing.md       ảnh là nội dung hay trang trí, và chứng minh nguồn từng tấm
     ├── color-protocol.md       lấy mẫu → hội tụ → lập luận, kèm bảng chroma
     ├── taste-calibration.md    các lối mòn cần né, và chữ nghĩa là vật liệu thiết kế
     ├── motion-playbook.md      trọn vòng đời chuyển động, và những gì phải từ chối

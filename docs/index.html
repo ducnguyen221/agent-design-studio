@@ -221,8 +221,16 @@ h1 em{font-style:normal;color:var(--mark);white-space:nowrap}
 h1 em.ink{position:relative;display:inline-block}
 .shut{position:absolute;left:-0.05em;right:-0.02em;top:-0.30em;bottom:-0.34em;
   background:var(--stage-900);display:block;transform-origin:right center}
-.herorow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,580px);
+.herorow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,640px);
   gap:clamp(24px,4vw,64px);align-items:start;margin-top:clamp(26px,3vw,44px)}
+/* The upper-right was the frame's thinnest region: the headline stops at 24ch and
+   the specimens sat low, leaving a quiet corner with nothing to hold it. Widening
+   the right column starts the stack further left, and lifting it closes the
+   vertical gap toward the headline. Layout only -- the deal choreography animates
+   the plates relative to wherever they land, so its values are untouched. */
+@media (min-width:1081px){
+  .stackwrap{margin-top:clamp(-64px,-3.4vw,-34px)}
+}
 .sub{color:var(--chalk-2);font-size:clamp(16px,1.15vw,19px);max-width:52ch}
 .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:var(--s3)}
 .btn{font:500 13px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;
@@ -291,7 +299,7 @@ h1 em.ink{position:relative;display:inline-block}
    rhythm the v1 page was rejected for. */
 .bandhead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,480px);
   gap:clamp(20px,3.4vw,72px);align-items:end}
-.bandhead h2{max-width:22ch}
+.bandhead h2{max-width:24ch}
 .bandhead.tall{align-items:start}
 .bandhead .lead{margin-top:0}
 @media (max-width:1080px){.bandhead{grid-template-columns:minmax(0,1fr);gap:var(--s3)}
@@ -465,10 +473,6 @@ blockquote cite{display:block;margin-top:14px;font:500 12px/1 var(--mono);letter
 pre{margin:0;padding:18px;font:13px/1.9 var(--mono);color:var(--chalk);overflow-x:auto;
   background:var(--stage-950)}
 pre span{color:var(--mark)}
-.ph{display:inline-flex;align-items:center;gap:10px;margin-top:var(--s3);
-  font:500 12px/1.5 var(--mono);letter-spacing:.05em;color:var(--chalk-3)}
-.ph b{background:transparent;border:1px solid var(--mark);color:var(--mark);
-  padding:5px 8px;border-radius:2px;letter-spacing:.1em;flex:none}
 
 /* ================= who ================= */
 .who{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);
@@ -500,6 +504,13 @@ footer .lbl{color:var(--mark)}
   .steprow{grid-template-columns:84px minmax(0,1fr)}
   .ldr{display:none}
   .stepart{grid-column:2;text-align:left;margin-top:14px;white-space:normal}
+}
+@media (max-width:480px){
+  /* Directive 1's plain-language lead runs four lines longer than the jargon it
+     replaced, pushing the specimen captions under the fold at 390x844. One step
+     off the hero's top padding buys them back without shortening the copy. */
+  .hero{padding-top:12px}
+  h1{margin-top:var(--s2)}
 }
 @media (max-width:720px){
   .navlinks{display:none}
@@ -631,6 +642,7 @@ footer .lbl{color:var(--mark)}
       <div>
         <p class="kicker lbl" data-i18n="k2">02 — movement, running</p>
         <h2 data-i18n="h2b">Movement has to earn its place. Here it is, running.</h2>
+        <p class="rm-note" data-i18n="rmnote">Your device asks for less movement, so everything this page would have animated on its own is switched off. The four examples below still work, because they only move when you press them — that is the difference between movement you asked for and movement you did not.</p>
       </div>
       <div>
         <p class="lead" data-i18n="leadb">Everything that moved on your way down this page was written down first, with a reason. Below are four of the rules behind it, built as things you can press instead of claims you have to take on trust. A page that sells this and then only describes it has made the weaker version of its own case.</p>
@@ -642,7 +654,6 @@ footer .lbl{color:var(--mark)}
         </div>
       </div>
     </div>
-    <p class="rm-note" data-i18n="rmnote">Your device asks for less movement, so everything this page would have animated on its own is switched off. The four examples below still work, because they only move when you press them — that is the difference between movement you asked for and movement you did not.</p>
 
     <div class="rigs">
 
@@ -705,7 +716,7 @@ footer .lbl{color:var(--mark)}
         <p class="kicker lbl" data-i18n="k3">03 — what you get</p>
         <h2 data-i18n="h2c">Every run leaves a folder you can open</h2>
       </div>
-      <p class="lead" data-i18n="leadc">Twelve files, in the order they were made. None of them is a summary of work that happened somewhere you cannot see — each one is the work. The two marked below are the two places where you decided, and they carry your decision and your name.</p>
+      <p class="lead" data-i18n="leadc">Thirteen files, in the order they were made. None of them is a summary of work that happened somewhere you cannot see — each one is the work. The two marked below are the two places where you decided, and they carry your decision and your name.</p>
     </div>
     <div class="trail">
       <div class="sheet">
@@ -714,6 +725,7 @@ footer .lbl{color:var(--mark)}
           <b>00-brief.md</b><br><b>01-fidelity.md</b><br>
           <b>02-wireframe</b>.html + .png<br>
           <b>03-directions/</b>{a,b,c}.html + .png<br>
+          <b>03-compare.html</b><br>
           <b>03-direction-decision.md</b> <u>← gate 1</u><br>
           <b>04-design-system/</b>tokens.json<br>
           &nbsp;&nbsp;&nbsp;&nbsp;components.md<br>
@@ -774,7 +786,7 @@ footer .lbl{color:var(--mark)}
         <p class="kicker lbl" data-i18n="k5">05 — install</p>
         <h2 data-i18n="h2e">Install</h2>
       </div>
-      <p class="lead" data-i18n="leade">Two ready-made ways in, or copy the folder straight into any agent that can read a <code>SKILL.md</code>. Eleven reference documents and one router. Nothing to run in the background, nothing else to install.</p>
+      <p class="lead" data-i18n="leade">Two ready-made ways in, or copy the folder straight into any agent that can read a <code>SKILL.md</code>. Twelve reference documents and one router. Nothing to run in the background, nothing else to install.</p>
     </div>
     <div class="inst">
       <div class="pane"><h3>Claude Code</h3><pre><span>/</span>plugin marketplace add ducnguyen221/agent-design-studio
@@ -858,7 +870,7 @@ const I18N={vi:{
  rdr:"<b>Lật ngược cả hai khi chúng còn đang chạy.</b> Cái trên quay đầu ngay từ chỗ nó vừa tới. Cái dưới búng về vạch xuất phát rồi bắt đầu lại, và bạn thấy rõ cú giật. Đó là toàn bộ lý do mọi thứ bạn có thể bấm liên tiếp đều được làm theo cách thứ nhất.",
  k3:"03 — bạn nhận được gì",
  h2c:"Mỗi lần chạy để lại một thư mục bạn mở ra xem được",
- leadc:"Mười hai file, theo đúng thứ tự chúng được làm ra. Không cái nào là bản tóm tắt của việc đã làm ở chỗ bạn không nhìn thấy — mỗi cái chính là phần việc đó. Hai file được đánh dấu bên dưới là hai chỗ bạn đã quyết, và chúng mang quyết định cùng tên của bạn.",
+ leadc:"Mười ba file, theo đúng thứ tự chúng được làm ra. Không cái nào là bản tóm tắt của việc đã làm ở chỗ bạn không nhìn thấy — mỗi cái chính là phần việc đó. Hai file được đánh dấu bên dưới là hai chỗ bạn đã quyết, và chúng mang quyết định cùng tên của bạn.",
  tb1:"Bản kê — thứ nằm trong thư mục",tb2:"Lần chạy 2026-08-24",
  n1h:"Có một file viết cho bạn, không phải cho máy",
  n1p:"Bước nào xong, bước nào đang chờ, chờ ai, và đường dẫn tới mọi thứ đã làm ra. Một trang, viết bằng lời thường, cho người trả tiền chứ không phải người làm — để không ai phải hỏi tiến độ.",
@@ -878,7 +890,7 @@ const I18N={vi:{
  ev1:"02 · khung thô — chỉ có bố cục",ev2:"v1.0 · màn hình đầu tiên",ev2s:"BỊ GẠT",
  ev3:"v1.1 · bản ngay trước bản này",
  k5:"05 — cài đặt",h2e:"Cài đặt",
- leade:"Hai đường vào dựng sẵn, hoặc chép thẳng thư mục vào bất kỳ agent nào đọc được một file <code>SKILL.md</code>. Mười một tài liệu tham chiếu và một bộ định tuyến. Không có gì chạy ngầm, không phải cài thêm gì.",
+ leade:"Hai đường vào dựng sẵn, hoặc chép thẳng thư mục vào bất kỳ agent nào đọc được một file <code>SKILL.md</code>. Mười hai tài liệu tham chiếu và một bộ định tuyến. Không có gì chạy ngầm, không phải cài thêm gì.",
  k6:"06 — dành cho ai",h2f:"Dành cho ai",
  leadf:"Mấy tài liệu viết ra mới là sản phẩm. Bảy bước là cách chúng được dùng, theo đúng thứ tự.",
  w1h:"Người đang học nghề",

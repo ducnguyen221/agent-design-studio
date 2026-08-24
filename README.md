@@ -20,7 +20,7 @@ three looks it produces for everyone. Not because the model lacks taste — beca
 in the request forced a choice. There was no brief, no alternative to reject, no floor to
 clear, and no reviewer.
 
-This pack supplies all four. It is one skill and eleven references: a router that decides
+This pack supplies all four. It is one skill and twelve references: a router that decides
 what happens next, and playbooks that carry the actual craft — decision orders, thresholds,
 curve values, colour maths, and the parts that tell the agent to stop and build nothing.
 
@@ -129,6 +129,7 @@ skills/design-routing/
     ├── prototype-playbook.md   modelling real behaviour and real states
     ├── direction-gate.md       three anti-convergence logics + a 40-entry style catalogue
     ├── brand-asset-protocol.md finding real logos and assets instead of guessing
+    ├── image-sourcing.md       are images content or decoration, and proving where each came from
     ├── color-protocol.md       sample → converge → justify, with the chroma table
     ├── taste-calibration.md    the defaults to avoid, and writing as design material
     ├── motion-playbook.md      the full motion lifecycle, and what to refuse
