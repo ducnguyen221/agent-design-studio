@@ -64,7 +64,7 @@ Do not preload references for later steps.
 | 1 | Intake — subject, audience, the one job this screen must do | `ownership-matrix.md` | `00-brief.md` |
 | 2 | Fidelity — how finished this needs to be, and why | `choosing-fidelity.md` | `01-fidelity.md` |
 | 3 | Wireframe — structure only, deliberately unfinished | `wireframe-playbook.md` | `02-wireframe.html` + `.png` |
-| 4 | Direction gate — three genuinely different real renders | `direction-gate.md` | `03-directions/{a,b,c}.html` + `.png`, `03-direction-decision.md` |
+| 4 | Direction gate — three genuinely different real renders | `direction-gate.md` | `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, `03-direction-decision.md` |
 | 5 | Design system + build | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md` | `04-design-system/{tokens.json,components.md,assets-manifest.md}`, `05-implementation.md` |
 | 6 | Motion pass — a **second pass over the built page**, never planned during Step 5 | `motion-playbook.md` | `06-motion-spec.md` |
 | 7 | Review loop | `uat-report-schema.md` | `07-uat-report.md` |
@@ -128,7 +128,7 @@ Mode: static-artifact | existing-product · Updated: YYYY-MM-DD
 | 1 Intake | done | 00-brief.md | — |
 | 2 Fidelity | done | 01-fidelity.md | — |
 | 3 Wireframe | done | 02-wireframe.png (or 02-prototype.png) | — |
-| 4 Direction | GATE 1: pending | 03-directions/ | your choice of A / B / C |
+| 4 Direction | GATE 1: pending | 03-compare.html + 03-directions/ | your choice of A / B / C |
 | 5 System + build | not started | — | gate 1 |
 | 6 Motion | not started | — | step 5 |
 | 7 Review | not started | — | step 6 |

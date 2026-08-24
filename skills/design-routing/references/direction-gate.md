@@ -4,7 +4,8 @@ Step 4. Produce three genuinely different visual directions as **real renders**,
 them, and let a person choose. This is the step that decides whether the result looks
 like this project or like every other page an AI has produced this year.
 
-Outputs: `03-directions/{a,b,c}.html` + `.png`, and `03-direction-decision.md`.
+Outputs: `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, and
+`03-direction-decision.md`.
 
 ## Why renders, not descriptions
 
@@ -125,15 +126,47 @@ option, and merging two into one is the failure mode to watch for.
   thing has not won the three seconds it will actually get. See *"Quiet is not bare"* in
   `taste-calibration.md` for the one-invested-moment-per-viewport rule and the shipped
   page that failed it.
-- Content-essential imagery uses real images, shared across all three (see the brand
-  asset protocol). Only decorative or abstract elements may be CSS or SVG.
+- Content-essential imagery uses real images, shared across all three (see
+  `image-sourcing.md` for subject imagery and the brand asset protocol for named brands —
+  both are gathered **before** this step, precisely so the three share one set). Only
+  decorative or abstract elements may be CSS or SVG.
 - Self-contained files, saved under `03-directions/`, never in a temp folder.
 - Screenshot each at the primary viewport, and at mobile if the composition changes.
 
+## The compare board
+
+Alongside the three renders, produce `03-compare.html` in the run folder: one
+self-contained file showing the three captures side by side, so the choice can be made in
+one view instead of three tabs and a memory test.
+
+- **Standardized capture.** The binding rule is that all three panels use the *same
+  frame*. For a page, site or app screen that frame is **1440×900 desktop plus 390×844
+  mobile**; other deliverables use their own target size instead — a deck at its slide
+  dimensions, a single image at its own — and get one row rather than two. First
+  screenful only, never a full-page stitch, for the reason given in the white-space rule
+  above.
+- **One display scale.** All three panels in a row render at the same scale. No panel is
+  cropped, zoomed, or re-fitted to flatter it.
+- **Every panel links to its runnable file** — `03-directions/a.html` and its full-size
+  capture — so the board is one click from the real thing.
+- **Caption is name plus one line of intent:** the letter, the logic and anchor that
+  produced it, and the sentence on why it fits. The caption belongs to the direction, not
+  to the panel — carry it once, on the primary viewport row; a second row repeats the
+  name only, or the same six sentences push the captures off the screen.
+
+**The board is a comparison layer, not the artifact.** The three HTML files and their
+captures remain Step 4's deliverable; the board is regenerated whenever a direction is
+rerun, never hand-patched to stay in sync. And it settles a narrower question than it
+appears to: side-by-side panels distort spacing, type size and density, so the board
+decides *which one or two to open at full size* — never which one ships. Confirm the
+winner in its own file, at its own scale, before writing the gate file. Where the board
+and the real render disagree, the real render is right.
+
 ## Present, then stop
 
-Show all three screenshots together. For each: which logic produced it, the specific
-style / exemplar / studio behind it, and one sentence on why it fits.
+Show all three screenshots together — the compare board is the natural way to do it. For
+each: which logic produced it, the specific style / exemplar / studio behind it, and one
+sentence on why it fits.
 
 Then **end the turn and wait.** This is a decision only the person can make. An
 unattended session either holds a recorded grant to auto-select or stops here — see the
@@ -156,6 +189,9 @@ logics rather than defending the originals.
 | A | dice roll | <style name> | a.html | a.png |
 | B | verified exemplar | <name + URL, verified YYYY-MM-DD> | b.html | b.png |
 | C | studio philosophy | <studio> | c.html | c.png |
+
+**Compare board:** 03-compare.html · capture frame: <1440×900 + 390×844, or the
+deliverable's own size>, first screenful
 
 ## Decision
 **Chosen:** A | B | C | mix of <…>
