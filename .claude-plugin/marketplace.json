@@ -9,7 +9,7 @@
     {
       "name": "agent-design-studio",
       "description": "Seven-step UI/UX design process: intake, fidelity, wireframe, three real directions, design system, motion, review. One artifact per step, two human gates.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "source": "./",
       "license": "MIT",
       "author": {
