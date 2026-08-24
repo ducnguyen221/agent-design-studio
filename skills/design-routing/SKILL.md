@@ -71,8 +71,12 @@ Do not preload references for later steps.
 
 Step 2 may route to `prototype-playbook.md` instead of a wireframe when the open question
 is behavior rather than structure; Step 3's artifact is then `02-prototype.html` + `.png`,
-replacing `02-wireframe`. Step 5 in `existing-product` mode also loads
-`library-selection.md` when a new dependency is on the table.
+replacing `02-wireframe`. Step 5 also loads `image-sourcing.md` when the deliverable shows
+imagery of its own subject — but answer its one checkpoint question at Step 2, without
+opening it: **are images content here, or decoration?** If content, they are gathered
+before Step 4, because all three directions must share one set. Step 5 in
+`existing-product` mode also loads `library-selection.md` when a new dependency is on the
+table.
 
 All artifacts live in one folder: `<project>/design/<YYYY-MM-DD>-<slug>/`.
 
