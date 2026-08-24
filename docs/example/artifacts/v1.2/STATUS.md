@@ -1,0 +1,75 @@
+# STATUS — agent-design-studio site, v3 (page v1.2)
+
+**Run:** `2026-08-24-site-v2/v3/` · **Date:** 2026-08-24
+**Target:** `<local path>`
+**Overall:** built, measured, committed locally. **Not pushed. Not tagged.**
+
+---
+
+## Where this stands
+
+| Step | State | Artifact |
+| --- | --- | --- |
+| 00–03 | carried from v1.1, unchanged | `../` |
+| **Gate 1 — direction** | **exempt this run** | `00-owner-directive.md` |
+| 05 — system & build | done | `05-implementation.md`, `05-build-source.html`, `05-build.py` |
+| 06 — motion | done — 21 accepted, 18 refused | `06-motion-spec.md` |
+| 07 — inspection | done — 8.5, hard floor PASS | `07-uat-report.md`, `uat.py`, `uat-raw.json` |
+| **Gate 2 — sign-off** | **PENDING — the design review, then Đức** | this file |
+
+## Why this run exists
+
+The owner reviewed the live v1.1 page and issued two binding directives:
+
+1. **Plain language.** Rewrite all body copy, EN and VI, for a reader with no design or
+   engineering background.
+2. **Motion as a feature of the page**, with the delight budget widened by owner mandate.
+
+Both were carried out. **The second one overrides a stated preference of the pipeline
+itself** — the v2 motion spec argued in writing that the refusal list should stay longer
+than the accepted list. It is now shorter. That override is recorded in
+`00-owner-directive.md` with what it overrode, what stayed the default, and why the
+distinction matters for the next run.
+
+**Gate 1 is exempt** because this is iteration inside an approved direction: no new
+renders, no new choice, direction B unchanged. Gate 2 is not exempt and has not moved.
+
+## What is waiting on whom
+
+**Waiting on the design review** — a visual review of:
+- `screens/07-first-viewport-1905.png` — the three-second frame
+- `screens/07-load-choreography.webm` — the load entrance, watched not read
+- `screens/07-load-t0.png` / `t600` / `t1400` — the same entrance as fixed-timestamp stills
+- `screens/07-vi-first-viewport-1905.png` — the Vietnamese hero
+
+**Then waiting on Đức** — the two questions his directives raise:
+1. Is the copy actually plain enough for someone outside the field?
+2. Does the first view land as "wow", and is 1.8 s the right length for it?
+
+## Measured, not asserted
+
+| | |
+| --- | --- |
+| Contrast | 67/67 elements pass, EN · VI · 390px · no-JS. Lowest 4.66 |
+| Keyboard | 21 stops, every one with a visible focus ring |
+| Overflow | 0 at 390 / 768 / 1024 / 1440 / 1905 |
+| Console errors | 0 in every context |
+| Hidden with JS off | 0 content elements (1 `aria-hidden` decoration — disclosed in the report) |
+| Reduced motion | 0 hidden, all entrances dropped, note visible |
+| First movement after load | ~60 ms; unmistakable by 600 ms |
+
+## Open items, none blocking
+
+- Mobile first viewport is tighter than v1.1 — a direct cost of the plain-language rewrite,
+  accepted rather than reversed.
+- Motion band header's lower-left is empty (carried from v1.1).
+- `.ph` install-placeholder CSS is unused.
+- Chromium only. No physical device testing.
+
+## Commits
+
+Local only, on `HEAD` from `49355b2`. **Nothing pushed, nothing tagged.**
+
+1. `v1.2: plain-language copy + motion as a feature` — `docs/index.html`
+2. `Bump the pack to 1.2.0 in all three manifests` — `.claude-plugin/marketplace.json`,
+   `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`

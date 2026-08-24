@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A real run — agent-design-studio</title>
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Every file from one real design run, opened up: the brief, the wireframe, three directions, the design system, the motion spec and the review that turned the first version down. Nothing reconstructed.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23231f1c%27/%3E%3Crect x=%275%27 y=%275%27 width=%2722%27 height=%2722%27 fill=%27none%27 stroke=%27%23d4573a%27 stroke-width=%272%27/%3E%3C/svg%3E">
+<style>
+:root{
+  --stage-950:oklch(0.145 0.012 258);
+  --stage-900:oklch(0.185 0.014 258);
+  --stage-800:oklch(0.235 0.015 258);
+  --stage-700:oklch(0.305 0.014 258);
+  --stepn:oklch(0.600 0.013 258);
+  --chalk:oklch(0.965 0.004 90);
+  --chalk-2:oklch(0.775 0.008 90);
+  --chalk-3:oklch(0.665 0.008 90);
+  --paper-50:oklch(0.968 0.010 85);
+  --paper-200:oklch(0.910 0.014 85);
+  --ink-900:oklch(0.235 0.022 248);
+  --ink-700:oklch(0.400 0.020 248);
+  --ink-500:oklch(0.520 0.016 248);
+  --mark:oklch(0.660 0.185 30);
+  --mark-deep:oklch(0.440 0.160 30);
+  --mark-ink:oklch(0.478 0.150 32);
+  --s1:8px;--s2:16px;--s3:24px;--s4:40px;--s5:64px;--s6:96px;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --wrap:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--stage-950);color:var(--chalk);
+     font-family:var(--sans);font-size:17px;line-height:1.6;
+     -webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--s3)}
+a{color:var(--chalk);text-decoration-color:oklch(0.660 0.185 30/0.5);
+  text-underline-offset:3px}
+a:hover,a:focus-visible{color:var(--mark)}
+:focus-visible{outline:2px solid var(--mark);outline-offset:3px;border-radius:2px}
+.lbl{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+     text-transform:uppercase;color:var(--stepn)}
+h1,h2,h3{letter-spacing:-.018em;line-height:1.12;margin:0}
+
+/* ---------- top bar ---------- */
+.top{border-bottom:1px solid var(--stage-800);position:sticky;top:0;z-index:10;
+     background:oklch(0.145 0.012 258/0.92);backdrop-filter:blur(8px)}
+.topin{display:flex;justify-content:space-between;align-items:center;
+       gap:var(--s2);padding:14px var(--s3);max-width:var(--wrap);margin:0 auto}
+.home{font-family:var(--mono);font-size:12.5px;color:var(--chalk-3);
+      text-decoration:none}
+.home:hover,.home:focus-visible{color:var(--mark)}
+.topmeta{font-family:var(--mono);font-size:12px;color:var(--stepn)}
+@media (max-width:620px){.topmeta{display:none}}
+
+/* ---------- hero ---------- */
+.hero{padding:var(--s6) 0 var(--s5)}
+.herogrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:var(--s5);
+          align-items:start}
+@media (max-width:1000px){.herogrid{grid-template-columns:1fr;gap:var(--s4)}}
+.hero h1{font-size:clamp(38px,5.4vw,68px);font-weight:700;max-width:15ch}
+.hero h1 em{font-style:normal;color:var(--mark)}
+.hero .lead{font-size:19px;color:var(--chalk-2);max-width:56ch;margin:var(--s3) 0 0}
+.vi{margin:var(--s3) 0 0;font-size:14px;color:var(--stepn);max-width:56ch;
+    border-left:2px solid var(--stage-700);padding-left:14px}
+.hero .lbl{margin:0 0 var(--s2)}
+/* A drafting title block — the same device the run's chosen direction used to mark
+   anything the process hands to a person. Here it carries the run's identity. */
+.tblock{background:var(--paper-50);color:var(--ink-900);align-self:start}
+@media (max-width:1000px){.tblock{max-width:420px}}
+.tblock .tbh{display:flex;justify-content:space-between;gap:12px;
+     background:var(--ink-900);color:var(--paper-50);padding:9px 14px;
+     font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.tblock dl{margin:0;padding:4px 14px 14px}
+.tblock div{display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+     padding:9px 0;border-bottom:1px solid var(--paper-200)}
+.tblock div:last-child{border-bottom:0}
+.tblock dt{font-family:var(--mono);font-size:12px;letter-spacing:.06em;
+     text-transform:uppercase;color:var(--ink-500)}
+.tblock dd{margin:0;font-family:var(--mono);font-size:13px;color:var(--ink-900);
+     text-align:right}
+.tblock dd.no{color:var(--mark-ink);font-weight:600}
+.tblock dd.yes{font-weight:600}
+
+/* ---------- fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+       gap:1px;background:var(--stage-800);border-top:1px solid var(--stage-800);
+       border-bottom:1px solid var(--stage-800);margin-top:var(--s5)}
+.fact{background:var(--stage-950);padding:var(--s3) var(--s2)}
+.fact b{display:block;font-family:var(--mono);font-size:23px;font-weight:600;
+        color:var(--chalk);margin-bottom:5px}
+.fact span{font-size:13px;color:var(--chalk-3);line-height:1.45;display:block}
+
+/* ---------- bands ---------- */
+.band{padding:var(--s6) 0}
+.band.paper{background:var(--paper-50);color:var(--ink-900)}
+.band.paper .lbl{color:var(--mark-ink)}
+.band.paper a{color:var(--ink-900);text-decoration-color:oklch(0.478 0.150 32/0.45)}
+.band.paper a:hover,.band.paper a:focus-visible{color:var(--mark-ink)}
+.band h2{font-size:clamp(27px,3.4vw,40px);font-weight:700;max-width:20ch}
+.band .lead{font-size:17px;color:var(--chalk-2);max-width:64ch;margin:var(--s2) 0 0}
+.band.paper .lead{color:var(--ink-700)}
+.bandhead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+          gap:var(--s4);align-items:end;margin-bottom:var(--s5)}
+@media (max-width:820px){.bandhead{grid-template-columns:1fr;gap:var(--s2)}}
+
+/* ---------- timeline ---------- */
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3)}
+@media (max-width:900px){.tl{grid-template-columns:1fr}}
+.tlc{background:var(--stage-900);border-top:3px solid var(--stage-700);
+     padding:var(--s3);display:flex;flex-direction:column;gap:10px}
+.tlc.win{border-top-color:var(--mark)}
+.tlc h3{font-size:20px;font-weight:650}
+.tlc .ver{font-family:var(--mono);font-size:12px;color:var(--stepn)}
+.tlc p{margin:0;font-size:14.5px;color:var(--chalk-2);line-height:1.55}
+.verdict{font-family:var(--mono);font-size:12px;letter-spacing:.1em;
+         text-transform:uppercase;padding:5px 9px;align-self:flex-start;
+         border:1px solid currentColor}
+.verdict.no{color:var(--mark)}
+.verdict.yes{color:oklch(0.78 0.10 150)}
+.score{font-family:var(--mono);font-size:32px;font-weight:600;color:var(--chalk);
+       margin-top:auto;padding-top:var(--s2)}
+.score s{text-decoration:none;font-size:13px;color:var(--stepn);
+         display:block;letter-spacing:.1em;text-transform:uppercase}
+
+/* ---------- quote ---------- */
+.quote{margin:var(--s5) 0 0;background:var(--paper-50);color:var(--ink-900);
+       padding:var(--s4);border-left:4px solid var(--mark)}
+.quote blockquote{margin:0;font-size:clamp(19px,2.3vw,25px);line-height:1.42;
+                  max-width:44ch;font-weight:500}
+.quote cite{display:block;margin-top:var(--s2);font-family:var(--mono);
+            font-size:12px;font-style:normal;color:var(--ink-500);
+            letter-spacing:.06em}
+/* This block is paper inside a slate band, so the global light link colour would
+   put near-white text on near-white paper. */
+.quote a{color:var(--mark-ink);text-decoration-color:oklch(0.478 0.150 32/0.5)}
+.quote a:hover,.quote a:focus-visible{color:var(--ink-900)}
+
+/* ---------- artifact table ---------- */
+.steps{border-top:1px solid var(--paper-200)}
+.step{display:grid;grid-template-columns:52px minmax(0,1.15fr) minmax(0,1.5fr);
+      gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--paper-200);
+      align-items:baseline}
+@media (max-width:760px){.step{grid-template-columns:40px 1fr;row-gap:10px}
+  .step .files{grid-column:2}}
+.step .n{font-family:var(--mono);font-size:26px;color:var(--mark-ink);
+         font-weight:600;line-height:1}
+.step h3{font-size:17px;font-weight:650;margin-bottom:4px}
+.step .d{font-size:14px;color:var(--ink-700);margin:0}
+.files{display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start}
+.files a,.files span{font-family:var(--mono);font-size:12.5px;
+      padding:5px 9px;border:1px solid var(--paper-200);background:#fff;
+      text-decoration:none;color:var(--ink-900);white-space:nowrap}
+.files a:hover,.files a:focus-visible{border-color:var(--mark-ink);
+      color:var(--mark-ink);background:oklch(0.660 0.185 30/0.07)}
+.files span{color:var(--ink-500);border-style:dashed;background:transparent}
+.gatemark{color:var(--mark-ink);font-family:var(--mono);font-size:12px;
+          letter-spacing:.1em;text-transform:uppercase;display:block;margin-top:6px}
+
+/* ---------- directions ---------- */
+.dirs{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3)}
+@media (max-width:900px){.dirs{grid-template-columns:1fr}}
+.dir figure{margin:0}
+.dir .shot{display:block;border:1px solid var(--stage-700);background:var(--stage-900);
+           overflow:hidden;aspect-ratio:16/10}
+.dir .shot img{width:100%;height:100%;object-fit:cover;object-position:top center;
+               display:block}
+.dir .shot:hover img,.dir .shot:focus-visible img{opacity:.86}
+.dir figcaption{margin-top:12px}
+.dir .nm{font-weight:650;font-size:16px;display:block}
+.dir .lg{font-family:var(--mono);font-size:12px;color:var(--stepn);
+         display:block;margin:3px 0 7px;letter-spacing:.05em}
+.dir p{margin:0 0 10px;font-size:14px;color:var(--chalk-2);line-height:1.5}
+.dir .go{font-family:var(--mono);font-size:12px;color:var(--chalk-3)}
+.chosen{color:var(--mark);border:1px solid var(--mark);padding:3px 8px;
+        font-family:var(--mono);font-size:12px;letter-spacing:.1em;
+        text-transform:uppercase;margin-left:8px;white-space:nowrap}
+
+/* ---------- radar + compare ---------- */
+.two{display:grid;grid-template-columns:340px minmax(0,1fr);gap:var(--s5);
+     align-items:start}
+@media (max-width:860px){.two{grid-template-columns:1fr;gap:var(--s4)}}
+.radar{width:100%;max-width:340px;height:auto}
+.radar .ring{fill:none;stroke:var(--paper-200);stroke-width:1}
+.radar .spoke{stroke:var(--paper-200);stroke-width:1}
+.radar .t{font-family:var(--mono);font-size:12px;fill:var(--ink-500)}
+.radar .p1{fill:none;stroke:var(--ink-500);stroke-width:1.5;stroke-dasharray:4 3}
+.radar .p2{fill:oklch(0.660 0.185 30/0.13);stroke:var(--mark-ink);stroke-width:2}
+.key{font-family:var(--mono);font-size:12px;color:var(--ink-700);
+     margin:var(--s2) 0 0;display:flex;gap:var(--s3);flex-wrap:wrap}
+.key i{font-style:normal;display:inline-flex;align-items:center;gap:7px}
+.key b{width:20px;height:0;border-top:2px dashed var(--ink-500);display:inline-block}
+.key b.s{border-top:2px solid var(--mark-ink)}
+.deltas{border-top:1px solid var(--paper-200)}
+.delta{display:grid;grid-template-columns:130px 1fr;gap:var(--s3);
+       padding:14px 0;border-bottom:1px solid var(--paper-200);font-size:14.5px}
+@media (max-width:620px){.delta{grid-template-columns:1fr;gap:4px}}
+.delta b{font-family:var(--mono);font-size:12.5px;color:var(--mark-ink);
+         letter-spacing:.04em}
+.delta p{margin:0;color:var(--ink-700)}
+
+/* ---------- frames ---------- */
+.frames{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+@media (max-width:860px){.frames{grid-template-columns:1fr}}
+.frames figure{margin:0}
+/* One frame for both panels, top-anchored: the comparison is of first screens, so
+   neither panel may be scaled or cropped to flatter it. */
+/* One frame for both panels: a fixed-ratio box, image top-anchored inside it. The
+   ratio lives on the box, not on the <img>, so it holds before the image loads. */
+.frames .shot{display:block;aspect-ratio:16/10;overflow:hidden;
+              border:1px solid var(--stage-700);background:var(--stage-900)}
+.frames .shot img{width:100%;height:100%;object-fit:cover;object-position:top center;
+                  display:block}
+.frames figcaption{margin-top:11px;font-size:13.5px;color:var(--chalk-2)}
+.frames figcaption b{display:block;font-family:var(--mono);font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--stepn);margin-bottom:4px}
+
+/* ---------- notes / footer ---------- */
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+@media (max-width:820px){.notes{grid-template-columns:1fr}}
+.note{background:var(--stage-900);padding:var(--s3);border-left:2px solid var(--stage-700)}
+.note h3{font-size:16px;font-weight:650;margin-bottom:8px}
+.note p{margin:0;font-size:14.5px;color:var(--chalk-2);line-height:1.55}
+.note p+p{margin-top:10px}
+footer{border-top:1px solid var(--stage-800);padding:var(--s4) 0 var(--s5);
+       font-size:13.5px;color:var(--chalk-3)}
+footer .fl{display:flex;justify-content:space-between;gap:var(--s3);flex-wrap:wrap}
+
+/* ---------- motion: modest, and never gating content ---------- */
+/* Elements are visible by default. Only when JS has confirmed itself does the
+   .js class arm the entrance -- so with scripting off, everything is simply here. */
+.js .rv{opacity:0;transform:translateY(14px)}
+.js .rv.in{opacity:1;transform:none;
+     transition:opacity 560ms var(--ease-out),transform 560ms var(--ease-out)}
+@media (prefers-reduced-motion:reduce){
+  .js .rv{opacity:1;transform:none}
+  .js .rv.in{transition:none}
+}
+/* Printing and PDF export never scroll, so an un-fired entrance would hand over a
+   stack of blank pages. Same failure this pack documents; closed here explicitly. */
+@media print{
+  .js .rv,.rv{opacity:1!important;transform:none!important;transition:none!important}
+  body{background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="topin">
+    <a class="home" href="../index.html">&#8592; agent-design-studio</a>
+    <span class="topmeta">run 2026-08-24 &middot; artifacts unedited except for sanitizing</span>
+  </div>
+</div>
+
+<main>
+
+<section class="hero">
+  <div class="wrap herogrid">
+    <div>
+      <p class="lbl">A real run — every file, opened</p>
+      <h1>The run that <em>failed</em>, and the two that followed it</h1>
+      <p class="lead">This is the design run that produced the page you just came from. Not a
+        reconstruction and not a demo — the actual folder, with the version that was turned
+        down still in it. Open any file below and you are reading what the process wrote.</p>
+      <p class="vi">Tiếng Việt: đây là hồ sơ đầy đủ của một lần chạy thật — mở bất kỳ file
+        nào để đọc đúng thứ quy trình đã tạo ra. Nội dung các file giữ nguyên tiếng Anh.</p>
+    </div>
+    <div class="tblock">
+      <div class="tbh"><span>Run record</span><span>2026-08-24</span></div>
+      <dl>
+        <div><dt>Mode</dt><dd>static-artifact</dd></div>
+        <div><dt>Deliverable</dt><dd>this project's site</dd></div>
+        <div><dt>Pass 1</dt><dd class="no">7.8 — rejected</dd></div>
+        <div><dt>Pass 2</dt><dd>8.3</dd></div>
+        <div><dt>Pass 3</dt><dd class="yes">8.5 — shipped</dd></div>
+        <div><dt>Pack</dt><dd>1.0.0 → 1.2.0</dd></div>
+      </dl>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="facts">
+      <div class="fact"><b>3</b><span>versions, kept as history — not merged into one tidy pass</span></div>
+      <div class="fact"><b>38</b><span>artifacts exported, byte-for-byte apart from 11 sanitizing edits</span></div>
+      <div class="fact"><b>7.8 &rarr; 8.5</b><span>review score, across the rejection and the two rebuilds</span></div>
+      <div class="fact"><b>1</b><span>rejection by a person, at a checkpoint the process required</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="bandhead">
+      <div>
+        <p class="lbl">01 — what happened</p>
+        <h2>Three passes, in the order they happened</h2>
+      </div>
+      <p class="lead">The honest shape of this run is not one clean sweep through seven
+        steps. It is a run that passed its own inspection, got turned down by the person
+        paying for it, and went round again — twice. Each pass kept its own folder.</p>
+    </div>
+    <div class="tl">
+      <div class="tlc rv">
+        <span class="ver">pass 1 &middot; pack v1.0.0</span>
+        <h3>Built, inspected, published</h3>
+        <p>The full seven steps, start to finish. Every measurable check passed: contrast,
+          keyboard, mobile, no overflow. The weakest mark was craft, and the inspection let
+          it through because the average looked respectable.</p>
+        <span class="verdict no">turned down at gate 2</span>
+        <span class="score">7.8<s>overall</s></span>
+      </div>
+      <div class="tlc rv">
+        <span class="ver">pass 2 &middot; pack v1.1.0</span>
+        <h3>Rebuilt on the losing direction</h3>
+        <p>The rejected option B was still on disk and still runnable, so promoting it cost
+          hours rather than days. Three rules were added to the process itself the same day,
+          so a page cannot fail this way again.
+          <a href="img/v1.1/07-first-viewport.png">See its first screen &#8594;</a></p>
+        <span class="verdict yes">passed, held for review</span>
+        <span class="score">8.3<s>overall</s></span>
+      </div>
+      <div class="tlc win rv">
+        <span class="ver">pass 3 &middot; pack v1.2.0</span>
+        <h3>Two more directives, answered</h3>
+        <p>Plain language everywhere a human reads, and motion that belongs to the page
+          rather than only to the demos. 21 animations accepted, 18 refused, every one with
+          its reason recorded.</p>
+        <span class="verdict yes">shipped</span>
+        <span class="score">8.5<s>overall</s></span>
+      </div>
+    </div>
+
+    <div class="quote rv">
+      <blockquote>It reads as a wireframe — a spec document, not a designed website. Almost
+        no colour. The motion is invisible on first load. One even rhythm all the way down.
+        It has to read as a product somebody invested in.</blockquote>
+      <cite>Đức &middot; 2026-08-24 &middot; on the live v1.0 page &middot;
+        recorded in <a href="artifacts/v1.1/03-direction-decision.md.html">03-direction-decision.md</a></cite>
+    </div>
+  </div>
+</section>
+
+<section class="band paper">
+  <div class="wrap">
+    <div class="bandhead">
+      <div>
+        <p class="lbl">02 — the folder</p>
+        <h2>Pass 1, step by step</h2>
+      </div>
+      <p class="lead">The complete run. Every row is a real file you can open — markdown
+        artifacts render as plain text, the wireframe and the three directions are live HTML
+        that still runs. Nothing here is a summary of work done somewhere you cannot see.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step rv">
+        <span class="n">00</span>
+        <div><h3>Intake</h3><p class="d">Subject, audience, and the one job the page must do.</p></div>
+        <div class="files"><a href="artifacts/v1.0/00-brief.md.html">00-brief.md</a></div>
+      </div>
+      <div class="step rv">
+        <span class="n">01</span>
+        <div><h3>Fidelity</h3><p class="d">How finished this needs to be, and why that is the cheapest answer.</p></div>
+        <div class="files"><a href="artifacts/v1.0/01-fidelity.md.html">01-fidelity.md</a></div>
+      </div>
+      <div class="step rv">
+        <span class="n">02</span>
+        <div><h3>Wireframe</h3><p class="d">Structure only, deliberately unfinished — the comments in the source are the structural questions it was asking.</p></div>
+        <div class="files">
+          <a href="artifacts/v1.0/02-wireframe.html">02-wireframe.html</a>
+          <a href="img/v1.0/02-wireframe.png">02-wireframe.png</a>
+        </div>
+      </div>
+      <div class="step rv">
+        <span class="n">03</span>
+        <div><h3>Direction gate</h3><p class="d">Three genuinely different renders of the same content, then a full stop until a person chose.
+          <span class="gatemark">Gate 1 — human-approved</span></p></div>
+        <div class="files">
+          <a href="artifacts/v1.0/03-directions/a.html">a.html</a>
+          <a href="artifacts/v1.0/03-directions/b.html">b.html</a>
+          <a href="artifacts/v1.0/03-directions/c.html">c.html</a>
+          <a href="artifacts/v1.0/03-direction-decision.md.html">03-direction-decision.md</a>
+        </div>
+      </div>
+      <div class="step rv">
+        <span class="n">04</span>
+        <div><h3>Design system</h3><p class="d">Tokens, component contracts, and where every asset came from.</p></div>
+        <div class="files">
+          <a href="artifacts/v1.0/04-design-system/tokens.json.html">tokens.json</a>
+          <a href="artifacts/v1.0/04-design-system/components.md.html">components.md</a>
+          <a href="artifacts/v1.0/04-design-system/assets-manifest.md.html">assets-manifest.md</a>
+        </div>
+      </div>
+      <div class="step rv">
+        <span class="n">05</span>
+        <div><h3>Build</h3><p class="d">What was built, what was deferred, and what the code does not yet do.</p></div>
+        <div class="files">
+          <a href="artifacts/v1.0/05-implementation.md.html">05-implementation.md</a>
+          <span>05-build.html — not exported</span>
+        </div>
+      </div>
+      <div class="step rv">
+        <span class="n">06</span>
+        <div><h3>Motion</h3><p class="d">A second pass over the built page. Every animation accepted or refused, with its reason.</p></div>
+        <div class="files"><a href="artifacts/v1.0/06-motion-spec.md.html">06-motion-spec.md</a></div>
+      </div>
+      <div class="step rv">
+        <span class="n">07</span>
+        <div><h3>Review</h3><p class="d">The page inspecting itself against a fixed rubric — and passing, which is the interesting part.
+          <span class="gatemark">Gate 2 — this is the one the owner overruled</span></p></div>
+        <div class="files">
+          <a href="artifacts/v1.0/07-uat-report.md.html">07-uat-report.md</a>
+          <a href="artifacts/v1.0/STATUS.md.html">STATUS.md</a>
+          <a href="img/v1.0/07-desktop.png">07-desktop.png</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="bandhead">
+      <div>
+        <p class="lbl">03 — the gate</p>
+        <h2>The three directions, still runnable</h2>
+      </div>
+      <p class="lead">Each came from a different anchor, on purpose, so they could not
+        converge into one layout with three palettes. A person picked A. Months of hindsight
+        say B was the better page — and because B was never deleted, that was recoverable.</p>
+    </div>
+    <div class="dirs">
+      <div class="dir rv">
+        <figure>
+          <a class="shot" href="artifacts/v1.0/03-directions/a.html">
+            <img src="img/v1.0/thumb-a.png" alt="Direction A: a drafting specimen sheet with figure rules and gate stamps" width="900" height="620" loading="lazy" decoding="async"></a>
+          <figcaption>
+            <span class="nm">A — Specimen sheet<span class="chosen">chosen</span></span>
+            <span class="lg">dice roll · engineering drawing</span>
+            <p>The process drawn as a drafting sheet: figure rules, captions on the rule,
+              stamps where a person signs. Won the vote, then lost the room.</p>
+            <span class="go"><a href="artifacts/v1.0/03-directions/a.html">run it</a> ·
+              <a href="img/v1.0/a.png">full capture</a></span>
+          </figcaption>
+        </figure>
+      </div>
+      <div class="dir rv">
+        <figure>
+          <a class="shot" href="artifacts/v1.0/03-directions/b.html">
+            <img src="img/v1.0/thumb-b.png" alt="Direction B: a dark slate stage that turns to warm paper at each decision point" width="900" height="620" loading="lazy" decoding="async"></a>
+          <figcaption>
+            <span class="nm">B — Stage and paper</span>
+            <span class="lg">verified exemplar</span>
+            <p>Slate where the machine works; the page turns to paper wherever a human
+              decides. This is what the site became after the rejection.</p>
+            <span class="go"><a href="artifacts/v1.0/03-directions/b.html">run it</a> ·
+              <a href="img/v1.0/b.png">full capture</a></span>
+          </figcaption>
+        </figure>
+      </div>
+      <div class="dir rv">
+        <figure>
+          <a class="shot" href="artifacts/v1.0/03-directions/c.html">
+            <img src="img/v1.0/thumb-c.png" alt="Direction C: a quiet editorial layout with wide margins" width="900" height="620" loading="lazy" decoding="async"></a>
+          <figcaption>
+            <span class="nm">C — Editorial</span>
+            <span class="lg">studio philosophy</span>
+            <p>Wide margins, restraint, type carrying the argument. The quietest of the
+              three, and the one that had least to say in three seconds.</p>
+            <span class="go"><a href="artifacts/v1.0/03-directions/c.html">run it</a> ·
+              <a href="img/v1.0/c.png">full capture</a></span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band paper">
+  <div class="wrap">
+    <div class="bandhead">
+      <div>
+        <p class="lbl">04 — the scores</p>
+        <h2>What actually moved</h2>
+      </div>
+      <p class="lead">Six dimensions, scored against a fixed rubric each pass. The rejection
+        did not change most of them — it changed craft, which is precisely the mark the first
+        review had waved through at 7.</p>
+    </div>
+    <div class="two">
+      <div class="rv">
+        <svg class="radar" viewBox="-50 -12 340 274" role="img"
+             aria-label="Radar chart. Pass 1 scores: concept 8, direction consistency 8, visual hierarchy 8, craft 7, function 8, originality 8. Pass 3 scores: concept 8, direction consistency 9, visual hierarchy 9, craft 8, function 8, originality 8.">
+          <polygon class="ring" points="120.0,28.0 199.7,74.0 199.7,166.0 120.0,212.0 40.3,166.0 40.3,74.0"/>
+          <polygon class="ring" points="120.0,74.0 159.8,97.0 159.8,143.0 120.0,166.0 80.2,143.0 80.2,97.0"/>
+          <line class="spoke" x1="120" y1="120" x2="120.0" y2="28.0"/>
+          <line class="spoke" x1="120" y1="120" x2="199.7" y2="74.0"/>
+          <line class="spoke" x1="120" y1="120" x2="199.7" y2="166.0"/>
+          <line class="spoke" x1="120" y1="120" x2="120.0" y2="212.0"/>
+          <line class="spoke" x1="120" y1="120" x2="40.3" y2="166.0"/>
+          <line class="spoke" x1="120" y1="120" x2="40.3" y2="74.0"/>
+          <polygon class="p1" points="120.0,46.4 183.7,83.2 183.7,156.8 120.0,184.4 56.3,156.8 56.3,83.2"/>
+          <polygon class="p2" points="120.0,46.4 191.7,78.6 191.7,161.4 120.0,193.6 56.3,156.8 56.3,83.2"/>
+          <text class="t" x="120.0" y="15.0" text-anchor="middle">Concept 8</text>
+          <text class="t" x="214.4" y="69.5" text-anchor="start">Direction</text>
+          <text class="t" x="214.4" y="178.5" text-anchor="start">Hierarchy</text>
+          <text class="t" x="120.0" y="233.0" text-anchor="middle">Craft 7 &rarr; 8</text>
+          <text class="t" x="25.6" y="178.5" text-anchor="end">Function</text>
+          <text class="t" x="25.6" y="69.5" text-anchor="end">Originality</text>
+        </svg>
+        <p class="key"><i><b></b> pass 1 — 7.8</i><i><b class="s"></b> pass 3 — 8.5</i></p>
+      </div>
+      <div class="deltas rv">
+        <div class="delta"><b>craft 7 &rarr; 8</b>
+          <p>The mark that shipped the failure. A rule was added: on anything public,
+            craft below 8 blocks the release outright, whatever the average says.</p></div>
+        <div class="delta"><b>the 3-second test</b>
+          <p>New hard floor. Show a cold eye the <em>first screen only</em> for three
+            seconds. "A document" is a blocking answer, like a contrast failure.</p></div>
+        <div class="delta"><b>every element swept</b>
+          <p>Both colour defects in pass 2 sat in elements a hand-written checklist had
+            omitted. Contrast is now measured across all 67 text-bearing elements.</p></div>
+        <div class="delta"><b>quiet is not bare</b>
+          <p>A restrained direction now owes at least one unmistakably designed moment per
+            screen. The v1.0 page is named in the rule as the failure it describes.</p></div>
+        <div class="delta"><b>read the full reports</b>
+          <p><a href="artifacts/v1.0/07-uat-report.md.html">pass 1</a> ·
+             <a href="artifacts/v1.1/07-uat-report.md.html">pass 2</a> ·
+             <a href="artifacts/v1.2/07-uat-report.md.html">pass 3</a> — each with its
+             contrast table, its refusals, and what it admits is still unfixed.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="bandhead">
+      <div>
+        <p class="lbl">05 — the frames</p>
+        <h2>The same first screen, before and after</h2>
+      </div>
+      <p class="lead">The rejection was about the first viewport, so this is the comparison
+        that mattered. Full-page captures were explicitly ruled out as evidence — they
+        flatter a page by showing a visitor something no visitor ever sees at once.</p>
+    </div>
+    <div class="frames">
+      <figure class="rv">
+        <a class="shot" href="img/v1.0/07-first-viewport.png"><img src="img/v1.0/07-first-viewport.png" alt="The first version of the page: pale, evenly spaced, reading as a specification document" width="1440" height="900" loading="lazy" decoding="async"></a>
+        <figcaption><b>pass 1 — turned down · 1440×900</b>Passed every measurable check and
+          scored 7.8. The objection was not a defect list; it was that nothing on the screen
+          looked invested in.
+          <a href="img/v1.0/07-desktop.png">full page</a></figcaption>
+      </figure>
+      <figure class="rv">
+        <a class="shot" href="img/v1.2/07-first-viewport.png"><img src="img/v1.2/07-first-viewport.png" alt="The final version's first screen: deep slate with a warm drafting red accent and strong typographic hierarchy" width="1905" height="937" loading="lazy" decoding="async"></a>
+        <figcaption><b>pass 3 — shipped · 1905×937</b>Same content, same seven steps, the
+          direction that had lost the first vote. Craft 8, and the first screen answers in
+          three seconds.
+          <a href="img/v1.2/07-mobile-first-viewport.png">mobile frame</a></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="band paper">
+  <div class="wrap">
+    <div class="bandhead">
+      <div>
+        <p class="lbl">06 — the fine print</p>
+        <h2>What was changed before publishing this</h2>
+      </div>
+      <p class="lead">A fixture that quietly edits its own evidence is worth nothing. Every
+        change made to these files on the way out is listed, counted, and reproducible.</p>
+    </div>
+    <div class="notes">
+      <div class="note rv" style="background:#fff;border-left-color:var(--mark-ink)">
+        <h3 style="color:var(--ink-900)">11 edits, in 5 files</h3>
+        <p style="color:var(--ink-700)">Two absolute paths from the author's machine became
+          <code>&lt;local path&gt;</code>. Nine mentions of an internal reviewing agent's name
+          became "the design review". Nothing else was touched — not a typo, not a score, not
+          a sentence that reads badly.</p>
+        <p style="color:var(--ink-700)">The owner's name and quote stay, because they are
+          already published on the page this run produced.</p>
+      </div>
+      <div class="note rv" style="background:#fff;border-left-color:var(--mark-ink)">
+        <h3 style="color:var(--ink-900)">Frozen on purpose</h3>
+        <p style="color:var(--ink-700)">These artifacts are a public fixture, not living
+          documentation. They record what the pack produced at v1.0.0 through v1.2.0 and are
+          not retro-fitted when the pack moves on. Later versions get a note, never an edit.</p>
+        <p style="color:var(--ink-700)">The full ledger — allowlist, every rule, what was
+          left out and why — is in <a href="ABOUT.md">ABOUT.md</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap fl">
+    <span>A real run &middot; 2026-08-24 &middot; produced by the pack at v1.0.0 &rarr; v1.2.0</span>
+    <span><a href="../index.html">agent-design-studio</a> &middot;
+      <a href="ABOUT.md">provenance</a></span>
+  </div>
+</footer>
+
+<script>
+/* Modest entrance only. The .js class is what arms it, so with scripting off every
+   element above is already visible -- the pack's own rule zero, applied to its example. */
+document.documentElement.classList.add('js');
+(function(){
+  var els = document.querySelectorAll('.rv');
+  if (!('IntersectionObserver' in window)) {
+    for (var i=0;i<els.length;i++) els[i].classList.add('in');
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, {rootMargin:'0px 0px -8% 0px', threshold:0.05});
+  els.forEach(function(el){ io.observe(el); });
+  /* Anything already in view when the script runs must not wait for a scroll. */
+  requestAnimationFrame(function(){
+    els.forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight) el.classList.add('in');
+    });
+  });
+  /* Safety net. An observer that never fires is precisely how a page in this project's
+     own history rendered blank below the fold. Content availability outranks the
+     entrance: after six seconds everything is shown, fired or not. */
+  setTimeout(function(){
+    els.forEach(function(el){ el.classList.add('in'); });
+  }, 6000);
+})();
+</script>
+</body>
+</html>

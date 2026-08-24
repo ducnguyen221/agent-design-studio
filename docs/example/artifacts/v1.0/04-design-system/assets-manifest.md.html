@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>assets-manifest.md — v1.0 — a real run</title>
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="../../../artifact.css">
+</head>
+<body>
+<header class="ah">
+  <a class="back" href="../../../index.html">&#8592; the run</a>
+  <h1>assets-manifest.md</h1>
+  <p class="am">v1.0 &middot; artifact as produced &middot;
+     <a href="assets-manifest.md">raw file</a></p>
+</header>
+<pre class="doc"># 04 — Assets manifest
+
+Collected: 2026-08-24 · Completeness: **partial, and honestly so**
+
+## Brand asset protocol — applicability
+
+The protocol's trigger is a design that shows a real, recognizable brand. This page shows
+**no brand's logo**: the project has no logo yet, and no third-party product is depicted.
+So steps 1–4 of the protocol (ask → search official channels → download → quality bar)
+do not fire.
+
+What *does* apply is step 5: colour must be extracted from something real rather than
+invented. The reference site below is the real thing it was extracted from.
+
+## Palette reference — the owner's personal site
+
+Read locally at `&lt;local path&gt;` (143 KB).
+Extraction by hex frequency with neutrals filtered, per the protocol.
+
+| Hex | Occurrences | Role on the reference site |
+| --- | --- | --- |
+| `#ffffff` | 12 | (neutral — filtered) |
+| `#cbd5e1` | 9 | (neutral — filtered) |
+| `#64748b` | 8 | (neutral — filtered) |
+| `#94a3b8` | 7 | muted text |
+| `#04060a` | 4 | page ground |
+| `#0f172a` `#1e293b` `#334155` | 2,1,1 | panel steps |
+| **`#00f0ff`** | 2 | primary accent — cyan |
+| `#39ff14` | 1 | secondary accent — green |
+| `#bd00ff` | 1 | tertiary accent — purple |
+| `#ff4757` | 1 | coral |
+| `#ffd32a` | 1 | amber |
+
+Declared CSS custom properties confirm the roles: `--bg: #04060a`, `--cyan: #00f0ff`,
+`--green: #39ff14`, `--purple: #bd00ff`, plus glow variables
+(`--cyan-glow: rgba(0,240,255,0.4)`).
+
+Type stack on the reference: a Vietnamese-capable sans for body, a geometric sans for
+headings, a monospace for code.
+
+## The conflict, and how it was resolved
+
+The reference site's execution — **near-black ground plus high-chroma neon accents with
+glow** — is one of the five default looks this pack's own taste reference tells people to
+stop producing. Inheriting it would put the pack's homepage in direct contradiction with
+the pack's content.
+
+The brief said *inspiration, not inheritance*, and that resolves it cleanly:
+
+| Taken | Rejected |
+| --- | --- |
+| The **cool, cyan-leaning hue family** (H ≈ 225–230) as the through-line | The near-black ground |
+| The pairing of a cool primary with a **warm secondary mark** | High chroma (`#00f0ff` is fluorescent at full-screen scale) |
+| Monospace as a genuine character-carrying face, not just for code | Glow effects |
+| The bilingual EN/VI requirement, and a Vietnamese-capable type stack | The four-accent palette — reduced to two |
+
+**Net:** the hue family is inherited; the ground is inverted from near-black to warm paper;
+chroma is pulled from fluorescent down into the ink range. Same temperature, opposite
+material.
+
+## Images
+
+All imagery on the page is **screenshots of this pipeline's own artifacts**, generated
+during this run:
+
+| Asset | Source | Embedding |
+| --- | --- | --- |
+| Wireframe | `02-wireframe.png` (this run) | data URI |
+| Three directions | `03-directions/{a,b,c}.png` (this run) | data URI |
+| Scorecard | rendered from `07-uat-report.md` | inline SVG — it is a diagram, not a photo |
+
+Rights: all self-generated. No stock photography, no third-party imagery, no
+AI-generated illustration. Nothing on the page requires a licence.
+
+**Honest gaps:** the project has no logo and no favicon. The hero is composed to work
+without one rather than pretending otherwise, and the favicon is deferred to D4.
+
+## Fonts
+
+Body and display: `Inter` where available, falling back to the system UI stack.
+Labels, captions, file names, stamps: the platform monospace stack.
+
+Chosen for a reason rather than by habit: Vietnamese needs full diacritic coverage in both
+faces, and a self-contained single file cannot ship font binaries without bloating past
+the size the deliverable should be. The system stacks cover Vietnamese on every target
+platform, so the page degrades to zero external requests without losing the second
+language.
+</pre>
+</body>
+</html>

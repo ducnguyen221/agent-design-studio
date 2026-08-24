@@ -1,0 +1,33 @@
+/* Readable view for a run artifact. Same palette as the site: slate stage,
+   warm paper for anything handed to a person. No script. */
+:root{
+  --stage-950:oklch(0.145 0.012 258);
+  --stage-800:oklch(0.235 0.015 258);
+  --paper-50:oklch(0.968 0.010 85);
+  --ink-900:oklch(0.235 0.022 248);
+  --ink-500:oklch(0.520 0.016 248);
+  --chalk:oklch(0.965 0.004 90);
+  --chalk-3:oklch(0.665 0.008 90);
+  --mark:oklch(0.660 0.185 30);
+  --mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--stage-950);color:var(--chalk);font-family:var(--sans);
+     padding:32px 20px 72px}
+.ah{max-width:96ch;margin:0 auto 24px}
+.back{display:inline-block;margin-bottom:16px;color:var(--chalk-3);text-decoration:none;
+      font-size:13px;font-family:var(--mono)}
+.back:hover,.back:focus-visible{color:var(--mark)}
+h1{font-family:var(--mono);font-size:19px;font-weight:600;margin:0 0 4px;
+   letter-spacing:-.01em}
+.am{margin:0;font-size:12.5px;color:var(--chalk-3);font-family:var(--mono)}
+.am a{color:var(--chalk-3)}
+.am a:hover,.am a:focus-visible{color:var(--mark)}
+.doc{max-width:96ch;margin:0 auto;background:var(--paper-50);color:var(--ink-900);
+     border-top:3px solid var(--mark);padding:32px 28px;overflow-x:auto;
+     font-family:var(--mono);font-size:13px;line-height:1.62;
+     white-space:pre-wrap;word-wrap:break-word;
+     box-shadow:0 18px 40px -12px oklch(0.10 0.02 258/0.72)}
+a:focus-visible,.back:focus-visible{outline:2px solid var(--mark);outline-offset:3px}
+@media (max-width:520px){.doc{padding:20px 14px;font-size:12.5px}}

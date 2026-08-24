@@ -1,0 +1,65 @@
+# 04 — Assets manifest (v2)
+
+Per the brand-asset protocol: what is depicted, where it came from, and what is *not*
+depicted.
+
+## Brands depicted
+
+**None.** The page names four upstream open-source projects in its acknowledgements as
+**plain text repository paths**, never as logos, wordmarks or brand colours. No product is
+drawn as a CSS silhouette, and no logo is approximated. The page has no logo of its own
+and does not pretend to.
+
+The two harnesses named in the install section (Claude Code, Codex) appear as pane titles
+in the page's own mono label style, deliberately unbranded. Rendering someone else's
+wordmark as text is not the same as faking their logo — but drawing it would be, so
+neither is drawn.
+
+## Images — all five are real artifacts from this project's own runs
+
+Nothing here is stock, illustrative, or generated to fill a hole. Every image is a
+screenshot of a file that exists on disk.
+
+| Slot | Source file | Crop | Delivered | Size | Alt text |
+| --- | --- | --- | --- | --- | --- |
+| Hero plate C | `…/2026-08-24-agent-design-studio-site/thumbs/c.png` | none | 620×427 JPEG q82 | 17 KB | "Direction C — a near-white, centred single-column render, rejected at the gate" |
+| Hero plate B | `…/thumbs/b.png` | none | 620×427 | 25 KB | "Direction B — a deep-slate editorial render with oversized type" |
+| Hero plate A | `…/thumbs/a.png` | none | 620×427 | 33 KB | "Direction A — a warm-paper engineering specimen sheet" |
+| Evidence — wireframe | `…/02-wireframe.png` | **top crop to 1905:937** | 760×374 | 24 KB | "The first viewport of the step-2 wireframe: grey blocks and labels, structure without any visual styling" |
+| Evidence — v1.0 shipped | `…/screens/07-desktop.png` | **top crop to 1905:937** | 760×374 | 32 KB | "The first viewport of the shipped v1.0 page: a warm paper sheet divided into a hairline grid" |
+
+### Why the two evidence images are cropped to 1905:937
+
+They are shown to make one argument — that the shipped v1 page read like the unfinished
+wireframe beside it — and that argument is about the **first viewport**, not the full page.
+Cropping both to the exact aspect of the review frame puts them on equal terms and matches
+the new three-second rule in the UAT schema. A full-page render of either would have
+flattered it, which is the same reason the rule says not to judge on one.
+
+## Delivery
+
+All five are inlined as `data:image/jpeg;base64` URIs. The page makes **zero network
+requests**: no fonts, no scripts, no images, no analytics.
+
+| | |
+| --- | --- |
+| Total page | 226 KB self-contained |
+| Images | 131 KB of that |
+| Build step | `05-build-source.html` + PIL → `05-build.html` and `docs/index.html` |
+
+Source images live in the v1 run folder and are referenced, not copied — the build script
+reads them from there, so there is one copy of each artifact on disk.
+
+## Favicon
+
+Inline SVG data URI, redrawn for v2: two overlapping paper plates on a slate ground with a
+drafting-red stamp on the front one. It is the page's own signature element at 32px, and
+it replaces v1's drawing-frame mark, which belonged to a direction that no longer exists.
+
+## Not present, deliberately
+
+- No stock photography, no illustration, no hand-drawn figures.
+- No social proof, no logos of users, no testimonials — there are none, and inventing them
+  is the one failure a reviewer cannot detect and a user will.
+- No screenshot of the pack "in use" inside an agent, because no such session has been
+  captured. If one is ever wanted, it must be a real recording.

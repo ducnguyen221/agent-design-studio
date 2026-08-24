@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Direction C — Considered Emptiness</title>
+<style>
+:root{
+  --ground:oklch(0.975 0.004 230);    /* near-white, faintly cool */
+  --ground-2:oklch(0.945 0.006 230);
+  --ink:oklch(0.26 0.014 245);
+  --ink-2:oklch(0.52 0.012 245);
+  --hair:oklch(0.86 0.008 230);
+  --brand:oklch(0.50 0.092 222);      /* muted cool — ink range, not neon */
+  --warm:oklch(0.58 0.128 48);        /* single warm mark, small areas only */
+  --sans:"Inter",system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.75 var(--sans)}
+.col{max-width:660px;margin:0 auto;padding:0 24px}      /* single narrow column = the skeleton */
+.lbl{font:500 10.5px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}
+
+header{padding:26px 0}
+.hin{max-width:660px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center}
+.wm{font:500 12.5px/1 var(--mono);letter-spacing:.06em;color:var(--ink-2)}
+.lang{display:flex;gap:14px}
+.lang button{font:500 11px/1 var(--mono);letter-spacing:.1em;border:0;background:0;padding:4px 0;
+  color:oklch(0.68 0.01 245);cursor:pointer;border-bottom:1px solid transparent}
+.lang button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--warm)}
+
+/* HERO — vast vertical space, centred, no image, one warm mark */
+.hero{padding:clamp(90px,19vh,190px) 0 clamp(80px,15vh,150px);text-align:center}
+h1{font-size:clamp(29px,4.4vw,50px);line-height:1.22;letter-spacing:-0.021em;font-weight:400;margin:26px auto 0;max-width:19ch}
+h1 b{font-weight:600;color:var(--brand)}
+h1 .m{position:relative;font-weight:600}
+h1 .m::after{content:"";position:absolute;left:0;right:0;bottom:.08em;height:.10em;background:var(--warm);opacity:.55}
+.sub{max-width:47ch;margin:30px auto 0;color:var(--ink-2);font-size:16.5px}
+.cta{display:flex;gap:22px;justify-content:center;align-items:center;margin-top:44px;flex-wrap:wrap}
+.btn{font:500 13.5px/1 var(--sans);padding:15px 30px;border:1px solid var(--ink);color:var(--ink);
+  text-decoration:none;display:inline-block;border-radius:2px}
+.btn.p{background:var(--ink);color:var(--ground)}
+.quiet{font:500 12.5px/1 var(--mono);letter-spacing:.06em;color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--hair);padding-bottom:3px}
+
+hr{border:0;border-top:1px solid var(--hair);margin:0}
+section{padding:clamp(64px,11vh,120px) 0}
+h2{font-size:clamp(21px,2.6vw,29px);font-weight:500;letter-spacing:-0.013em;margin:18px 0 34px;line-height:1.3}
+
+/* steps as a quiet numbered list, one per line — vertical rhythm is the composition */
+.steps{list-style:none;margin:0;padding:0}
+.steps li{display:grid;grid-template-columns:44px 1fr;gap:18px;padding:19px 0;border-top:1px solid var(--hair);align-items:baseline}
+.steps li:last-child{border-bottom:1px solid var(--hair)}
+.steps .n{font:500 11.5px/1.6 var(--mono);color:var(--ink-2);letter-spacing:.08em}
+.steps h3{font-size:16.5px;font-weight:600;margin:0 0 5px}
+.steps p{margin:0;font-size:14.5px;color:var(--ink-2);line-height:1.62}
+.steps li.gate .n{color:var(--warm)}
+.steps li.gate h3::after{content:"human gate";font:500 9.5px/1 var(--mono);letter-spacing:.14em;
+  text-transform:uppercase;color:var(--warm);margin-left:10px;vertical-align:2px}
+
+.fl{font:12.5px/2.15 var(--mono);color:var(--ink-2);background:var(--ground-2);border-radius:3px;padding:24px 22px;margin-top:8px}
+.fl b{color:var(--ink);font-weight:600}
+.fl u{color:var(--warm);text-decoration:none}
+.note{color:var(--ink-2);font-size:15px;max-width:46ch}
+</style></head><body>
+<header><div class="hin">
+  <span class="wm">agent-design-studio</span>
+  <div class="lang"><button aria-pressed="true">EN</button><button aria-pressed="false">VI</button></div>
+</div></header>
+
+<div class="col hero">
+  <div class="lbl">Seven steps · Two gates · MIT</div>
+  <h1>Your agent can already write UI.<br>This teaches it to <span class="m">design</span>.</h1>
+  <p class="sub">One process, run end to end: intake, fidelity, wireframe, three real directions,
+    a token system, motion, review. An artifact at every step. Two places where it stops
+    and waits for you.</p>
+  <div class="cta">
+    <a class="btn p" href="#install">Install</a>
+    <a class="quiet" href="#process">Read the process →</a>
+  </div>
+</div>
+
+<hr>
+<section class="col">
+  <div class="lbl">The process</div>
+  <h2>Seven steps, in the order that decides whether it works</h2>
+  <ol class="steps">
+    <li><span class="n">01</span><div><h3>Intake</h3><p>Subject, audience, and the single job this screen has to do.</p></div></li>
+    <li><span class="n">02</span><div><h3>Fidelity</h3><p>How finished this needs to be — the first real design decision, made deliberately.</p></div></li>
+    <li><span class="n">03</span><div><h3>Wireframe</h3><p>Structure only, deliberately unfinished, so review is about layout and not colour.</p></div></li>
+    <li class="gate"><span class="n">04</span><div><h3>Direction</h3><p>Three genuinely different renders, built for real. Never a written menu of adjectives.</p></div></li>
+    <li><span class="n">05</span><div><h3>System + build</h3><p>Colour sampled from real assets and justified in one sentence. Then the code.</p></div></li>
+    <li><span class="n">06</span><div><h3>Motion</h3><p>Every animation earns its place against four gates — or is refused, in writing.</p></div></li>
+    <li class="gate"><span class="n">07</span><div><h3>Review</h3><p>Scored on five dimensions against a hard floor. Fixed one commit at a time.</p></div></li>
+  </ol>
+</section>
+
+<hr>
+<section class="col">
+  <div class="lbl">Deliverables</div>
+  <h2>Every run leaves a paper trail</h2>
+  <p class="note"><strong>STATUS.md is the page for everyone else.</strong> Which step is done,
+    which is waiting, who on, and a link to every artifact — written for the person paying for
+    the work rather than the one doing it.</p>
+  <div class="fl">
+    <b>00-brief.md</b><br><b>01-fidelity.md</b><br><b>02-wireframe</b>.html + .png<br>
+    <b>03-directions/</b>{a,b,c}.html + .png<br><b>03-direction-decision.md</b> <u>← gate 1</u><br>
+    <b>04-design-system/</b>tokens.json<br>&nbsp;&nbsp;components.md · assets-manifest.md<br>
+    <b>05-implementation.md</b><br><b>06-motion-spec.md</b><br>
+    <b>07-uat-report.md</b> <u>← gate 2</u><br><b>STATUS.md</b>
+  </div>
+</section>
+</body></html>

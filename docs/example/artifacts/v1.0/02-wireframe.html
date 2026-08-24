@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wireframe — agent-design-studio site</title>
+<style>
+  /* WIREFRAME CONTRACT: grayscale only, system type, 1px borders, one radius, one spacing scale.
+     No brand color, no gradient, no shadow, no imagery. Intentionally unfinished. */
+  :root{
+    --g0:#ffffff; --g1:#f2f2f2; --g2:#e0e0e0; --g3:#bdbdbd; --g4:#8a8a8a; --g5:#555; --g6:#222;
+    --s1:8px; --s2:16px; --s3:24px; --s4:40px; --s5:64px; --r:4px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.5 system-ui,sans-serif;color:var(--g6);background:var(--g0)}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 var(--s3)}
+  .blk{border:1px solid var(--g3);border-radius:var(--r);padding:var(--s2);background:var(--g1)}
+  .ph{border:1px dashed var(--g4);border-radius:var(--r);background:var(--g1);color:var(--g5);
+      display:flex;align-items:center;justify-content:center;text-align:center;padding:var(--s2);font-size:13px}
+  .note{font-size:12px;color:var(--g5);border-left:2px solid var(--g4);padding-left:var(--s1);margin:var(--s1) 0}
+  h1{font-size:34px;line-height:1.15;margin:0 0 var(--s2)}
+  h2{font-size:22px;margin:0 0 var(--s2)}
+  h3{font-size:16px;margin:0 0 var(--s1)}
+  p{margin:0 0 var(--s2)}
+  section{padding:var(--s5) 0;border-bottom:1px solid var(--g2)}
+  :focus-visible{outline:2px solid var(--g6);outline-offset:2px}
+  /* nav */
+  nav{border-bottom:1px solid var(--g3);position:sticky;top:0;background:var(--g0);z-index:5}
+  .navin{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);padding:var(--s2) 0}
+  .navlinks{display:flex;gap:var(--s2);font-size:14px}
+  button{font:inherit;border:1px solid var(--g4);background:var(--g0);border-radius:var(--r);padding:6px 12px;cursor:pointer}
+  button[aria-pressed=true]{background:var(--g6);color:var(--g0)}
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--s4);align-items:center}
+  .cta{display:flex;gap:var(--s2);flex-wrap:wrap}
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2)}
+  .steps .blk:nth-child(1){grid-column:span 4}
+  /* trail */
+  .trail{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);align-items:start}
+  .files{display:grid;gap:var(--s1);font-family:ui-monospace,monospace;font-size:13px}
+  .files div{border:1px solid var(--g2);border-radius:var(--r);padding:6px 10px;background:var(--g1)}
+  /* gallery */
+  .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+  .gal .ph{aspect-ratio:16/10}
+  /* install */
+  .inst{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+  pre{background:var(--g1);border:1px solid var(--g2);border-radius:var(--r);padding:var(--s2);
+      font-size:13px;overflow-x:auto;margin:0}
+  footer{padding:var(--s4) 0;font-size:13px;color:var(--g5)}
+  @media (max-width:820px){
+    .hero,.trail,.inst{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr 1fr}
+    .steps .blk:nth-child(1){grid-column:span 2}
+    .gal{grid-template-columns:1fr}
+    .navlinks{display:none}
+    h1{font-size:26px}
+  }
+</style>
+</head>
+<body>
+
+<nav aria-label="Primary">
+  <div class="wrap navin">
+    <strong>agent-design-studio</strong>
+    <div class="navlinks">
+      <a href="#process">Process</a><a href="#trail">Artifacts</a><a href="#install">Install</a>
+    </div>
+    <div>
+      <button aria-pressed="true">EN</button><button aria-pressed="false">VI</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- HERO — structural question: does the thesis need an image beside it, or is the
+       argument textual and the visual should be the process itself? -->
+  <section id="hero">
+    <div class="hero">
+      <div>
+        <div class="note">EYEBROW — one line, positioning</div>
+        <h1>[HEADLINE — the thesis. ~8 words. States what the process does that a bare agent does not]</h1>
+        <p>[SUBHEAD — 2 lines. Who it is for, and the concrete promise.]</p>
+        <div class="cta">
+          <button>[PRIMARY — Install]</button>
+          <button>[SECONDARY — See the process]</button>
+        </div>
+        <div class="note">No social proof, no counts — none exist and inventing them is forbidden.</div>
+      </div>
+      <div class="ph" style="aspect-ratio:4/3">[HERO VISUAL — candidate: the seven steps as a live
+        diagram, OR the artifact trail rendering itself. Structural question for review:
+        does the hero carry an image at all?]</div>
+    </div>
+  </section>
+
+  <!-- PROBLEM — one short block. Why a process rather than a prompt. -->
+  <section id="problem">
+    <h2>[PROBLEM — 1 short paragraph + 3 bullets]</h2>
+    <div class="steps">
+      <div class="blk" style="grid-column:span 4">[Paragraph: what goes wrong without a process]</div>
+    </div>
+  </section>
+
+  <!-- PROCESS — the 7 steps. Structural question: 7 across, 4+3, or a vertical rail? -->
+  <section id="process">
+    <h2>The seven steps</h2>
+    <div class="steps">
+      <div class="blk">[Step 0 — target mode. Spans full width: it is a precondition, not a step]</div>
+      <div class="blk"><h3>1 Intake</h3>[one line]</div>
+      <div class="blk"><h3>2 Fidelity</h3>[one line]</div>
+      <div class="blk"><h3>3 Wireframe</h3>[one line]</div>
+      <div class="blk"><h3>4 Direction gate</h3>[one line + GATE marker]</div>
+      <div class="blk"><h3>5 System + build</h3>[one line]</div>
+      <div class="blk"><h3>6 Motion</h3>[one line]</div>
+      <div class="blk"><h3>7 Review loop</h3>[one line + GATE marker]</div>
+    </div>
+    <div class="note">Two of the seven are gates. The design must make gates read differently
+      from steps — that is the idea the section exists to communicate.</div>
+  </section>
+
+  <!-- ARTIFACT TRAIL — file list + what each is for -->
+  <section id="trail">
+    <h2>What you get, every run</h2>
+    <div class="trail">
+      <div class="files">
+        <div>00-brief.md</div><div>01-fidelity.md</div><div>02-wireframe.html + .png</div>
+        <div>03-directions/{a,b,c}.html + .png</div><div>03-direction-decision.md</div>
+        <div>04-design-system/tokens.json</div><div>04-design-system/components.md</div>
+        <div>04-design-system/assets-manifest.md</div><div>05-implementation.md</div>
+        <div>06-motion-spec.md</div><div>07-uat-report.md</div><div>STATUS.md</div>
+      </div>
+      <div>
+        <div class="blk">[Explanation: the trail is the point. A non-technical stakeholder
+          reads STATUS.md; everyone else reads the artifact for their step.]</div>
+        <div class="ph" style="aspect-ratio:16/10;margin-top:16px">[SCREENSHOT — STATUS.md rendered]</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE — the page's own artifacts. This is the proof. -->
+  <section id="showcase">
+    <h2>This page was made by the process</h2>
+    <div class="gal">
+      <div class="ph">[SCREENSHOT — 02-wireframe.png]</div>
+      <div class="ph">[SCREENSHOT — three directions side by side]</div>
+      <div class="ph">[SCREENSHOT — 07 radar / scorecard]</div>
+    </div>
+    <div class="note">Real screenshots from this run, embedded as data URIs. If a screenshot
+      is unavailable, an honest labeled placeholder ships instead — never a drawn substitute.</div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install">
+    <h2>Install</h2>
+    <div class="inst">
+      <div><h3>Harness A</h3><pre>[placeholder command — real URL in D4]</pre></div>
+      <div><h3>Harness B</h3><pre>[placeholder command — real URL in D4]</pre></div>
+    </div>
+    <div class="note">STATE: placeholder. Must be visibly marked as such on the live page
+      until D4 replaces it — shipping a command that does not work is worse than none.</div>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section id="who">
+    <h2>[Who it is for — 2 columns: students / practitioners]</h2>
+    <div class="inst">
+      <div class="blk">[Students]</div><div class="blk">[Practitioners]</div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <div class="blk">[ACKNOWLEDGMENTS — four upstream projects, named, with licenses.
+    Required. This is the only place proper names appear.]</div>
+  <p style="margin-top:16px">[License · repo link · built-with line]</p>
+</footer>
+
+</body>
+</html>

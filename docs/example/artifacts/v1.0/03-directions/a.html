@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Direction A — Specimen Sheet</title>
+<style>
+:root{
+  --paper:oklch(0.965 0.009 85);      /* warm drafting paper */
+  --paper-2:oklch(0.935 0.012 85);
+  --ink:oklch(0.24 0.021 250);        /* cool near-black, cyan-leaning */
+  --ink-2:oklch(0.46 0.018 250);
+  --rule:oklch(0.62 0.045 228);       /* blueprint hairline */
+  --rule-soft:oklch(0.80 0.025 228);
+  --mark:oklch(0.55 0.165 32);        /* drafting red, small areas only */
+  --mono:ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --sans:"Inter",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--sans);
+  background-image:linear-gradient(var(--rule-soft) 1px,transparent 1px),linear-gradient(90deg,var(--rule-soft) 1px,transparent 1px);
+  background-size:64px 64px;background-position:-1px -1px}
+.sheet{max-width:1180px;margin:0 auto;background:var(--paper);border-left:1px solid var(--rule);border-right:1px solid var(--rule);min-height:100vh}
+.pad{padding:0 clamp(20px,4vw,56px)}
+.lbl{font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.rule{border-top:1px solid var(--rule);position:relative;margin:0}
+.rule::before,.rule::after{content:"";position:absolute;top:-4px;width:1px;height:9px;background:var(--rule)}
+.rule::before{left:0}.rule::after{right:0}
+
+header{display:flex;justify-content:space-between;align-items:center;padding:16px clamp(20px,4vw,56px);border-bottom:1px solid var(--rule)}
+.wm{font:600 13px/1 var(--mono);letter-spacing:.04em}
+.lang{display:flex;border:1px solid var(--rule)}
+.lang button{font:500 11px/1 var(--mono);padding:6px 10px;border:0;background:transparent;color:var(--ink-2);cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+
+/* HERO — drawing frame with dimension callouts */
+.hero{display:grid;grid-template-columns:88px 1fr;gap:0}
+.index{border-right:1px solid var(--rule);padding:32px 0;display:flex;flex-direction:column;gap:10px;align-items:center}
+.index span{font:500 10px/1 var(--mono);color:var(--ink-2);writing-mode:vertical-rl;letter-spacing:.2em}
+.herobody{padding:56px clamp(20px,4vw,56px) 40px}
+h1{font-size:clamp(30px,4.6vw,58px);line-height:1.04;letter-spacing:-0.025em;margin:14px 0 0;font-weight:600;max-width:16ch}
+h1 em{font-style:normal;color:var(--mark);position:relative}
+.sub{max-width:56ch;color:var(--ink-2);margin:20px 0 0;font-size:17px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{font:500 13px/1 var(--mono);letter-spacing:.03em;padding:13px 20px;border:1px solid var(--ink);
+  background:var(--ink);color:var(--paper);text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--ink)}
+
+/* callout leader lines */
+.spec{margin-top:44px;border:1px solid var(--rule);position:relative;background:var(--paper)}
+.spec .cap{position:absolute;top:-9px;left:16px;background:var(--paper);padding:0 8px}
+.specgrid{display:grid;grid-template-columns:repeat(4,1fr)}
+.cell{padding:18px 16px;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
+.cell:nth-child(4n){border-right:0}
+.cell b{display:block;font:600 12px/1 var(--mono);color:var(--mark);margin-bottom:7px}
+.cell p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.cell.gate b{color:var(--ink)}
+.cell.gate{background:var(--paper-2)}
+.cell.gate::after{content:"GATE";float:right;font:500 9px/1 var(--mono);letter-spacing:.16em;
+  border:1px solid var(--ink);padding:3px 5px;margin-top:-22px}
+
+section{padding:56px 0}
+h2{font-size:clamp(21px,2.4vw,30px);letter-spacing:-0.015em;margin:10px 0 22px;font-weight:600}
+.trail{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,4vw,56px)}
+.fl{font:12.5px/2.05 var(--mono);color:var(--ink-2)}
+.fl b{color:var(--ink);font-weight:600}
+.fl span{color:var(--mark)}
+.card{border:1px solid var(--rule);padding:20px;background:var(--paper-2)}
+@media(max-width:820px){
+  .hero{grid-template-columns:1fr}.index{display:none}
+  .specgrid{grid-template-columns:1fr 1fr}.cell:nth-child(4n){border-right:1px solid var(--rule-soft)}
+  .cell:nth-child(2n){border-right:0}.trail{grid-template-columns:1fr}
+}
+</style></head><body>
+<div class="sheet">
+<header>
+  <span class="wm">AGENT-DESIGN-STUDIO</span>
+  <span class="lbl">DIR. A · SPECIMEN SHEET</span>
+  <div class="lang"><button aria-pressed="true">EN</button><button aria-pressed="false">VI</button></div>
+</header>
+
+<div class="hero">
+  <div class="index"><span>SHEET 01 / 01 — PROCESS SPECIFICATION</span></div>
+  <div class="herobody">
+    <div class="lbl">An agent skill · MIT · Seven steps · Two gates</div>
+    <h1>Your agent can already write UI. This teaches it to <em>design</em>.</h1>
+    <p class="sub">A seven-step process an AI coding agent runs end to end — intake, fidelity,
+      wireframe, three real directions, a token system, motion, review. Every step leaves an
+      artifact on disk. Two steps stop and wait for a person.</p>
+    <div class="cta">
+      <a class="btn" href="#install">Install</a>
+      <a class="btn ghost" href="#process">Read the process</a>
+    </div>
+
+    <div class="spec">
+      <span class="cap lbl">Fig. 1 — the seven steps</span>
+      <div class="specgrid">
+        <div class="cell"><b>01 INTAKE</b><p>Subject, audience, and the one job the screen must do.</p></div>
+        <div class="cell"><b>02 FIDELITY</b><p>How finished this needs to be — the first design decision.</p></div>
+        <div class="cell"><b>03 WIREFRAME</b><p>Structure only. States and viewports declared here.</p></div>
+        <div class="cell gate"><b>04 DIRECTION</b><p>Three real renders. A person chooses.</p></div>
+        <div class="cell"><b>05 SYSTEM</b><p>Tokens derived, not picked. Then the build.</p></div>
+        <div class="cell"><b>06 MOTION</b><p>Every animation earns its place or is refused.</p></div>
+        <div class="cell gate"><b>07 REVIEW</b><p>Scored against a floor. Fixes verified.</p></div>
+        <div class="cell"><b>00 MODE</b><p>Static artifact, or a screen inside a real codebase.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rule"></div>
+<section class="pad">
+  <div class="lbl">Fig. 2 — deliverables</div>
+  <h2>Every run leaves a paper trail</h2>
+  <div class="trail">
+    <div class="fl">
+      <b>00-brief.md</b><br><b>01-fidelity.md</b><br><b>02-wireframe</b>.html + .png<br>
+      <b>03-directions/</b>{a,b,c}.html + .png<br><b>03-direction-decision.md</b> <span>← gate 1</span><br>
+      <b>04-design-system/</b>tokens.json<br>&nbsp;&nbsp;&nbsp;&nbsp;components.md · assets-manifest.md<br>
+      <b>05-implementation.md</b><br><b>06-motion-spec.md</b><br>
+      <b>07-uat-report.md</b> <span>← gate 2</span><br><b>STATUS.md</b> <span>← read this one</span>
+    </div>
+    <div class="card">
+      <p style="margin:0 0 12px"><strong>STATUS.md is the one page for everyone else.</strong></p>
+      <p style="margin:0;color:var(--ink-2);font-size:14.5px">Which step is done, which is waiting,
+      who it is waiting on, and a link to every artifact. Written for someone who does not read code —
+      so the person paying for the work can see where it stands without asking.</p>
+    </div>
+  </div>
+</section>
+</div>
+</body></html>

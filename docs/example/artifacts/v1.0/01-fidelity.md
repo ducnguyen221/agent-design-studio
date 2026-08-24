@@ -1,0 +1,42 @@
+# 01 — Fidelity
+
+**Open question.** Not *what goes on the page* — the brief settles that. Not *how it
+behaves* — it is a landing page with a language toggle. The genuinely open question is
+**what visual identity this project has**, and whether a page can argue for a design
+process by being well designed rather than by describing itself.
+
+**Chosen fidelity: production.**
+
+**Why this one.** The deliverable is the shipped page. There is no downstream artifact
+this feeds; `docs/index.html` on GitHub Pages *is* the outcome. Building a mockup first
+and then rebuilding it as production would be pure duplication, because the mockup and
+the production file are the same technology — one self-contained HTML file.
+
+**Scope.** One page. One scroll. Two languages. Not a documentation site, not a multi-page
+structure — the repository carries depth, the page carries the argument.
+
+**Deliberately deferred.** Real install URLs (D4). A logo and favicon (none exists; the
+page must work without one, which constrains the hero). Any documentation pages.
+
+**Boundaries.** No server, no analytics, no form submission, no external data. The
+language toggle is client-side only. Nothing on the page pretends to do something a
+static file cannot.
+
+---
+
+## Note on interpretation — flagged for v1.1
+
+`choosing-fidelity.md` reads as though the chosen fidelity replaces the other artifacts:
+pick wireframe *or* mockup *or* production. But the router runs Step 3 (wireframe) and
+Step 4 (direction renders) regardless of what Step 2 chose, so on this run "production"
+did not mean "skip to production".
+
+The two are reconcilable — Step 2 chooses the **fidelity of the deliverable**, while
+Steps 3 and 4 are **review instruments** that exist to de-risk it — but the reference
+does not say so, and I had to decide that for myself mid-run. A single sentence in
+`choosing-fidelity.md` would remove the ambiguity. Logged in the UAT report's
+process-feedback section.
+
+Interpretation used here: **fidelity = the deliverable's finish level. The wireframe and
+the three directions are still produced, because structure precedes surface and the
+direction is unsettled.**

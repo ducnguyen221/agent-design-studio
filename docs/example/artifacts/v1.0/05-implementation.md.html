@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05-implementation.md — v1.0 — a real run</title>
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="../../artifact.css">
+</head>
+<body>
+<header class="ah">
+  <a class="back" href="../../index.html">&#8592; the run</a>
+  <h1>05-implementation.md</h1>
+  <p class="am">v1.0 &middot; artifact as produced &middot;
+     <a href="05-implementation.md">raw file</a></p>
+</header>
+<pre class="doc"># 05 — Implementation
+
+Mode: `static-artifact` · Direction: A — Specimen Sheet · Date: 2026-08-24
+
+## Files
+
+| File | Role |
+| --- | --- |
+| `05-build-source.html` | Authored source, with `__IMG_*__` placeholders |
+| `05-build.html` | Built output — placeholders replaced by data URIs (201 KB) |
+| `thumbs/*.png` | Gallery images, generated from this run's own artifacts |
+
+Build step: one script substitutes each placeholder with a base64 data URI. It is a
+scratch tool, not a deliverable, and is deleted at the end of the run. The published file
+has no build dependency — it is one HTML file with everything inside it.
+
+## Two-pass record (taste calibration)
+
+**Pass 1 — the plan.**
+
+- *Colour*: warm paper ground, cool cyan-leaning ink and hairlines, one drafting red.
+  Derived in `color-protocol`, values in `tokens.json`.
+- *Type*: two families, three roles. Tight semibold sans display, sans body, and monospace
+  doing real work on labels, captions, filenames and stamps.
+- *Layout*: bordered sheet, 88px vertical index rail, figure-numbered sections separated by
+  captioned rules.
+- *Signature*: the callout system — figure captions knocked out of a hairline, and `GATE`
+  stamps on exactly the two steps where a person decides.
+
+**Pass 2 — critique of the plan before coding.** Three things were changed:
+
+1. *Would I produce this for any similar brief?* The sheet frame and figure captions — no.
+   The four-across card grid for the steps — **yes**, that is the default answer for "show
+   seven things". Revised: the grid is bordered as a single figure with internal hairlines,
+   so it reads as one drawing rather than eight cards. Cards are the thing everyone ships;
+   a bordered figure is what a specification does.
+2. *Is the hero image-led by habit?* The wireframe left the hero-visual question open. Answer:
+   **no image**. The project has no logo, and a stock-feeling visual would contradict the
+   page. The figure grid immediately below acts as the hero's visual weight.
+3. *Is the mark colour earning itself?* Initially the drafting red was on all eight figure
+   numbers. That spreads boldness evenly, which is exactly what the restraint rule forbids.
+   Revised: red on the step labels, and the two gate cells get a soft red field plus a
+   stamp — so the one thing the eye catches is the structural claim the page is making.
+
+## Content decisions
+
+- **No invented social proof.** No counts, no logos, no testimonials. There are none.
+- **Install commands are visibly stamped `PLACEHOLDER`.** This is a modelled UI state, not
+  an oversight — the page says plainly that shipping a failing command is worse than none.
+- **Acknowledgements name all four upstream projects with licences**, and state explicitly
+  that no text was reproduced. This is the only place proper names appear.
+
+## Bilingual implementation
+
+One DOM, not two. Every translatable node carries `data-i18n`; English is captured from the
+markup at load, Vietnamese lives in one object. The toggle swaps `innerHTML`, sets
+`documentElement.lang`, and moves `aria-pressed`.
+
+Vietnamese is written, not machine-translated, and carries the same argument at the same
+length. Both faces are system stacks with full diacritic coverage, so the second language
+is not degraded and the file needs no font download.
+
+## Known defects at the end of Step 5
+
+Found by looking at the render. Left for the Step 7 loop deliberately — that is the step
+that exists to catch them, and fixing them silently here would make the review theatre.
+
+1. `h2` inherits `line-height: 1.6` from body. At display sizes it reads as two loosely
+   stacked lines instead of one heading.
+2. Section rhythm compounds: `section` bottom padding plus `.figrule` top margin produce
+   voids between sections that read as absence rather than composition — the precise
+   failure the direction-gate reference warns about.
+3. The two-column trail section leaves a short right column, so the gap below it is
+   uneven.
+
+## Accessibility built in, not retrofitted
+
+Skip link · semantic landmarks (`header`/`nav`/`main`/`section`/`footer`) · every image has
+a real alt description · the language control is two real buttons in a labelled group with
+`aria-pressed` · focus-visible outline on every stop · no hover-only affordances · press
+feedback gated behind fine pointer.
+</pre>
+</body>
+</html>

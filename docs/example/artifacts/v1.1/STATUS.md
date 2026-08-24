@@ -1,0 +1,78 @@
+# STATUS — agent-design-studio site, v2 rebuild
+
+**Run:** `2026-08-24-site-v2` · **Started/finished:** 2026-08-24
+**Supersedes:** `../2026-08-24-agent-design-studio-site/` (v1.0, shipped and then rejected)
+**Deliverable:** `docs/index.html` in `ducnguyen221/agent-design-studio` — the public page
+at `ducnguyen.vn/agent-design-studio`
+
+## Where this stands
+
+| Step | State | Artifact |
+| --- | --- | --- |
+| 0–2 Mode, intake, fidelity | **Carried from v1** — unchanged brief, audience and fidelity | `../2026-08-24-agent-design-studio-site/00-brief.md`, `01-fidelity.md` |
+| 3 Wireframe | **Carried from v1** — the structure was never the complaint | `../02-wireframe.html` |
+| **4 Direction — GATE 1** | ✅ **human-approved** | `03-direction-decision.md` |
+| 5 System + build | ✅ done | `04-design-system/` · `05-implementation.md` · `05-build-source.html` · `05-build.html` |
+| 6 Motion | ✅ done — 9 accepted, 10 refused | `06-motion-spec.md` |
+| **7 Review — GATE 2** | ⏳ **pending** — waiting on a person | `07-uat-report.md` |
+
+## Waiting on
+
+**the design review's visual review, then Đức's.** Specifically the first-viewport frame at
+`screens/07-first-viewport-1905.png` — this run exists because v1 shipped without anyone
+looking at that frame.
+
+Committed locally in three commits. **Not pushed. Not tagged.** Publication happens after
+Gate 2 closes.
+
+## What happened, in one paragraph
+
+v1.0 shipped on direction A, auto-selected under a recorded grant. The owner saw the live
+page and overruled it: it read as a wireframe, not a designed site. That is the gate
+mechanism working — an auto-selected decision is provisional by construction, every render
+stayed on disk, and the rejection note for direction B already recorded what would have to
+change if it were ever promoted. B was promoted. Its two flagged AI defaults — a gradient
+headline and a cool neon accent — are refused in writing and absent from the code. Three
+patches went into the skill the same day so that the defect v1 shipped with is now
+catchable: the three-second test is a hard-floor row, Craft below 8 blocks a public
+deliverable, and a restrained direction owes one invested moment per viewport.
+
+## Result
+
+| | v1.0 | v2 |
+| --- | --- | --- |
+| Three-second test | **would fail** (its owner read it as a document) | **PASS** |
+| Concept | 8 | 8 |
+| Direction consistency | 8 | 9 |
+| Visual hierarchy | 8 | 9 |
+| **Craft** | **7 — passed anyway** | **8 — at the floor** |
+| Function | 8 | 8 |
+| Originality | 8 | 8 |
+| Overall | 7.8 | **8.3** |
+| Hard-floor failures at review | 6 label sizes, 2 contrast pairs, 1 overflow, 1 invisible page | 3, all fixed in-loop |
+| Motion | 8 accepted / 8 refused, none visible on first load | 9 accepted / 10 refused, **felt on first load**, plus 4 live demos |
+
+## Known and unfixed, deliberately
+
+Three polish items are listed in `07-uat-report.md` §Fix (items 9–11) and were left so the
+report describes what shipped: an empty upper-right quadrant in the hero, an evidence
+column that bottoms out above its prose, and a one-word last line on the motion heading.
+Quick-win fixes for all three are written down.
+
+## Files
+
+```
+2026-08-24-site-v2/
+├── 03-direction-decision.md      ← GATE 1 · human-approved, with the override recorded
+├── 04-design-system/
+│   ├── tokens.json
+│   ├── components.md
+│   └── assets-manifest.md
+├── 05-implementation.md
+├── 05-build-source.html          (placeholders — edit this one)
+├── 05-build.html                 (built, self-contained, = docs/index.html)
+├── 06-motion-spec.md
+├── 07-uat-report.md              ← GATE 2 · pending
+├── STATUS.md
+└── screens/                      9 frames incl. first-viewport at 1905×937 and 390
+```

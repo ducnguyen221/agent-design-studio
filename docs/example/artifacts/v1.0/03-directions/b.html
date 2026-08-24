@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Direction B — Weighted Editorial</title>
+<style>
+:root{
+  --ground:oklch(0.19 0.017 245);     /* deep slate, NOT pure navy-black */
+  --ground-2:oklch(0.25 0.020 245);
+  --ink:oklch(0.97 0.006 245);
+  --ink-2:oklch(0.74 0.014 245);
+  --brand:oklch(0.72 0.118 205);      /* cool, chroma pulled to ink range */
+  --warm:oklch(0.78 0.135 68);        /* warm counterpoint, 137deg away */
+  --sans:"Inter",system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.6 var(--sans);overflow-x:hidden}
+.wrap{max-width:1240px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+.lbl{font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--brand)}
+
+header{position:sticky;top:0;z-index:9;backdrop-filter:blur(14px);
+  background:color-mix(in oklch,var(--ground) 82%,transparent);border-bottom:1px solid oklch(0.35 0.02 245)}
+.hin{display:flex;justify-content:space-between;align-items:center;padding:15px 0}
+.wm{font:600 14px/1 var(--sans);letter-spacing:-0.01em}
+.lang{display:flex;gap:2px;background:var(--ground-2);border-radius:99px;padding:3px}
+.lang button{font:600 11px/1 var(--sans);padding:7px 13px;border:0;border-radius:99px;background:transparent;color:var(--ink-2);cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--brand);color:var(--ground)}
+
+/* HERO — full-bleed, oversized type, no image. Type IS the image. */
+.hero{padding:clamp(64px,11vw,140px) 0 clamp(48px,7vw,88px)}
+h1{font-size:clamp(38px,8.2vw,104px);line-height:0.96;letter-spacing:-0.042em;font-weight:650;margin:22px 0 0;max-width:14ch}
+h1 .g{background:linear-gradient(96deg,var(--brand),var(--warm));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{max-width:58ch;color:var(--ink-2);font-size:clamp(16px,1.5vw,20px);margin:28px 0 0}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px}
+.btn{font:600 14px/1 var(--sans);padding:16px 26px;border-radius:99px;text-decoration:none;border:1px solid transparent;display:inline-block}
+.btn.p{background:var(--brand);color:var(--ground)}
+.btn.s{border-color:oklch(0.42 0.02 245);color:var(--ink)}
+
+/* STEP RAIL — horizontal scroller, the structural signature */
+.railwrap{padding:clamp(40px,6vw,72px) 0;border-top:1px solid oklch(0.32 0.02 245)}
+.rail{display:flex;gap:16px;overflow-x:auto;padding-bottom:14px;scroll-snap-type:x mandatory}
+.step{flex:0 0 clamp(210px,23vw,268px);scroll-snap-align:start;background:var(--ground-2);
+  border:1px solid oklch(0.34 0.02 245);border-radius:16px;padding:22px 20px;min-height:172px;position:relative}
+.step .n{font:600 40px/1 var(--sans);letter-spacing:-0.04em;color:oklch(0.40 0.03 245)}
+.step h3{font-size:17px;margin:12px 0 8px;font-weight:600}
+.step p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.step.gate{border-color:var(--warm)}
+.step.gate .n{color:var(--warm)}
+.step.gate::after{content:"HUMAN GATE";position:absolute;top:20px;right:18px;
+  font:600 9px/1 var(--mono);letter-spacing:.12em;color:var(--warm)}
+
+section{padding:clamp(48px,7vw,86px) 0}
+h2{font-size:clamp(26px,4vw,48px);line-height:1.06;letter-spacing:-0.03em;font-weight:650;margin:14px 0 24px;max-width:20ch}
+.two{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,5vw,64px);align-items:start}
+.fl{font:13px/2.1 var(--mono);color:var(--ink-2);background:var(--ground-2);
+  border:1px solid oklch(0.34 0.02 245);border-radius:16px;padding:26px 24px}
+.fl b{color:var(--ink);font-weight:600}
+.fl u{color:var(--warm);text-decoration:none}
+.lead{color:var(--ink-2);font-size:17px}
+@media(max-width:880px){.two{grid-template-columns:1fr}}
+</style></head><body>
+<header><div class="wrap hin">
+  <span class="wm">agent-design-studio</span>
+  <div class="lang"><button aria-pressed="true">EN</button><button aria-pressed="false">VI</button></div>
+</div></header>
+
+<div class="wrap hero">
+  <div class="lbl">Agent skill · MIT · Seven steps · Two gates</div>
+  <h1>Your agent can write UI.<br>This makes it <span class="g">design</span>.</h1>
+  <p class="sub">A seven-step process an AI coding agent runs from brief to reviewed interface.
+    Three real directions before a single line of production CSS. An artifact on disk at every
+    step. Two places where it stops and a person decides.</p>
+  <div class="cta">
+    <a class="btn p" href="#install">Install the pack</a>
+    <a class="btn s" href="#process">Read the process</a>
+  </div>
+</div>
+
+<div class="railwrap"><div class="wrap">
+  <div class="lbl">The process</div>
+  <h2>Seven steps, in the order that matters</h2>
+  <div class="rail">
+    <div class="step"><div class="n">01</div><h3>Intake</h3><p>Subject, audience, and the one job this screen must do.</p></div>
+    <div class="step"><div class="n">02</div><h3>Fidelity</h3><p>How finished it needs to be. The first real design decision.</p></div>
+    <div class="step"><div class="n">03</div><h3>Wireframe</h3><p>Structure only — deliberately unfinished so reviewers judge layout.</p></div>
+    <div class="step gate"><div class="n">04</div><h3>Direction gate</h3><p>Three genuinely different renders. Never a written menu.</p></div>
+    <div class="step"><div class="n">05</div><h3>System + build</h3><p>Colour derived from real assets, never invented. Then code.</p></div>
+    <div class="step"><div class="n">06</div><h3>Motion</h3><p>Every animation earns its place — or gets refused, in writing.</p></div>
+    <div class="step gate"><div class="n">07</div><h3>Review loop</h3><p>Scored, floored, fixed one commit at a time.</p></div>
+  </div>
+</div></div>
+
+<section class="wrap">
+  <div class="two">
+    <div>
+      <div class="lbl">Deliverables</div>
+      <h2>Every run leaves a paper trail</h2>
+      <p class="lead"><strong>STATUS.md is the page for everyone else</strong> — which step is done,
+        which is waiting, who on, and a link to every artifact. Written for the person paying for
+        the work, not for the person doing it.</p>
+    </div>
+    <div class="fl">
+      <b>00-brief.md</b><br><b>01-fidelity.md</b><br><b>02-wireframe</b>.html + .png<br>
+      <b>03-directions/</b>{a,b,c}.html + .png<br><b>03-direction-decision.md</b> <u>← gate 1</u><br>
+      <b>04-design-system/</b>tokens.json<br>&nbsp;&nbsp;components.md · assets-manifest.md<br>
+      <b>05-implementation.md</b><br><b>06-motion-spec.md</b><br>
+      <b>07-uat-report.md</b> <u>← gate 2</u><br><b>STATUS.md</b>
+    </div>
+  </div>
+</section>
+</body></html>

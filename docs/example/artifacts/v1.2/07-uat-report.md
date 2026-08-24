@@ -1,0 +1,325 @@
+# 07 — UAT report (v3)
+
+**Date:** 2026-08-24 · **Build:** `v3/05-build.html` → `docs/index.html`
+(276 KB, self-contained, 0 subresource requests)
+**Gate 2 state:** `pending` — closes at the design review's visual review, then Đức's.
+**Gate 1:** exempt for this run — direction unchanged. See `00-owner-directive.md`.
+**Reviewed against:** the v1.1 schema (six dimensions, hard floor, three-second test,
+Craft ≥ 8 for a public deliverable) plus one new row required by the owner's second
+directive.
+
+Everything below was measured in Chromium at five viewports through
+`v3/uat.py`; raw output in `v3/uat-raw.json`.
+
+## Mechanical pre-pass
+
+`static-lint` skipped again — the linter is network-dependent and this run was offline.
+Recorded, not omitted. In its place: **the contrast probe from v1.1 was itself found
+defective and rebuilt.** The old probe read `getComputedStyle().color` with a numeric regex.
+Every colour on this page is authored in `oklch()` and `color-mix()`, which Chromium hands
+back verbatim, so the probe was parsing `0.185 0.014 258` as an RGB triple and returning
+fiction. The v1.1 table's numbers happened to be right because that run used a different
+canvas method; the *script* that shipped could not have caught a regression. It now paints
+each colour on a canvas, composites the whole background stack under it, and reads sRGB
+bytes back. **A measurement tool that can silently return plausible numbers is worse than
+no tool.** Candidate for the pack.
+
+---
+
+## NEW — does the first viewport visibly move with intent within 2 seconds? **PASS**
+
+**Evidence:** `screens/07-load-t0.png` (21 ms), `07-load-t600.png` (603 ms),
+`07-load-t1400.png` (1403 ms), and a 4-second capture at
+`screens/07-load-choreography.webm`. Timestamps are measured wall-clock from
+`domcontentloaded`, printed by the script, not estimated.
+
+| Frame | What it shows |
+| --- | --- |
+| **21 ms** | Ground and header only. The headline's first line has begun to rise and is still half-transparent. Nothing else has arrived. There is no flash of a fully-composed page |
+| **603 ms** | Two headline lines are set, the third is arriving, the lead paragraph and both buttons have risen, two of the three plates are mid-flight at visible off-angles, and the last word of the headline is still under its shutter |
+| **1403 ms** | The plates have landed in their fan, the red has flooded the word, the `GATE 1` stamp has slammed and settled, and the eight-step index is lighting left to right — cells `00`–`05` are up, `06` is mid-fade, `07` has not started |
+
+**Verdict.** Motion begins at roughly 60 ms and is unmistakable well before 600 ms. It is
+staged rather than simultaneous, it is directional, and by 1.4 s it has told a small story:
+a stage lights, words arrive, three objects are dealt, one is stamped. The page then goes
+still. **This is the check v1.0 would have failed outright and v1.1 would have passed
+narrowly** — v1.1's entrance was the headline and a fade, roughly 400 ms of arrival with
+nothing after it.
+
+**Honest caveat.** A static reviewer reading this report sees three stills. The frames were
+picked before they were taken (0 / 600 / 1400 ms, fixed in the script) so they are not
+flattering selections, and the video is the real evidence. But "does it feel good" is still
+a human's call, and it is the one thing here a script cannot return.
+
+---
+
+## Three-second test — **PASS**
+
+**Frame judged:** `screens/07-first-viewport-1905.png`, first viewport only, 1905 × 937.
+
+**Cold-eye verdict: invested product page.** In three seconds the frame resolves as a dark
+editorial site with an 80 px headline, one word in red, three photographed paper specimens
+fanned on a lit patch of ground with a red `GATE 1` stamp overhanging them, and a ruled
+eight-cell index across the bottom with two cells picked out in red.
+
+**What changed since v1.1's frame.** The stage light behind the specimens is new, and it
+does the work the v1.1 report flagged as unfinished (finding #9): the upper-right quadrant
+is now a lit region with objects in it rather than flat empty ground. It is still the
+quietest part of the frame; it no longer reads as a hole.
+
+**Mobile.** `screens/07-mobile-390-first-viewport.png`: passes. Headline holds three lines
+at 34 px, both buttons land above the fold, and the top of the plate stack with its `GATE 1`
+stamp is visible. **It is tighter than v1.1** — the plain-language lead is four lines longer
+than the jargon version it replaced, which pushes the specimens down. Flagged below.
+
+---
+
+## Hard floor — PASS
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Body ≥ 14px | PASS | body 17px · lead 18px · hero sub 19px · step body 15.5px · rig rule 14.5px |
+| Labels/captions ≥ 12px | PASS | full sweep of every text-bearing element: **smallest = 12px**, 0 violations |
+| Text contrast ≥ 4.5:1 (3:1 large) | PASS | swept **all 67** text-bearing elements, EN. **0 failures.** Lowest 4.66 |
+| Contrast, Vietnamese | PASS | re-swept after the language switch: **0 failures** |
+| Contrast, 390px | PASS | re-swept at mobile widths: **0 failures** |
+| Contrast, no-JS render | PASS | re-swept with the `<script>` removed: **0 failures** |
+| Focus visible, full keyboard walk | PASS | **21 stops**, `solid 2px` accent outline at 3px offset on every one, 0 stops without an outline. DOM order matches the components contract |
+| Dialogs | n/a | none — the one candidate (a plate lightbox) is refused in the motion spec rather than half-built |
+| `prefers-reduced-motion` | PASS | 0 elements hidden; every entrance dropped; thread pinned full-length; caret stopped; shutter retracted; note computes to `display: block` |
+| Declared UI states exist | PASS | all reachable states implemented; unreachable product states declared in `../04-design-system/components.md` |
+| No horizontal overflow | PASS | 390=390 · 768=768 · 1024=1024 · 1440=1440 · 1905=1905 |
+| Console errors | PASS | **0** across every context: load-capture, 1905, 390, reduced-motion. 0 page errors during rig interaction |
+| No dead controls | PASS | install commands are live (the placeholder state was retired in the previous commit); all 21 stops do something |
+| Real logos / no CSS silhouettes | PASS | no brand depicted; four upstream projects credited as plain repo paths |
+| Meaning never by colour alone | PASS | checkpoints carry a `YOU DECIDE` tag **and** a ground inversion **and** two red rules; toggles carry `aria-pressed`/`aria-checked` **and** a fill; the turned-down plate carries a `TURNED DOWN` stamp **and** a caption |
+| Images have alt text | PASS | **6/6**, each describing what the frame shows |
+| Landmarks / single h1 | PASS | 1 header · 1 nav · 1 main · 1 footer · 1 h1 |
+| Works with JavaScript disabled | PASS | 0 content elements hidden (see note); rig A still fully functional (pure CSS); rigs B–D inert with their explanations intact; red thread renders at full length |
+| Print | PASS | 0 elements hidden under `@media print`; thread hidden |
+| Data the user reads does not move | PASS | nothing scroll-linked touches a text block. The two scroll-linked transforms are a 2px rule and an 8px diamond, both `aria-hidden`, both outside the text column |
+
+**The one non-zero hidden count, stated plainly.** In the true no-JS render, exactly one
+element computes below 8 % opacity: `i.threadhead`, the 8 px diamond at the tip of the red
+thread. It is `aria-hidden`, contains no text, and is *correctly* invisible when there is no
+scroll position for it to report. Everything with content renders. This is disclosed rather
+than rounded to zero.
+
+### Full contrast sweep — 67 elements, lowest 14 shown
+
+| Element | Size | Ratio | Needs |
+| --- | --- | --- | --- |
+| artifact sub-label (`a · b · c`, on paper) | 12px | **4.66** | 4.5 |
+| step numeral, on stage | 46px | 4.73 | 3.0 |
+| spec count, accent | 26px | 4.96 | 3.0 |
+| rig letter | 12px | 4.96 | 4.5 |
+| plate caption (paper) | 12px | 5.00 | 4.5 |
+| file list (paper) | 13px | 5.00 | 4.5 |
+| motion-spec title bar | 12px | 5.50 | 4.5 |
+| hero eyebrow | 12px | 5.52 | 4.5 |
+| mark word, hero | 80px | 5.52 | 3.0 |
+| index numeral, gate cell | 21px | 5.52 | 4.5 |
+| section kicker | 12px | 5.52 | 4.5 |
+| prompt mark, code | 13px | 5.88 | 4.5 |
+| footer label | 12px | 5.88 | 4.5 |
+| step numeral, on paper | 46px | 6.03 | 3.0 |
+
+Full table of all 67 in `uat-raw.json`. Highest 17.86 (code on the near-black rig ground).
+**No token values were changed this run** — the palette that passed in v1.1 passed again
+under a probe that actually works.
+
+### Viewport evidence
+
+`screens/07-first-viewport-1905.png` · `07-full-1905.png` · `07-tablet-768.png` ·
+`07-mobile-390.png` · `07-mobile-390-first-viewport.png` · `07-nojs-1905.png` ·
+`07-reduced-motion-1905.png` · `07-vi-first-viewport-1905.png` · `07-vi-full-1905.png`
+
+**Motion evidence:** `07-load-t0.png` · `07-load-t600.png` · `07-load-t1400.png` ·
+`07-load-choreography.webm`
+
+> **Note on the full-page stills.** Chromium stitches a full-page screenshot by scrolling,
+> which drives the red thread's scroll handler. For the four full-page captures the thread
+> is pinned to its end state by script so the still shows the completed stroke. Live, it
+> draws with scroll. Said here because a reader comparing the still to the page would
+> otherwise think the thread was static.
+
+### Bilingual evidence
+
+Switching to Vietnamese sets `documentElement.lang="vi"`, moves `aria-pressed` to
+`[false, true]`, and renders
+`Agent của bạn đã biết viết UI. Đây là thứ dạy nó thiết kế.` **All 108 strings were
+retranslated for the plain register, not patched** — the seven step bodies, all four rig
+rules, the whole story section, the new `YOU DECIDE` tag (`BẠN QUYẾT`), and the new third
+evidence caption. Register was matched, not vocabulary: *"Bạn nói mình cần gì. Nó hỏi lại
+đúng những câu một người làm thiết kế giỏi sẽ hỏi, phác cái khung thô…"* Diacritics render
+in the system stack with no font download. Contrast re-swept in Vietnamese: 0 failures.
+
+The owner's quote is left verbatim in both languages, including the word *wireframe*,
+because it is a quotation. The sentence before it now explains in plain words what he was
+looking at.
+
+---
+
+## Scores
+
+| Dimension | Score | Evidence |
+| --- | --- | --- |
+| **Concept** | **8** | *The stage is slate; wherever a human decides, the page turns to paper* — now with a red thread that runs **through** both paper bands rather than stopping at them, which is a better statement of the same idea than v1.1 had. Not a 9: the human-decision-point half would still survive a neighbouring human-in-the-loop product |
+| Direction consistency | **9** | Direction B's language intact — deep slate, oversized confident type, full-bleed stacked bands — with both of B's original AI defaults still refused in writing and in code. No gradient, no glow token, no cyan. The wide motion budget did not import a single one of them back |
+| Visual hierarchy | **9** | Heading-to-body 4.7× at desktop against a 2.5× floor. Squint test gives five clear levels. The load choreography now *sequences* that hierarchy in time as well as space: eyebrow → headline → lead → objects → stamp → index, which is the same order the eye takes it |
+| **Craft** | **8** | One 8px scale, three hue families, two type families, 67/67 contrast pairings measured under a rebuilt probe, 0 overflow and 0 console errors at five widths, one reveal mechanism rather than four. **At the floor, not above it** — see the four unfixed items |
+| Function | **8** | Every element earns its place; no invented social proof. The plain-language rewrite is a genuine gain in function and it cost vertical space on mobile, which is a real trade recorded below |
+| Originality | **8** | Deep slate, warm drafting red, photographed paper specimens, and a scroll-drawn thread that passes through its own checkpoints. Rarer still: publishing three generations of your own page — skeleton, turned down, superseded — at the same crop, as the argument for the process |
+| **Overall** | **8.5** | **Excellent.** Concept 8, no veto. Craft 8, public-deliverable block clears — narrowly, again |
+
+```
+            Concept 8
+                |
+ Original 8 ----+---- Direction 9
+         \      |      /
+          \     |     /
+ Function 8 ----+---- Hierarchy 9
+                |
+             Craft 8
+```
+
+## Keep
+
+- **The ink flooding the red word.** One shutter, one transform, and it is the only moment
+  where the motion *is* the message.
+- **The red thread.** The only animation on the page that explains something a static page
+  could not, and the only one that makes an argument (the checkpoint is part of the work).
+- **The plates dealing.** It is what makes the first second feel like objects were placed
+  rather than a page loaded — and they are real renders, not stock.
+- **The plain-language rewrite.** The step list now reads like something you could hand to
+  a client. The old one read like an internal spec, which is exactly what the page is
+  arguing against.
+- **The three-generation evidence column.** Skeleton → turned down → the version before
+  this one. It fixed a layout gap and strengthened the argument in the same move.
+- **The single reveal mechanism.** Four characters, one class, one failsafe.
+
+## Fix
+
+**1. The rebuilt contrast probe** — *blocking · FIXED inside this loop*
+- The v1.1 probe parsed `oklch()` strings as RGB and returned confident nonsense.
+- Now paints on canvas, composites the background stack, reads sRGB back. Re-swept EN, VI,
+  390px and no-JS: 0 failures across all four.
+
+**2. Invalid `<div>` inside `<ol>`** — *blocking · FIXED inside this loop*
+- The thread's positioning parent was the step `<ol>`; browsers hoist an invalid `div` out
+  of a list, which would have broken the absolute positioning silently.
+- Fixed with a `.stepswrap` wrapper. Caught by reading the spec, not by a linter — worth
+  noting, because nothing in the toolchain would have flagged it.
+
+**3. Hover inheriting the entrance's 710 ms delay** — *important · FIXED inside this loop*
+- The plates animate the same two properties on load and on hover. The first hover would
+  have waited out the deal's delay.
+- A `.dealt` class set at 1800 ms re-declares both at 260 ms with no delay.
+
+**4. The ink shutter did not cover the descender** — *important · FIXED inside this loop*
+- The first cut sized the shutter to the em box, leaving the tail of the *g* in "design"
+  showing red before the fill. Visible in the 603 ms frame of the first capture run.
+- Extended to `-0.30em / -0.34em`; the parent line mask clips the excess. Re-verified in
+  the second capture run.
+
+**5. The mobile first viewport is tighter than v1.1** — *polish · NOT FIXED*
+- The plain-language lead is four lines longer than the jargon it replaced, so at 390 × 844
+  the specimen stack sits lower — the top of the plates and the `GATE 1` stamp are visible,
+  the captions are not. This is a **direct cost of Directive 1** and it was accepted rather
+  than solved by shortening the plain copy back toward jargon. Named so it is a decision on
+  the record, not an oversight.
+
+**6. The motion section's band header leaves its lower-left empty** — *polish · NOT FIXED*
+- The two-column header puts the heading left and the lead plus spec card right; the card
+  is tall, so roughly 400 × 300 px under the heading is empty. Carried from v1.1 unchanged.
+
+**7. The hero's upper-right is improved, not solved** — *polish · NOT FIXED*
+- The stage light gives the region a reason to exist. It is still the lowest-density part
+  of the composed frame.
+
+**8. The `.ph` install-placeholder CSS is now unused** — *polish · NOT FIXED*
+- Four lines of dead CSS, kept because the placeholder state may return at the next
+  release. Declared rather than silently left behind.
+
+## Quick wins
+
+- [ ] At ≤ 480 px, drop the hero's top padding by one step so the plate captions clear the
+      fold.
+- [ ] Give the motion band header a third element under the heading — the reduced-motion
+      note would sit there naturally instead of below the grid.
+- [ ] Delete the `.ph` block, or restore the state it styles.
+
+## Motion review
+
+Run against the motion playbook's own bar. **Approve, with the budget disclosed.**
+
+No automatic blocks: no `transition: all`, no `scale(0)` entrance, no `ease-in` on UI, no
+layout-property animation, no keyframes on rapidly-fired elements without a guard, no
+ungated hover, no missing reduced-motion path, no parent custom property driving child
+transforms. Every animation moves `transform` or `opacity` and nothing else — verified by
+reading every rule, not sampled.
+
+Every *response to an interaction* is ≤ 260 ms. The values above 300 ms are all load or
+scroll entrances on a once-per-visitor surface, each with a written justification.
+
+**The disclosure that matters:** this page accepts 21 and refuses 18, inverting the v2
+spec's own stated preference that the refusal list should be longer. That inversion is an
+owner directive, recorded in `00-owner-directive.md` and argued in `06-motion-spec.md`. A
+reviewer who thinks the page is now overspent should read that file first — the counts are
+the intended outcome, not a drift.
+
+Two findings, both non-blocking:
+- `ease-in` still appears exactly once, on purpose, as rig A's labelled counter-example.
+- The turned-down plate's shake is a keyframe on a hover-fired element. It is guarded by a
+  class added on `pointerenter` and removed on `animationend`, so it cannot stack — but it
+  is the one place on the page where the playbook's own rule needed a workaround rather
+  than a redesign.
+
+## Unverified
+
+- **Feel.** Timings judged from values, three fixed-timestamp frames, and a 4-second
+  capture. Better evidence than v1.1 had; still not a person watching on a cold cache.
+- **The scroll rate of the red thread** on a trackpad with momentum, and in very short or
+  very tall windows.
+- **Real devices.** No physical device testing. Touch targets sized by rule, not tried. The
+  plate hover behaviours are pointer-gated and therefore *absent* on touch, which is
+  correct but untested by thumb.
+- **Cross-browser.** Chromium only. `oklch()`, `color-mix()`, `backdrop-filter`, and the
+  `translate`/`rotate` longhands are the four features worth checking elsewhere.
+- **Static lint.** Skipped, offline.
+- **The three-second test with an actual cold eye**, and the new two-second motion check
+  with one. Both simulated per the schema's fallback and written down verbatim, caveats
+  included. These are the two checks where a simulation is worth least, which is exactly
+  why the gate is a human's.
+
+## Gate 2
+
+`pending` — awaiting the design review's visual review of the stills and the load capture, then Đức's.
+
+The page must not publish before a person has watched the first two seconds. That is the
+whole lesson of v1.0, applied to the thing v1.1 was asked to fix.
+
+---
+
+## Process feedback
+
+1. **A measurement tool that can return plausible fiction is worse than no tool.** The
+   contrast probe agreed with itself for two runs while parsing `oklch()` lightness as a red
+   channel. The schema should require every measurement helper to be validated against one
+   known-good pair before its output is trusted. *Candidate for v1.2.*
+2. **Plain language is a layout change, not a copy change.** Rewriting for a non-specialist
+   reader made the hero lead 40 % longer and cost the mobile first viewport its plate
+   captions. A copy-register directive should trigger a re-run of the viewport checks, not
+   just a proofread. *Candidate for v1.2.*
+3. **The transform-only constraint produced the better idea twice.** The ink-fill became a
+   retracting shutter and the gate band became a drawn rule plus a stamp — both are cheaper
+   *and* more on-concept than the versions the constraint forbade. Worth writing into the
+   motion reference as an expectation rather than a consolation.
+4. **An owner override needs its own file, not a commit message.** Recording *what was
+   overridden and what stays the default* took ten minutes and makes the 21/18 inversion
+   legible to anyone reading this run cold. Without it, the next run would read the counts
+   as the new normal. *Candidate for v1.2: `direction-gate.md` should have an override
+   section.*
+5. **HTML validity is a gap in the toolchain.** A `<div>` inside an `<ol>` would have
+   shipped silently. Nothing in this pipeline parses the markup. The dead-code sweep should
+   grow a structural-validity pass.
