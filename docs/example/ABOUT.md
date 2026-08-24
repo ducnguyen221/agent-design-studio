@@ -150,7 +150,8 @@ No other image was altered. The remaining 11 are byte-for-byte copies.
   URLs, upstream source-repository names, credential shapes (API keys, tokens, private
   keys). **0 hits.**
 - Every exported PNG parsed chunk by chunk; only image-critical chunks are present.
-  **No `tEXt`, `iTXt`, `eXIf` or other metadata chunks in any of the 11 images.**
+  **No `tEXt`, `iTXt`, `eXIf` or other metadata chunks in any of the 12 images** — the 11
+  copies and the one derived crop alike.
 - HTML comments and URLs in exported HTML reviewed by hand.
 
 ---
@@ -168,9 +169,18 @@ which is the requirement.
 ## Re-checking this folder
 
 [`verify.py`](verify.py) re-runs the structural checks: the required artifacts exist for
-each pass, every internal link and anchor resolves, no path escapes the folder or assumes
-a domain root, every referenced image is present, and the basic accessibility floor holds
-(`lang`, one `h1`, `alt` on every image, a `title`). Run it from anywhere:
+each pass, every internal link resolves, no path escapes the folder or assumes a domain
+root, every referenced image is present, and the basic accessibility floor holds (`lang`,
+one `h1`, `alt` on every image, a `title`).
+
+**Anchors are checked with one deliberate exception.** Every anchor in a page this folder
+*authors*, and every cross-file `#section` link anywhere, must resolve or the run fails.
+The exception is a same-page `#anchor` **inside an exported artifact**, and six of those
+dangle: the three direction renders carry nav links to sections a first-screenful render
+never contained. The fixture is a frozen record, and editing a historical artifact to
+satisfy a checker would destroy the only thing a fixture is for. So the verifier counts
+them and reports the number as expected rather than passing over them in silence — the
+count moving is itself a signal. Run it from anywhere:
 
 ```
 python docs/example/verify.py

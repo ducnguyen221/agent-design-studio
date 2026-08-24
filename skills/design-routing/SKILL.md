@@ -57,12 +57,13 @@ actually looks at the rendered result.
 ## The seven steps
 
 Load the reference named in the row, do the step, write the artifact, update `STATUS.md`.
-Do not preload references for later steps.
+Do not preload references for later steps — load one when the work it governs starts,
+which for one reference below is earlier than the step that writes its artifact.
 
 | # | Step | Load | Artifact |
 | --- | --- | --- | --- |
 | 1 | Intake — subject, audience, the one job this screen must do | `ownership-matrix.md` | `00-brief.md` |
-| 2 | Fidelity — how finished this needs to be, and why | `choosing-fidelity.md` | `01-fidelity.md` |
+| 2 | Fidelity — how finished this needs to be, and why | `choosing-fidelity.md`, then `image-sourcing.md` if images are content | `01-fidelity.md` |
 | 3 | Wireframe — structure only, deliberately unfinished | `wireframe-playbook.md` | `02-wireframe.html` + `.png` |
 | 4 | Direction gate — three genuinely different real renders | `direction-gate.md` | `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, `03-direction-decision.md` |
 | 5 | Design system + build | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md` | `04-design-system/{tokens.json,components.md,assets-manifest.md}`, `05-implementation.md` |
@@ -71,12 +72,19 @@ Do not preload references for later steps.
 
 Step 2 may route to `prototype-playbook.md` instead of a wireframe when the open question
 is behavior rather than structure; Step 3's artifact is then `02-prototype.html` + `.png`,
-replacing `02-wireframe`. Step 5 also loads `image-sourcing.md` when the deliverable shows
-imagery of its own subject — but answer its one checkpoint question at Step 2, without
-opening it: **are images content here, or decoration?** If content, they are gathered
-before Step 4, because all three directions must share one set. Step 5 in
-`existing-product` mode also loads `library-selection.md` when a new dependency is on the
-table.
+replacing `02-wireframe`.
+
+**Imagery is the one task that starts before the step that files it.** Answer one
+checkpoint question at Step 2, alongside the fidelity call: **are images content here, or
+decoration?** If the answer is content — or if you cannot tell — load
+`image-sourcing.md` **then, right after Step 2**, and source the real set *before* Step 4,
+because all three directions must consume the same images or the gate compares
+photographs instead of designs. Step 5 does not start this work; it closes it, folding the
+sourced assets into `04-design-system/assets-manifest.md`. If the answer is decoration,
+the file is never loaded at all.
+
+Step 5 in `existing-product` mode also loads `library-selection.md` when a new dependency
+is on the table.
 
 All artifacts live in one folder: `<project>/design/<YYYY-MM-DD>-<slug>/`.
 

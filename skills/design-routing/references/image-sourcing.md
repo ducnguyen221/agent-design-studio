@@ -1,8 +1,10 @@
 # Image sourcing
 
-Step 5, second half of the asset work. The brand asset protocol covers the marks and
-material of named brands; this file covers everything else the design shows — the subject
-itself. Both feed `04-design-system/assets-manifest.md`.
+Loaded right after Step 2, whenever the checkpoint below answers *content*. The brand
+asset protocol covers the marks and material of named brands; this file covers everything
+else the design shows — the subject itself. Both feed
+`04-design-system/assets-manifest.md`, which is written at Step 5 — but the sourcing
+happens well before it, and that gap is the whole point of the timing note below.
 
 ## The checkpoint
 
@@ -16,10 +18,11 @@ A design about a tool, a dataset, a process, or an argument often needs none; de
 deliberately and say so. **When you cannot tell, treat them as content.** An unused real
 image costs an hour; a missing one costs the design.
 
-**Timing, and it is the part that gets missed.** Answer at Step 2 with the fidelity call.
-Gather **before Step 4**, because all three directions consume the same real content —
-swapping imagery between them turns the gate into a comparison of photographs instead of
-a comparison of designs. Step 5 closes the manifest; it is not where sourcing starts.
+**Timing, and it is the part that gets missed.** Answer at Step 2 with the fidelity call —
+that answer is what loads this file. Gather **before Step 4**, because all three
+directions consume the same real content: swapping imagery between them turns the gate
+into a comparison of photographs instead of a comparison of designs. Step 5 closes the
+manifest; it is not where sourcing starts.
 
 ## The removal test
 
@@ -76,9 +79,9 @@ protocol defines, one more section:
 ```
 
 "Free", "royalty-free" and "open" are not licences. A raw file URL carries no terms, so
-the item page is the only link a reviewer can check. Attribution licences are void
-without the author's name, and some restrict derivatives — which is why the shipped
-file's edits are declared rather than guessed at.
+the item page is the only link a reviewer can check. Using an attribution-licensed image
+without the credit it requires breaches the licence terms, and some licences restrict
+derivatives — which is why the shipped file's edits are declared rather than guessed at.
 
 **A field you cannot fill means the asset is not cleared.** Unclear rights are never
 resolved by embedding and hoping: use a clearly marked placeholder, and record what was
