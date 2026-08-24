@@ -1,6 +1,6 @@
 {
   "name": "agent-design-studio",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "A seven-step design process an AI coding agent runs from brief to reviewed interface. Three real directions before production CSS, a token system derived rather than picked, a motion pass that refuses in writing, and a scored review — with an artifact on disk at every step and two gates where a person decides.",
   "author": {
     "name": "Duc Nguyen",
