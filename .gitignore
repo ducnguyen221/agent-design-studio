@@ -16,3 +16,6 @@ npm-debug.log*
 .tmp/
 tmp/
 *.local.*
+
+# Plan/thiet ke noi bo -> quan ly tap trung o ~/.opcos/repo/<repo>/plans/ (repo opc-os, PRIVATE)
+docs/plans/
