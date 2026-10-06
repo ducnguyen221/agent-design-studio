@@ -62,43 +62,79 @@ img{display:block;max-width:100%;height:auto}
 .lbl{font:500 .875rem/1.35 var(--mono);letter-spacing:.04em;text-transform:uppercase}
 
 /* ================= MOTION CONTRACT (site v2) =================
-   Essential content is visible before JS and while every observer or animation fails.
-   Enhancement adds small cues; reduced motion and print keep the final state. */
+   Words and controls remain readable before JS and if an observer never responds.
+   The workshop's numbers, papers and decision stamps have distinct one-shot cues. */
 
 /* ---- visible-by-default cues; observer timing never gates words or controls ---- */
 .js .rv{opacity:1;transform:none}
 .js .rv.in{animation:cue-rise 460ms var(--ease-out) both}
-.js .rv.num.in{animation-duration:560ms}
+.js .rv.num.in{animation:number-land 560ms var(--ease-lift) both}
+.js .stepart.rv.in{animation:paper-file 620ms var(--ease-card) both}
+.js .rig.rv.in{animation:none}
+.js .rig.rv.in .righead{animation:rig-present 560ms var(--ease-lift) both}
 .js .rv.edge{opacity:1;transform:scaleX(0);transform-origin:left center;
   transition:transform var(--dur-slam) var(--ease-out)}     /* gate band edge rule */
 .js .rv.edge.r{transform-origin:right center}
 .js .rv.edge.in{animation:none;transform:scaleX(1)}
-.js .rv.slam.in{animation:cue-stamp var(--dur-slam) var(--ease-out) both}
+.js .rv.slam.in{animation:gate-stamp var(--dur-slam) var(--ease-out) both}
 .js .drawline{transform:scaleX(0);transform-origin:left center;
   transition:transform var(--dur-reveal) var(--ease-out)}
 .js .drawline.in{transform:scaleX(1)}
+/* Deadline finishes decorative strokes without consuming later encounters. */
+.js.safe .rv.edge:not(.in),.js.safe .drawline:not(.in){transform:scaleX(1)}
+.js.safe .rv.edge.in{animation:rule-draw var(--dur-slam) var(--ease-out) both}
+.js.safe .drawline.in{animation:rule-draw var(--dur-reveal) var(--ease-out) both}
 .ldr{transition-delay:150ms}
-@keyframes cue-rise{from{transform:translateY(8px)}to{transform:none}}
-@keyframes cue-stamp{from{transform:scale(1.1)}to{transform:scale(1)}}
+@keyframes cue-rise{from{transform:translateY(10px);opacity:.94}to{transform:none;opacity:1}}
+@keyframes number-land{from{transform:translateY(22px) scale(.92);opacity:.82}to{transform:none;opacity:1}}
+@keyframes paper-file{from{transform:translateX(20px) rotate(1.5deg);opacity:.92}to{transform:none;opacity:1}}
+@keyframes rig-present{from{transform:translateY(16px) scale(.985);opacity:.96}to{transform:none;opacity:1}}
+@keyframes rule-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes gate-stamp{0%{transform:scale(1.24) rotate(-5deg);opacity:.74}58%{transform:scale(.95) rotate(1deg);opacity:1}100%{transform:none;opacity:1}}
+@keyframes hero-rise{from{transform:translateY(16px);opacity:.9}to{transform:none;opacity:1}}
+@keyframes hero-ink{from{opacity:.9}to{opacity:1}}
+@keyframes headline-rise{from{transform:translateY(26px);opacity:.9}to{transform:none;opacity:1}}
+@keyframes card-stamp{0%{transform:scale(1.7) rotate(-7deg);opacity:.9}56%{transform:scale(.91) rotate(2deg);opacity:1}100%{transform:none;opacity:1}}
+@keyframes spine-arrive{from{transform:translateY(8px)}to{transform:none}}
 
 /* ---- load cues start from a readable page ---- */
 .js .stagelight{opacity:0;transition:opacity 900ms var(--ease-out)}
 .js.lit .stagelight{opacity:1}
-.js.lit .heroin,.js.lit .hl>span{animation:cue-rise 520ms var(--ease-lift) both}
-.js.lit .hl:nth-child(2)>span{animation-delay:80ms}
-.js.lit .hl:nth-child(3)>span{animation-delay:160ms}
+.js.safe .stagelight{opacity:1}
+.js.lit .heroin{animation:hero-rise 520ms var(--ease-lift) both}
+.js.lit .eyebrow{animation-delay:20ms}
+.js.lit .herotext{animation:none}
+.js.lit .herotext .sub{animation:hero-ink 520ms var(--ease-out) 440ms both}
+.js.lit .stackcap{animation-delay:840ms}
+.js.lit .hl>span{animation:headline-rise 640ms var(--ease-lift) both}
+.js.lit .hl:nth-child(1)>span{animation-delay:130ms}
+.js.lit .hl:nth-child(2)>span{animation-delay:220ms}
+.js.lit .hl:nth-child(3)>span{animation-delay:310ms}
 /* The old shutter covered essential text during startup; keep the ink readable. */
 .shut{transform:scaleX(0)}
 .js.lit .shut{transform:scaleX(0)}
-/* Plates begin at their final positions; a small arrival cue leaves captions visible. */
+/* Visible plates take separate arcs: a deal, not three identical rises. */
 .js .stack .plate{opacity:1}
-.js.lit .stack .plate{animation:cue-rise var(--dur-deal) var(--ease-card) both}
-.js.lit .stack .b{animation-delay:70ms}
-.js.lit .stack .a{animation-delay:140ms}
+.js.lit .stack .plate{animation-duration:var(--dur-deal);animation-timing-function:var(--ease-card);animation-fill-mode:both}
+.js.lit .stack .c{animation-name:deal-c;animation-delay:470ms}
+.js.lit .stack .b{animation-name:deal-b;animation-delay:590ms}
+.js.lit .stack .a{animation-name:deal-a;animation-delay:710ms}
+@keyframes deal-c{from{transform:translate(var(--deal-c-x),8px) rotate(-17deg);opacity:.9}to{transform:none;opacity:1}}
+@keyframes deal-b{from{transform:translate(6px,8px) rotate(17deg);opacity:.9}to{transform:none;opacity:1}}
+@keyframes deal-a{from{transform:translate(var(--deal-a-x),-20px) rotate(19deg);opacity:.9}to{transform:none;opacity:1}}
 /* once the deal has landed, the same properties belong to the pointer */
 .js .stack.dealt .plate{transition:translate 260ms var(--ease-out),
   rotate 260ms var(--ease-out);transition-delay:0ms}
-.js.lit .stack .a .stamp{animation:cue-stamp var(--dur-slam) var(--ease-out) 200ms both}
+.js.lit .stack .a .stamp{animation:card-stamp var(--dur-slam) var(--ease-out) 1230ms forwards}
+.js.lit .spine li{animation:spine-arrive 260ms var(--ease-out) both}
+.js.lit .spine li:nth-child(1){animation-delay:1290ms}
+.js.lit .spine li:nth-child(2){animation-delay:1322ms}
+.js.lit .spine li:nth-child(3){animation-delay:1354ms}
+.js.lit .spine li:nth-child(4){animation-delay:1386ms}
+.js.lit .spine li:nth-child(5){animation-delay:1418ms}
+.js.lit .spine li:nth-child(6){animation-delay:1450ms}
+.js.lit .spine li:nth-child(7){animation-delay:1482ms}
+.js.lit .spine li:nth-child(8){animation-delay:1514ms}
 
 /* ---- ambient: one element, the caret in the wordmark ---- */
 @keyframes caret{0%,52%{opacity:1}53%,100%{opacity:.2}}
@@ -127,13 +163,15 @@ img{display:block;max-width:100%;height:auto}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .js .rv,.js .drawline,.js .hl>span,.js .plate,.js .spine li,.js .stagelight,
-  .js .heroin,.js .shut,.js .stack .plate,.js .stack .a .stamp,.evid .plate{
+  .js .heroin,.js .herotext .sub,.js .rig.rv.in .righead,.js .shut,.js .stack .plate,.js .stack .a .stamp,.evid .plate{
     transition:none!important;animation:none!important;transform:none!important;
     translate:none!important;opacity:1!important;transition-delay:0ms!important}
   .js .shut{transform:scaleX(0)!important}
   .js .stack .c{rotate:-7deg!important}
   .js .stack .b{rotate:-2deg!important}
   .js .stack .a{rotate:3.5deg!important}
+  .rig{transition:none!important}
+  .rig:focus-within .rigno{transform:none!important;transition:none!important}
   .wm i{animation:none}
   .js .thread{transform:none!important}
   .threadhead{display:none}
@@ -141,7 +179,7 @@ img{display:block;max-width:100%;height:auto}
 }
 @media print{
   .js .rv,.js .drawline,.js .hl>span,.js .plate,.js .spine li,.js .stagelight,
-  .js .heroin,.js .stack .a .stamp{
+  .js .heroin,.js .herotext .sub,.js .rig.rv.in .righead,.js .stack .a .stamp{
     animation:none!important;transform:none!important;translate:none!important;opacity:1!important}
   .js .shut{transform:scaleX(0)!important}
   .js .stack .c{rotate:-7deg!important}
@@ -219,7 +257,8 @@ h1 em.ink{position:relative;display:inline-block}
 .stagelight{position:absolute;left:-16%;right:-16%;top:-38%;bottom:-46%;z-index:0;
   pointer-events:none;
   background:radial-gradient(closest-side,oklch(0.272 0.014 258),transparent 76%)}
-.stack{position:relative;z-index:1;height:clamp(198px,17.6vw,268px)}
+.stack{position:relative;z-index:1;height:clamp(198px,17.6vw,268px);
+  --deal-c-x:20px;--deal-a-x:62px}
 .plate{margin:0;position:absolute;bottom:0;background:var(--paper-50);
   padding:7px 7px 0;border-radius:3px;box-shadow:var(--plate-shadow)}
 .plate img{border-radius:1px}
@@ -321,9 +360,12 @@ h2{font-size:clamp(1.875rem,1.25rem + 2.2vw,2.875rem);line-height:1.22;max-width
 .rigs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);
   margin-top:clamp(32px,3.4vw,48px)}
 .rig{border:1px solid var(--stage-700);background:var(--stage-800);padding:22px 22px 20px;
-  border-radius:2px;display:flex;flex-direction:column;min-width:0}
+  border-radius:2px;display:flex;flex-direction:column;min-width:0;transition:border-color var(--dur-ui) var(--ease-out)}
 .righead{display:flex;align-items:baseline;gap:12px}
-.rigno{font:600 12px/1 var(--mono);letter-spacing:.1em;color:var(--mark)}
+.rigno{font:600 12px/1 var(--mono);letter-spacing:.1em;color:var(--mark);
+  transition:transform var(--dur-ui) var(--ease-out)}
+.rig:focus-within{border-color:var(--mark)}
+.rig:focus-within .rigno{transform:translateX(4px)}
 .rig h3{font-size:17px}
 .rigstage{margin:20px 0 18px;padding:20px 18px;background:var(--stage-950);
   border:1px solid var(--stage-700);border-radius:2px;flex:1;
@@ -469,6 +511,7 @@ footer .lbl{color:var(--mark)}
   .rigs,.trail,.story,.inst,.who,.ack,.evid{grid-template-columns:minmax(0,1fr)}
   .herorow{grid-template-columns:minmax(0,1fr)}
   .stack{height:clamp(200px,32vw,280px);max-width:560px}
+  .stack{--deal-c-x:12px;--deal-a-x:24px}
   .spine{grid-template-columns:repeat(4,1fr)}
   .spine li:nth-child(4){border-right:0}
   .spine li:nth-child(-n+4){border-bottom:1px solid var(--stage-800)}
@@ -938,7 +981,9 @@ document.documentElement.classList.add("js");
   setTimeout(dealt,1800);
 
   var targets=document.querySelectorAll(".rv,.drawline");
-  function revealAll(){targets.forEach(function(n){n.style.transitionDelay="0ms";n.classList.add("in")})}
+  /* Fail open on a deadline, but leave encounter cues for a later scroll. */
+  function safe(){root.classList.add("safe")}
+  setTimeout(safe,1200);
 
   /* --- the red thread: one continuous stroke from step 00 to step 07 --- */
   var wrapEl=document.querySelector(".stepswrap"),
@@ -979,7 +1024,7 @@ document.documentElement.classList.add("js");
   var reduce=matchMedia("(prefers-reduced-motion: reduce)");
   function onPreference(){
     if(reduce.matches){
-      light();dealt();revealAll();threadFinal();
+      light();dealt();safe();threadFinal();
       if(document.getAnimations)document.getAnimations().forEach(function(a){a.cancel()});
     }else onScroll();
   }
@@ -993,9 +1038,8 @@ document.documentElement.classList.add("js");
   }
   if(wrapEl&&typeof ResizeObserver==="function")new ResizeObserver(onScroll).observe(wrapEl);
   if(reduce.matches||typeof IntersectionObserver!=="function"){
-    light();dealt();revealAll();threadFinal();return;
+    light();dealt();safe();threadFinal();return;
   }
-  addEventListener("load",function(){setTimeout(revealAll,1200)});   /* failsafe */
   addEventListener("load",drawThread);
   drawThread();
 
