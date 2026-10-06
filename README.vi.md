@@ -20,7 +20,7 @@ kiểu nó làm cho tất cả mọi người. Không phải vì mô hình thi�
 yêu cầu buộc nó phải *chọn*. Không brief, không phương án để loại bỏ, không sàn chất lượng
 để vượt, và không ai rà soát.
 
-Bộ này cung cấp cả bốn. Nó gồm một skill và mười hai tài liệu tham chiếu: một router quyết
+Bộ này cung cấp cả bốn. Nó gồm một skill và mười bốn tài liệu tham chiếu: một router quyết
 định bước kế tiếp, và các playbook mang phần nghề thật sự — thứ tự ra quyết định, các
 ngưỡng cụ thể, giá trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại và
 đừng làm gì cả.
@@ -36,9 +36,9 @@ dùng nó; nếu không, playbook có sẵn sẽ chạy. Không cần bộ thứ
 | **1** Tiếp nhận | Chủ thể, người dùng, và việc duy nhất màn hình này phải làm. Đọc thứ đã có trước đã | `00-brief.md` |
 | **2** Mức hoàn thiện | Cần hoàn thiện tới đâu — quyết định thiết kế đầu tiên | `01-fidelity.md` |
 | **3** Wireframe | Chỉ cấu trúc, cố ý trông chưa xong. Khai báo trạng thái, viewport và luồng bàn phím ngay tại đây | `02-wireframe.html` + `.png` |
-| **4** Hướng thiết kế — **CỔNG** | Ba bản dựng khác nhau thật sự, dựng ra thật. Không bao giờ là một danh sách tính từ | `03-directions/{a,b,c}` + `03-direction-decision.md` |
-| **5** Hệ thiết kế + code | Màu lấy mẫu từ tài sản thật và giải thích được bằng một câu. Rồi mới code | `04-design-system/` + `05-implementation.md` |
-| **6** Chuyển động | Mọi hiệu ứng phải qua bốn cổng hoặc bị từ chối bằng văn bản. Phần bị từ chối cũng là kết quả | `06-motion-spec.md` |
+| **4** Hướng thiết kế — **CỔNG** | Ba bản dựng khác nhau thật sự, mỗi bản có tối đa hai giả thuyết chuyển động bằng keyframe tĩnh | `03-directions/{a,b,c}` + `03-direction-decision.md` |
+| **5** Hệ thiết kế + code | Màu lấy mẫu từ tài sản thật; dựng và kiểm bản tĩnh trước khi thêm chuyển động | `04-design-system/` + `05-implementation.md` |
+| **6** Chuyển động | So từng giả thuyết với bốn cổng, chọn recipe theo mục đích hoặc từ chối | `06-motion-spec.md` |
 | **7** Rà soát — **CỔNG** | Chấm trên sáu chiều so với sàn cứng. Sửa từng commit một, rồi kiểm lại | `07-uat-report.md` |
 
 Tất cả nằm trong `<dự-án>/design/<ngày>-<slug>/`.
@@ -103,6 +103,10 @@ minh một sản phẩm hay ví dụ tham chiếu có thật, và tải tài s�
 chất lượng, mẫu prompt điền-vào-chỗ-trống, nói gì ở hai điểm chốt, và tìm cảm hứng
 ở đâu. Năm phút đọc đổi lấy chất lượng của mọi thứ nó dựng cho bạn.
 
+Khi chọn chữ cho giao diện Anh–Việt, xem
+[tài liệu typography](skills/design-routing/references/typography-en-vi.md):
+font theo từng việc, cỡ chữ khởi đầu và cách kiểm dấu, tải font, tăng cỡ chữ.
+
 Với yêu cầu làm nguyên một giao diện, nó thường tự kích hoạt:
 
 > "Làm cho tôi một trang landing cho công cụ đặt lịch."
@@ -132,9 +136,15 @@ skills/design-routing/
     ├── image-sourcing.md       ảnh là nội dung hay trang trí, và chứng minh nguồn từng tấm
     ├── color-protocol.md       lấy mẫu → hội tụ → lập luận, kèm bảng chroma
     ├── taste-calibration.md    các lối mòn cần né, và chữ nghĩa là vật liệu thiết kế
+    ├── typography-en-vi.md     chọn font theo việc, thang chữ và kiểm tra EN/VI
     ├── motion-playbook.md      trọn vòng đời chuyển động, và những gì phải từ chối
+    ├── motion-patterns.md      sáu recipe theo mục đích, có fallback và reduced motion
     ├── library-selection.md    chọn thư viện, hoặc không thêm thư viện nào
     └── uat-report-schema.md    bản rà soát có chấm điểm và sàn cứng
+└── templates/
+    ├── 06-motion-spec.md        mẫu quyết định motion có đường lần ngược
+    ├── static-motion-demo.html  ví dụ CSS/WAAPI tự viết
+    └── react-motion-demo.tsx    ví dụ React tự viết, không thêm gói motion
 ```
 
 Router chỉ nạp tài liệu của bước đang chạy, nên context luôn gọn.
@@ -167,6 +177,13 @@ một thay đổi đọc như bài luận, chỗ của nó ở nơi khác.
 Quy trình này chắt lọc ý tưởng từ bốn dự án mở. Phần lập luận đã được diễn đạt lại bằng
 ngôn ngữ của chúng tôi chứ không sao chép; những ngưỡng và giá trị cụ thể học được từ họ
 thì được dùng với lòng biết ơn. Món nợ là thật và cụ thể.
+
+Các recipe motion mới còn dùng [React Bits Animated Content](https://reactbits.dev/c/animations/animated-content)
+làm tham khảo trực quan, cùng [demo/tài liệu GSAP](https://demos.gsap.com/) và
+[tài liệu hiệu năng Motion](https://motion.dev/docs/performance) để phân biệt từng engine.
+Pack **không chứa hay port** component React Bits: [giấy phép MIT + Commons Clause](https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md)
+hạn chế phân phối lại component. [Giấy phép runtime GSAP](https://gsap.com/community/standard-license/)
+khác với MIT của [skill GSAP chính thức](https://github.com/greensock/gsap-skills).
 
 | Dự án | Giấy phép | Đã dạy bộ này điều gì |
 | --- | --- | --- |

@@ -1,7 +1,8 @@
 # Library selection
 
-Loaded during Step 5 in `existing-product` mode, when a new front-end dependency is on
-the table. A dependency is a permanent decision made in a temporary moment — this is the
+Load during Step 5 for a non-motion front-end dependency in `existing-product` mode,
+or during Step 6 whenever a motion dependency is considered in either mode. A dependency
+is a permanent decision made in a temporary moment — this is the
 five minutes that prevents years of maintenance.
 
 ## The order of questions
@@ -36,7 +37,7 @@ Identify the category, not the library the user happened to name.
 | Accessible primitives — dialogs, popovers, menus, selects, comboboxes | Unstyled and headless, so it inherits your design system rather than fighting it; focus trapping, dismissal, and keyboard interaction handled |
 | Command palette | Keyboard-first, filtering built in, virtualized if the list is long |
 | Notifications / toasts | A queue, stacking, swipe-to-dismiss, and correct announcement to assistive tech |
-| Animation | Springs, layout animation, exit animation, gesture-driven values. Skip if you only need transitions |
+| Animation | Springs, layout/exit, gestures, coordinated timelines, scroll pin/scrub, SVG, interruption and cleanup. Skip if CSS/WAAPI or an installed engine covers the need |
 | Charts | Distinguish streaming/real-time from static or interactive dashboards — the right answer differs |
 | Drag and drop | Sensor abstraction (pointer, touch, keyboard), and a keyboard story that actually exists |
 | Virtualization | Handles variable row heights and dynamic content, not just fixed rows |
@@ -59,6 +60,16 @@ Identify the category, not the library the user happened to name.
 - **Escapable?** How much code touches it directly, and how hard is it to leave? Prefer
   ones that stay behind a thin wrapper of your own.
 - **Server rendering / hydration** behaves, if the product needs it.
+- **Motion lifecycle?** Check teardown on unmount/resize, reduced motion changing in
+  session, focus, breakpoint handling, and performance on the target browser/device.
+- **License and plugins?** Confirm the actual runtime/plugin terms, bundle size and
+  replacement path. A docs/skill repository's license does not license an engine.
+
+For choreography that truly needs a specialist engine, evaluate GSAP against the
+platform and already-installed option. If chosen, use its [runtime docs](https://gsap.com/docs/v3/)
+and [official agent skills](https://github.com/greensock/gsap-skills) for lifecycle,
+scroll/pin/scrub and framework guidance. Its runtime license is separate from that
+skills repository's MIT license. Do not install either by default.
 
 **6. Recommend one.** State what it is for in one sentence and wire it up. Do not present
 a menu when there is a clear answer — a menu just moves the decision to someone with less
@@ -79,7 +90,8 @@ from general knowledge, and be clear that you have left familiar ground.
 
 ## Record it
 
-Add to `05-implementation.md`:
+Record the choice or refusal in `06-motion-spec.md` for motion. Add **only packages
+actually installed** to `05-implementation.md`, linking back to that motion decision:
 
 ```markdown
 ## Dependency added
@@ -87,7 +99,9 @@ Add to `05-implementation.md`:
 **Why not the platform:** <what CSS/HTML could not do>
 **Why not what's installed:** <or "nothing installed covers this">
 **Bundle cost:** <kB> · **Accessibility:** <what it handles for us>
+**License / plugin terms:** <verified link and applicable component/runtime>
 **Exit plan:** <what wraps it, how contained the blast radius is>
+**Motion decision:** <06-motion-spec.md item ID, if applicable>
 ```
 
 In `static-artifact` mode the answer is almost always "no dependency": the deliverable is

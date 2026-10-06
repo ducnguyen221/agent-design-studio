@@ -12,7 +12,18 @@ Output: `07-uat-report.md` (and `.json` when a machine will read it).
 2. **Hard floor check.** The pass/fail list below. Any failure is a defect, not a
    suggestion.
 3. **Six-dimension critique.** Scored, with evidence.
+   For EN/VI pages, apply the font, scale, fallback, diacritic, resize, spacing, and
+   reflow checks in [typography-en-vi.md](typography-en-vi.md). Record the shipped file
+   and bytes, actual rendered evidence, and any unverified branch.
 4. **Motion review.** Run the motion playbook's review bar against Step 6's output.
+   For every accepted recipe, inspect the rendered result, not only source: reduced
+   motion at load and after a preference change, keyboard/focus, print/full-page
+   capture, and content/CTA when animation never runs or fails after starting.
+   Exercise observer absence/no callback and cleanup/remount only when those branches
+   exist. For scroll pin/scrub, inspect resize, teardown and focus in the pinned area.
+   Separate intended state transitions from unexpected layout shifts or moving targets;
+   a low CLS number alone does not prove the flow is usable. Record browser evidence
+   per recipe and mark untested branches unverified.
 5. **Fix, one issue at a time.** Each fix is its own commit with a before/after
    screenshot. Never batch unrelated fixes — when something regresses, you need to know
    which change caused it.

@@ -35,6 +35,8 @@ the template answer — use it only if it is genuinely the best answer here.
 families you would reach for on any project. Set a real type scale with intentional
 weights, widths, and spacing. The type treatment is part of what makes the design
 memorable, not a neutral delivery mechanism.
+For English/Vietnamese work, use [typography-en-vi.md](typography-en-vi.md) to screen
+the actual font files, compare scenario shortlists, and test the rendered scale.
 
 **Structure is information.** Numbering, eyebrows, dividers, and labels should encode
 something true. Numbered markers belong on content that really is a sequence — a process,

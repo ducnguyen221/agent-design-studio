@@ -10,6 +10,15 @@ the thing static in Step 5, confirm it renders, then add motion on top. Planning
 while writing the initial CSS means writing it twice and entangles two decisions that need
 to be judged separately.
 
+Read the selected static hypotheses in `03-direction-decision.md`, then choose from
+`motion-patterns.md` only after applying the four gates. For each hypothesis, record
+accepted or refused verdicts in `templates/06-motion-spec.md`. Trace an accepted item
+from reference URL and observed behavior through hypothesis, recipe ID, token/actual
+value, implementation and browser QA. Zero motion keeps the Step 5 build unchanged.
+Load `library-selection.md` if a motion dependency is considered in either target mode.
+Keep the engine decision here and actual package/bundle/license/exit plan in
+`05-implementation.md` only.
+
 ---
 
 ## Rule zero — motion must never gate content
@@ -159,28 +168,36 @@ at all.
 | --- | --- |
 | Hover, press, color, a state toggle you control with a class or attribute | CSS transition |
 | Entry animation on mount, no JS state | CSS starting-style rule |
-| Predetermined motion that must stay smooth while the page is busy | CSS animation (off the main thread) |
-| Programmatic control at CSS performance, no library | The browser's Web Animations API |
+| Simple predetermined motion | CSS animation; check in the target browser whether the chosen properties can run on the compositor |
+| Programmatic control without a library | The browser's Web Animations API; profile the actual effect |
 | Springs, layout animations, exit animations, gesture-driven values | A motion library |
+| Coordinated timelines, scroll pin/scrub or SVG sequences beyond platform/installed tools | Evaluate a specialist engine, including bundle, license, lifecycle and reduced motion |
 
-CSS beats JS under load — frame-callback animation drops frames while the browser loads,
-scripts, or paints. If the request is really for a *component* (toast, drawer, command
+CSS/WAAPI can animate compositor-friendly properties without per-frame script work,
+but CSS is not automatically off the main thread; paint, layout, and engine behavior
+vary. Profile the actual browser and workload. A JS timeline can be justified when it
+provides control the platform or installed engine cannot. If the request is really for a *component* (toast, drawer, command
 menu, dropdown), pick a library instead of hand-rolling one; hand-rolled versions ship
 without focus management.
 
 **4 — Properties.**
 
-- **`transform` and `opacity` only** — they skip layout and paint and run on the GPU.
-  `width`/`height`/`margin`/`padding`/`top`/`left` trigger all three. `clip-path` is a
-  sanctioned fourth for reveals; `height` is tolerated only for accordions.
+- **Prefer `transform` and `opacity` for movement** because they often avoid layout;
+  compositing is conditional, not guaranteed GPU work. Layout properties such as
+  `width`/`height`/`margin`/`padding`/`top`/`left` can force layout and affect nearby
+  targets. `clip-path` may help a reveal but must be profiled in its browser/shape.
 - **Never scale from zero.** Start at `scale(0.9–0.97)` + `opacity: 0`. Nothing real
   appears from nothing.
 - **Anchor the origin at the trigger** for popovers, dropdowns, menus, tooltips. **Modals
   are exempt** — unanchored, so they stay centered.
 - **Percentages in `translate()`** are relative to the element's own size, so
   `translateY(100%)` moves it by its own height. Prefer this to hard-coded pixels.
-- **In a motion library, animate the full transform string**; the `x`/`y`/`scale`
-  shorthands typically are not hardware-accelerated and drop frames under load.
+- **Match the transform advice to the engine.** Motion's individual transform values
+  may use CSS variables and can have different compositor behavior from animating a
+  full transform string; see [Motion performance](https://motion.dev/docs/performance).
+  [GSAP's CSS plugin](https://gsap.com/docs/v3/GSAP/CorePlugins/CSS/) explicitly
+  supports `x`/`y`/`scale` aliases. Do not ban aliases across engines: profile the
+  actual engine/browser combination and avoid per-frame style work when it matters.
 - **Never drive a child's transform from a custom property on the parent** — it forces a
   style recalculation for every child.
 
@@ -314,8 +331,9 @@ Consequences: use the animation library that runs on the UI runtime, not the fra
 bridge-crossing default. **Tab switches never slide** — tabs are peers, sliding implies
 depth that isn't there, and the user pays for it dozens of times a session. Use native
 presentations for screen transitions, bottom sheets, tab bars, context menus, and large
-collapsing headers. `transform` and `opacity` are free; everything else re-runs layout for
-that node *and its siblings* every frame. Use a continuously-tracked animated value only
+collapsing headers. `transform` and `opacity` often avoid layout work, but are not free;
+layout-affecting properties may move neighboring targets. Measure on the target device.
+Use a continuously-tracked animated value only
 when the value is continuous or interruptible — a two-state toggle is a transition. **Feel
 is judged on a release build on the slowest supported device.**
 
@@ -338,7 +356,7 @@ regression.
 | Centered origin on a trigger-anchored popover | Origin at the trigger (modals exempt) |
 | Keyframes on toasts, toggles, rapidly-fired elements | Transitions |
 | Animating layout properties | `transform` / `opacity` |
-| Shorthand transform props under load | The full transform string |
+| Motion-specific shorthand transform path is slow in a measured case | Try a full transform string in that engine; GSAP aliases need their own measurement |
 | A parent custom property driving child transforms | `transform` on the element itself |
 | Ungated `:hover` motion | Gate on fine pointer + real hover |
 | Missing reduced-motion handling | Reduce or remove non-essential motion; preserve state feedback |

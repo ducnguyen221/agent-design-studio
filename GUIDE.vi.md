@@ -18,6 +18,20 @@ vẫn chạy được, nhưng tốn một vòng hỏi-đáp.
 | 5 | **Nó sống ở đâu** | Trang độc lập và màn hình trong app là hai bài toán khác luật | "Một file HTML" vs "trong app React, repo đây" |
 | 6 | **Nhanh hay kỹ** | Chốt-3-phương-án là mặc định. Bạn được quyền bỏ qua | "Cho tôi xem phương án" hoặc "khỏi phương án, làm luôn" |
 
+## Chọn nhanh chữ Anh–Việt
+
+Trước khi chọn, kiểm giấy phép, dấu và kiểu chữ trong **file font thực dùng**, cùng ngân sách tải. Thứ tự sau là nhận định thiết kế theo việc, không phải bảng xếp hạng chung hay kết quả đo tốc độ đọc. So với nội dung thật và token sẵn có; [tài liệu đầy đủ](skills/design-routing/references/typography-en-vi.md) có thang chữ, chuỗi thử dấu, fallback và phép kiểm tăng cỡ chữ.
+
+| Việc cần làm | Thử theo thứ tự | Kiểm kỹ |
+| --- | --- | --- |
+| Giao diện hoặc landing kỹ thuật | Inter → Source Sans 3 → Be Vietnam Pro | Dấu ở chữ lớn, font dự phòng |
+| Thương hiệu ưu tiên tiếng Việt | Be Vietnam Pro → Inter → Noto Sans | Giọng thương hiệu, dấu ở các weight thật |
+| Tài liệu dài | Source Sans 3 → Noto Sans → Inter | Nhịp đoạn văn Anh–Việt |
+| Bài biên tập | Source Serif 4, dùng Source Sans 3 cho điều khiển | Chi phí tải hai font, độ rõ của nhãn |
+| Code và số cần căn cột | JetBrains Mono → monospace hệ thống | Chỉ dùng mono cho nội dung kỹ thuật |
+
+Nếu webfont không thêm giá trị rõ, dùng font hệ thống. Cỡ chữ thân bài có thể bắt đầu ở 1–1,125rem (16–18px khi root mặc định 16px), rồi kiểm bản render và quyền phóng to chữ; đây không phải mức tối thiểu do WCAG quy định.
+
 ## Mẫu prompt — chép, điền, gửi
 
 **Trang mới**
@@ -66,7 +80,7 @@ có trang tình trạng viết cho người không đọc code, và một file c
   infographic (`references/direction-gate.md`). Agent rút từ đây khi sinh phương án.
 - **Các giải thưởng thiết kế** — [Awwwards](https://www.awwwards.com),
   [CSS Design Awards](https://www.cssdesignawards.com), [FWA](https://thefwa.com),
-  [Godly](https://godly.website) cho website; [Land-book](https://land-book.com) và
+  [Recent](https://recent.design/) cho website; [Land-book](https://land-book.com) và
   [SaaS Landing Page](https://saaslandingpage.com) cho landing page;
   [Mobbin](https://mobbin.com) cho pattern UI ứng dụng.
 - **Chính thế giới của chủ đề.** Hướng hay nhất thường đến từ đời thật của lĩnh vực —
@@ -80,6 +94,32 @@ có trang tình trạng viết cho người không đọc code, và một file c
 
 Chọn một-hai tham chiếu thôi, đừng mười. Đống link trộn lại thành nhờ nhờ;
 một ví dụ bạn thật sự thích cho agent thứ để mổ xẻ.
+
+### Tìm mẫu chuyển động theo việc cần giải
+
+Chọn trước **một nguồn bố cục/luồng và một nguồn tương tác/chuyển động**; chỉ thêm mẫu
+thứ ba khi nó trả lời câu hỏi khác. Về bố cục, xem site mở được từ
+[Awwwards Animations](https://www.awwwards.com/websites/animations/),
+[Recent](https://recent.design/), [Mobbin](https://mobbin.com/) (một số luồng cần quyền),
+hoặc [Webflow Motion](https://webflow.com/made-in-webflow/motion). Gallery chỉ cho
+cảm hứng, không chứng minh usability hay cấp quyền dùng mã/tài sản.
+
+Khi cần component motion, hãy bắt đầu bằng **demo cụ thể đang chạy**, chẳng hạn
+[React Bits Animated Content](https://reactbits.dev/c/animations/animated-content).
+So với [Magic UI Animated List](https://magicui.design/docs/components/animated-list)
+hoặc [Motion Examples](https://motion.dev/examples). [Danh mục UI Layouts](https://www.ui-layouts.com/components)
+chỉ là đường tìm mẫu cho tới khi mở được preview của một component cụ thể. Ghi trigger,
+trạng thái đầu/cuối nhìn thấy, điều khiển và viewport thật sự đã xem; tách quan sát
+khỏi suy luận và nêu điều không chép. Xem preview không đồng nghĩa được lấy mã;
+một số mục trả phí hoặc có điều khoản riêng.
+
+Quy tắc triển khai lấy từ [W3C về motion](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html),
+[W3C về dừng chuyển động](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html),
+[MDN reduced motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion)
+và tài liệu engine được chọn. Chỉ mở [GSAP demo hub](https://demos.gsap.com/)
+cùng [GSAP docs](https://gsap.com/docs/v3/) khi bài toán thật sự cần choreography
+chuyên sâu. Bước 4 ghi giả thuyết bằng keyframe tĩnh; Bước 5 dựng bản tĩnh; Bước 6
+mới chốt recipe và engine.
 
 ## Lỗi thường gặp
 

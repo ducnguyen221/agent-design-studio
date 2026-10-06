@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Motion with a visible baseline</title>
+  <style>
+    :root { font: 16px/1.5 system-ui, sans-serif; color: #17302c; background: #f3f4ed; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .shell { width: min(100% - 2rem, 72rem); margin: auto; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.2rem 0; }
+    .brand { font-weight: 800; letter-spacing: -.04em; }
+    button, .cta { font: inherit; border-radius: .6rem; padding: .65rem 1rem; min-height: 2.75rem; }
+    button { color: #17302c; background: #fff; border: 1px solid #617b71; cursor: pointer; }
+    button:focus-visible, .cta:focus-visible { outline: 3px solid #116d54; outline-offset: 3px; }
+    .hero { position: relative; isolation: isolate; overflow: clip; min-height: 68vh; display: grid; align-items: center; padding: 3rem 0 6rem; }
+    .hero::before { content: ""; position: absolute; z-index: -1; width: min(65vw, 38rem); aspect-ratio: 1; right: -9rem; top: 1rem; border-radius: 50%; background: radial-gradient(circle at 38% 42%, #91bea3, #397f68 55%, #e1e7cf 56%); opacity: .38; transform: translateX(0); }
+    .motion-ready .hero.ambient-running::before { animation: drift 8s ease-in-out infinite alternate; }
+    @keyframes drift { to { transform: translateX(-1.2rem); } }
+    h1 { font-size: clamp(2.5rem, 7vw, 5.6rem); line-height: 1.02; letter-spacing: -.06em; max-width: 12ch; margin: 0; }
+    .lede { max-width: 45ch; font-size: clamp(1.1rem, 2vw, 1.35rem); margin: 1.5rem 0 2rem; }
+    .cta { display: inline-block; color: #fff; background: #17674e; text-decoration: none; border: 1px solid #17674e; }
+    .panel { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; padding: 3rem; margin: 2rem 0 6rem; border: 1px solid #c7d4c8; border-radius: 1rem; background: #fff; }
+    .panel h2 { margin-top: 0; font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.15; }
+    .panel p { margin-top: 0; }
+    .panel a { color: #12583f; font-weight: 700; }
+    .note { font-size: .9rem; color: #38534b; }
+    @media (max-width: 700px) { .hero { min-height: 60vh; } .hero::before { right: -6rem; width: 80vw; } .panel { grid-template-columns: 1fr; padding: 1.5rem; } }
+    @media (prefers-reduced-motion: reduce) { .hero::before { animation: none !important; } }
+    @media print { :root { color: #000; background: #fff; } header button { display: none; } .hero { min-height: 0; } .hero::before { display: none; } .panel { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header><span class="brand">FIELDNOTES / MOTION</span><button id="ambient-toggle" type="button" aria-pressed="false">Start background motion</button></header>
+    <main>
+      <section class="hero" id="hero"><div><h1>See the next step clearly.</h1><p class="lede">A small motion cue can guide attention. The message and the action stay here when it cannot run.</p><a class="cta" href="#details">Read the details</a></div></section>
+      <section class="panel" id="details"><div><p class="note">01 / Encounter cue</p><h2>Useful before it moves.</h2></div><div><p>This panel is already visible in the document. On first encounter, a brief cue may reinforce its place without controlling access to it.</p><p><a href="#hero">Return to the start</a></p><p class="note">The background motion is optional and stays stopped after you pause it, even when focus moves elsewhere.</p></div></section>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const hero = document.getElementById('hero');
+      const panel = document.getElementById('details');
+      const toggle = document.getElementById('ambient-toggle');
+      const preference = matchMedia('(prefers-reduced-motion: reduce)');
+      let userStopped = false;
+      let running = false;
+      let entrance = null;
+      document.documentElement.classList.add('motion-ready');
+
+      function setAmbient(next) {
+        running = next && !preference.matches && !userStopped;
+        hero.classList.toggle('ambient-running', running);
+        toggle.textContent = running ? 'Pause background motion' : 'Start background motion';
+        toggle.setAttribute('aria-pressed', String(running));
+      }
+      toggle.addEventListener('click', () => {
+        if (running) { userStopped = true; setAmbient(false); }
+        else { userStopped = false; setAmbient(true); }
+      });
+      preference.addEventListener('change', () => {
+        if (preference.matches) entrance?.cancel();
+        setAmbient(running);
+      });
+
+      // The panel never starts hidden. Observer and WAAPI only add an optional cue.
+      if ('IntersectionObserver' in window && typeof panel.animate === 'function' && !preference.matches) {
+        try {
+          const observer = new IntersectionObserver((entries) => {
+            if (!entries.some(entry => entry.isIntersecting)) return;
+            observer.disconnect();
+            if (preference.matches) return;
+            try {
+              const animation = panel.animate(
+                [{ transform: 'translateY(12px)', opacity: .82 }, { transform: 'none', opacity: 1 }],
+                { duration: 220, easing: 'ease-out' }
+              );
+              entrance = animation;
+              animation.finished.catch(() => { animation.cancel(); });
+            } catch (_) { /* Static panel remains usable. */ }
+          }, { threshold: .15 });
+          observer.observe(panel);
+        } catch (_) { /* Static panel remains usable. */ }
+      }
+    })();
+  </script>
+</body>
+</html>

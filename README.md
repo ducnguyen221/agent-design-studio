@@ -20,7 +20,7 @@ three looks it produces for everyone. Not because the model lacks taste — beca
 in the request forced a choice. There was no brief, no alternative to reject, no floor to
 clear, and no reviewer.
 
-This pack supplies all four. It is one skill and twelve references: a router that decides
+This pack supplies all four. It is one skill and fourteen references: a router that decides
 what happens next, and playbooks that carry the actual craft — decision orders, thresholds,
 curve values, colour maths, and the parts that tell the agent to stop and build nothing.
 
@@ -36,9 +36,9 @@ whole process.
 | **1** Intake | Subject, audience, and the single job this screen must do. Read what already exists first | `00-brief.md` |
 | **2** Fidelity | How finished this needs to be — the first real design decision | `01-fidelity.md` |
 | **3** Wireframe | Structure only, deliberately unfinished. States, viewports and keyboard flow declared here | `02-wireframe.html` + `.png` |
-| **4** Direction — **GATE** | Three genuinely different renders, built for real. Never a written menu of adjectives | `03-directions/{a,b,c}` + `03-direction-decision.md` |
-| **5** System + build | Colour sampled from real assets and justified in one sentence. Then the code | `04-design-system/` + `05-implementation.md` |
-| **6** Motion | Every animation passes four gates or is refused in writing. Refusals are part of the output | `06-motion-spec.md` |
+| **4** Direction — **GATE** | Three genuinely different renders with up to two static motion hypotheses each | `03-directions/{a,b,c}` + `03-direction-decision.md` |
+| **5** System + build | Colour sampled from real assets; render the chosen page statically before motion | `04-design-system/` + `05-implementation.md` |
+| **6** Motion | Recheck each hypothesis against four gates, choose a purpose-led recipe or refuse it | `06-motion-spec.md` |
 | **7** Review — **GATE** | Scored on six dimensions against a hard floor. Fixed one commit at a time, then verified | `07-uat-report.md` |
 
 Everything lands in `<project>/design/<date>-<slug>/`.
@@ -102,6 +102,10 @@ really exists, and downloading real brand assets instead of guessing at them.
 fill-in prompt templates, what to say at the two checkpoints, and where to find
 inspiration. Five minutes that change the quality of everything it builds for you.
 
+For English/Vietnamese type decisions, use the
+[typography reference](skills/design-routing/references/typography-en-vi.md): contextual
+font shortlists, starting sizes and checks for real glyphs, loading and text resizing.
+
 On whole-interface asks it usually triggers on its own:
 
 > "Build me a landing page for our scheduling tool."
@@ -132,9 +136,15 @@ skills/design-routing/
     ├── image-sourcing.md       are images content or decoration, and proving where each came from
     ├── color-protocol.md       sample → converge → justify, with the chroma table
     ├── taste-calibration.md    the defaults to avoid, and writing as design material
+    ├── typography-en-vi.md     contextual font choices, type scale and EN/VI checks
     ├── motion-playbook.md      the full motion lifecycle, and what to refuse
+    ├── motion-patterns.md      six purpose-led recipes with failure and reduced-motion states
     ├── library-selection.md    choosing a dependency, or not adding one
     └── uat-report-schema.md    the scored review and the hard floor
+└── templates/
+    ├── 06-motion-spec.md        traceable motion decision template
+    ├── static-motion-demo.html  original CSS/WAAPI example
+    └── react-motion-demo.tsx    original React example; no extra motion package
 ```
 
 The router loads only the current step's references, so context stays lean.
@@ -167,6 +177,14 @@ change reads like an essay, it belongs somewhere else.
 This process distils ideas from four open projects. The reasoning was re-expressed in our
 own words rather than copied; the specific thresholds and values we learned from them are
 used with gratitude. The debt is real and specific.
+
+The new motion recipes also use [React Bits Animated Content](https://reactbits.dev/c/animations/animated-content)
+as a live visual reference and [GSAP's demo/docs](https://demos.gsap.com/) and
+[Motion's performance docs](https://motion.dev/docs/performance) for engine-specific
+decisions. React Bits components are **not** included or ported: its
+[MIT + Commons Clause license](https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md)
+restricts redistribution of components. GSAP's [runtime license](https://gsap.com/community/standard-license/)
+is separate from the MIT license of its [official agent skills](https://github.com/greensock/gsap-skills).
 
 | Project | License | What it taught this pack |
 | --- | --- | --- |

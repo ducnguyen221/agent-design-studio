@@ -7,6 +7,14 @@ like this project or like every other page an AI has produced this year.
 Outputs: `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, and
 `03-direction-decision.md`.
 
+When motion is relevant, shortlist at most one layout/flow reference and one
+interaction/motion reference in Steps 2–4; use a third only for a different question.
+Open a specific live component demo (prefer a relevant React Bits website demo, or a
+similar accessible page), and record its URL, trigger, visible start/end states,
+controls/viewport actually checked, observation, design inference, and what will not
+be copied. A gallery thumbnail or repo source alone does not verify the behavior,
+usability, or code rights. Keep observed facts separate from the hypothesis.
+
 ## Why renders, not descriptions
 
 Asking someone to choose between "editorial and confident", "warm and approachable", and
@@ -132,6 +140,10 @@ option, and merging two into one is the failure mode to watch for.
   decorative or abstract elements may be CSS or SVG.
 - Self-contained files, saved under `03-directions/`, never in a temp folder.
 - Screenshot each at the primary viewport, and at mobile if the composition changes.
+- For web/UI motion, annotate at most two hypotheses per `03-directions/{a,b,c}.html`
+  with **static keyframes** (before/after frames), the user benefit, reference
+  observation, and an effect explicitly refused. Do not select engine, dependency,
+  timings, or live animation here. The person chooses a direction, not a runtime.
 
 ## The compare board
 
@@ -205,9 +217,13 @@ and the grant that permitted deciding without a person.
 - Type roles: <…>
 - Color starting point: <…>  (Step 5 derives the real values — do not fix hex here)
 - Signature element: <the one thing this page will be remembered by>
+- Motion hypotheses from chosen direction: <H1/H2 static keyframes, intended user
+  benefit, reference URL/observation, and refused effects; Step 6 may accept or refuse>
 ```
 
 The chosen direction is now binding. Later steps execute it; they do not renegotiate it.
+Step 5 first renders the chosen page with all content and actions available statically.
+Step 6 evaluates its motion hypotheses with the four gates and may keep zero motion.
 
 ---
 

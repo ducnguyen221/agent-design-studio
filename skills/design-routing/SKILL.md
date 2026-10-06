@@ -65,10 +65,10 @@ which for one reference below is earlier than the step that writes its artifact.
 | 1 | Intake — subject, audience, the one job this screen must do | `ownership-matrix.md` | `00-brief.md` |
 | 2 | Fidelity — how finished this needs to be, and why | `choosing-fidelity.md`, then `image-sourcing.md` if images are content | `01-fidelity.md` |
 | 3 | Wireframe — structure only, deliberately unfinished | `wireframe-playbook.md` | `02-wireframe.html` + `.png` |
-| 4 | Direction gate — three genuinely different real renders | `direction-gate.md` | `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, `03-direction-decision.md` |
-| 5 | Design system + build | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md` | `04-design-system/{tokens.json,components.md,assets-manifest.md}`, `05-implementation.md` |
-| 6 | Motion pass — a **second pass over the built page**, never planned during Step 5 | `motion-playbook.md` | `06-motion-spec.md` |
-| 7 | Review loop | `uat-report-schema.md` | `07-uat-report.md` |
+| 4 | Direction gate — three genuinely different real renders, each with up to two static motion hypotheses | `direction-gate.md`; `typography-en-vi.md` when EN/VI type is a direction decision | `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, `03-direction-decision.md` |
+| 5 | Design system + static build, confirmed in a browser before animation | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md`; `typography-en-vi.md` for EN/VI font and scale choices | `04-design-system/{tokens.json,components.md,assets-manifest.md}`, `05-implementation.md` |
+| 6 | Motion pass — decide and implement only after the static page works | `motion-playbook.md`, then `references/motion-patterns.md` and `templates/06-motion-spec.md` | `06-motion-spec.md` |
+| 7 | Review loop | `uat-report-schema.md`; `typography-en-vi.md` for EN/VI type verification | `07-uat-report.md` |
 
 Step 2 may route to `prototype-playbook.md` instead of a wireframe when the open question
 is behavior rather than structure; Step 3's artifact is then `02-prototype.html` + `.png`,
@@ -83,8 +83,13 @@ photographs instead of designs. Step 5 does not start this work; it closes it, f
 sourced assets into `04-design-system/assets-manifest.md`. If the answer is decoration,
 the file is never loaded at all.
 
-Step 5 in `existing-product` mode also loads `library-selection.md` when a new dependency
-is on the table.
+Step 5 may load `library-selection.md` for a non-motion dependency in
+`existing-product` mode. Step 6 loads it whenever a motion dependency is considered in
+either mode. Check the manifest and CSS/WAAPI first; record the chosen or refused engine
+in `06-motion-spec.md`. `05-implementation.md` is the sole ledger of packages actually
+added, their bundle cost, license, and exit plan, linking back to the motion decision.
+For a starting point, `templates/static-motion-demo.html` and
+`templates/react-motion-demo.tsx` are original examples, not required dependencies.
 
 All artifacts live in one folder: `<project>/design/<YYYY-MM-DD>-<slug>/`.
 

@@ -18,6 +18,20 @@ will stop and ask — which also works, but costs a round trip.
 | 5 | **Where it lives** | A standalone page and a screen inside your app are different jobs with different rules | "One HTML file" vs "inside our React app, repo attached" |
 | 6 | **Speed vs. care** | The three-options checkpoint is the default. You can skip it | "Show me options" or "no options, just build it" |
 
+## English/Vietnamese typography quick pick
+
+Apply license, actual glyph/style, and load-budget gates before choosing a family. This is a design shortlist by job, not a universal quality or reading-speed ranking. Compare with the real copy and the product's existing tokens; [the full reference](skills/design-routing/references/typography-en-vi.md) has the scale, proof string, fallback and resize tests.
+
+| Job | First candidates to compare | Check before deciding |
+| --- | --- | --- |
+| UI or technical landing | Inter → Source Sans 3 → Be Vietnam Pro | VI accent spacing at display sizes; fallbacks |
+| Vietnamese-first brand | Be Vietnam Pro → Inter → Noto Sans | Identity fit, actual weights and mark placement |
+| Long documentation | Source Sans 3 → Noto Sans → Inter | Paragraph rhythm with EN/VI copy |
+| Editorial feature | Source Serif 4 with Source Sans 3 for controls | Pairing cost and control legibility |
+| Code and aligned values | JetBrains Mono → system monospace | Restrict mono to technical text |
+
+Use a system stack when a webfont adds no clear value. Start body text around 1–1.125rem (16–18px at a default 16px root), then review actual rendering and user resizing; this is not a WCAG minimum-size rule.
+
 ## Prompt templates — copy, fill, send
 
 **A new page or site**
@@ -68,7 +82,7 @@ and a file for every step.
   it when generating options.
 - **Award galleries** — [Awwwards](https://www.awwwards.com),
   [CSS Design Awards](https://www.cssdesignawards.com), [FWA](https://thefwa.com),
-  [Godly](https://godly.website) for websites; [Land-book](https://land-book.com) and
+  [Recent](https://recent.design/) for websites; [Land-book](https://land-book.com) and
   [SaaS Landing Page](https://saaslandingpage.com) for landing pages;
   [Mobbin](https://mobbin.com) for app UI patterns.
 - **Your own field.** The best directions often come from the subject's real world —
@@ -82,6 +96,33 @@ and a file for every step.
 
 Pick one or two references, not ten. A pile of links averages into mush; one loved
 example gives the agent something to dissect.
+
+### Motion references by job
+
+Shortlist **one layout/flow reference and one interaction/motion reference**; add a
+third only if it answers a separate question. For layout, use an open site from
+[Awwwards Animations](https://www.awwwards.com/websites/animations/),
+[Recent](https://recent.design/), [Mobbin](https://mobbin.com/) (some flows require
+access), or [Webflow Motion](https://webflow.com/made-in-webflow/motion). A gallery
+is inspiration, not usability evidence or permission to reuse code/assets.
+
+For a component motion question, start with a **specific live demo**, such as
+[React Bits Animated Content](https://reactbits.dev/c/animations/animated-content).
+Compare with [Magic UI Animated List](https://magicui.design/docs/components/animated-list)
+or [Motion Examples](https://motion.dev/examples); the
+[UI Layouts component index](https://www.ui-layouts.com/components) is a navigation
+source until a particular preview can be opened. Note trigger, visible start/end
+states, controls and viewport actually checked, then separate observation from your
+inference and the effect you will not copy. Preview does not grant source rights;
+some linked items are paid or have separate license terms.
+
+For implementation rules, use [W3C motion guidance](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html),
+[W3C pause/stop/hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html),
+[MDN reduced motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion),
+and the chosen engine's docs. For specialist choreography, inspect the
+[GSAP demo hub](https://demos.gsap.com/) and [GSAP docs](https://gsap.com/docs/v3/)
+only when that complexity is relevant. Step 4 records static hypotheses; Step 5
+builds the static page; Step 6 decides the recipe and engine.
 
 ## Common mistakes
 
