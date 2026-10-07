@@ -20,7 +20,7 @@ kiểu nó làm cho tất cả mọi người. Không phải vì mô hình thi�
 yêu cầu buộc nó phải *chọn*. Không brief, không phương án để loại bỏ, không sàn chất lượng
 để vượt, và không ai rà soát.
 
-Bộ này cung cấp cả bốn. Nó gồm một skill và mười bốn tài liệu tham chiếu: một router quyết
+Bộ này cung cấp cả bốn. Nó gồm một skill và mười sáu tài liệu tham chiếu: một router quyết
 định bước kế tiếp, và các playbook mang phần nghề thật sự — thứ tự ra quyết định, các
 ngưỡng cụ thể, giá trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại và
 đừng làm gì cả.
@@ -107,6 +107,21 @@ Khi chọn chữ cho giao diện Anh–Việt, xem
 [tài liệu typography](skills/design-routing/references/typography-en-vi.md):
 font theo từng việc, cỡ chữ khởi đầu và cách kiểm dấu, tải font, tăng cỡ chữ.
 
+Khi cần mẫu UI/UX bên ngoài, xem link trong brief trước rồi mở
+[chỉ mục nguồn](skills/design-routing/references/resource-index.md). Chỉ mục trỏ đến
+[catalog JSON 75 nguồn](skills/design-routing/resources/uiux-catalog.json); lọc theo việc,
+đưa hai hoặc ba nguồn phù hợp, chỉ mở mẫu cụ thể khi cần, rồi cùng người dùng chốt hướng
+ở Bước 4. Catalog chỉ để mở link: trang đầu không chứng minh demo đã quan sát, runtime
+đã chạy hay quyền dùng lại mã và asset. Có thể lọc local bằng
+`python scripts/verify-resource-pack.py --query "loading" --stack React`; `--self-test`
+kiểm pack mà không truy cập website.
+
+Nếu chỉ cần phân tích ảnh UI, link hoặc nội dung mẫu trước khi dựng giao diện, dùng
+[hướng dẫn distill reference](skills/design-routing/references/reference-distill.md)
+và [mẫu Markdown](skills/design-routing/templates/reference-design.md). File kết quả
+tách điều đã quan sát, suy luận và phần chưa biết; lựa chọn của bạn trở thành đầu vào
+cho quy trình thiết kế. Phân tích riêng không khởi động cổng duyệt bản render.
+
 Với yêu cầu làm nguyên một giao diện, nó thường tự kích hoạt:
 
 > "Làm cho tôi một trang landing cho công cụ đặt lịch."
@@ -115,7 +130,7 @@ Với yêu cầu làm nguyên một giao diện, nó thường tự kích hoạt
 
 Khi trong máy có nhiều skill thiết kế, gọi thẳng `design-routing` là đường chắc chắn nhất.
 
-Nó cố ý đứng ngoài các việc lẻ một bước — phê bình một trang có sẵn, chuyển một thiết kế đã
+Nó cố ý đứng ngoài các việc lẻ một bước khác — phê bình một trang có sẵn, chuyển một thiết kế đã
 duyệt thành HTML, chọn bảng màu, vẽ biểu đồ, hay chỉnh bố cục một bộ slide đã có. Những
 việc đó có công cụ phù hợp hơn, và quy trình này sẽ là quá nặng. Thiết kế mới một bộ slide,
 một báo cáo hay một infographic như nguyên một sản phẩm thì lại khác: việc đó nằm trong
@@ -139,12 +154,15 @@ skills/design-routing/
     ├── typography-en-vi.md     chọn font theo việc, thang chữ và kiểm tra EN/VI
     ├── motion-playbook.md      trọn vòng đời chuyển động, và những gì phải từ chối
     ├── motion-patterns.md      sáu recipe theo mục đích, có fallback và reduced motion
+    ├── resource-index.md       shortlist nguồn theo việc; catalog chỉ nạp khi cần
+    ├── reference-distill.md    chắt mẫu được cung cấp thành Markdown thiết kế
     ├── library-selection.md    chọn thư viện, hoặc không thêm thư viện nào
     └── uat-report-schema.md    bản rà soát có chấm điểm và sàn cứng
 └── templates/
     ├── 06-motion-spec.md        mẫu quyết định motion có đường lần ngược
     ├── static-motion-demo.html  ví dụ CSS/WAAPI tự viết
-    └── react-motion-demo.tsx    ví dụ React tự viết, không thêm gói motion
+    ├── react-motion-demo.tsx    ví dụ React tự viết, không thêm gói motion
+    └── reference-design.md      mẫu một file để phân tích reference
 ```
 
 Router chỉ nạp tài liệu của bước đang chạy, nên context luôn gọn.

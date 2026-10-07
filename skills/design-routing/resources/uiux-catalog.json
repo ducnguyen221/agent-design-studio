@@ -1,0 +1,5042 @@
+{
+  "schema_version": "1",
+  "checked_at": "2026-10-07",
+  "scope": "75 public source links from 25 cards; links only; not a runtime or rights certification",
+  "sources": [
+    {
+      "id": "01",
+      "card": 1,
+      "slot": 1,
+      "original_label": "OriginKit",
+      "original_domain": "originkit.dev",
+      "original_url": "https://www.originkit.dev/",
+      "canonical_label": "OriginKit",
+      "canonical_url": "https://www.originkit.dev/",
+      "aliases": [],
+      "category": "animated_component_library",
+      "use_cases": [
+        "components",
+        "motion",
+        "web_sections"
+      ],
+      "source_role": "animated_component_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.originkit.dev/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.originkit.dev/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://www.originkit.dev/docs/licensing",
+      "allowed_use_scope": "**L✓** [license](https://www.originkit.dev/docs/licensing): dùng trong sản phẩm/client, không phân phối lại kit. Kiểm component lấy thực tế.",
+      "planned_use": "link_only",
+      "redistribution_status": "restricted",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_pilot; link_only in this pack",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Component hoạt họa cho web; ví dụ section/interaction.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE"
+      ],
+      "research_action": "Pilot",
+      "search_terms": [
+        "components",
+        "motion",
+        "web_sections",
+        "thành phần",
+        "chuyển động",
+        "OriginKit"
+      ],
+      "search_hint": "At www.originkit.dev, look for components / motion in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "02",
+      "card": 1,
+      "slot": 2,
+      "original_label": "21st.dev",
+      "original_domain": "21st.dev",
+      "original_url": "https://21st.dev/",
+      "canonical_label": "21st.dev",
+      "canonical_url": "https://21st.dev/",
+      "aliases": [],
+      "category": "component_marketplace",
+      "use_cases": [
+        "components",
+        "react_templates",
+        "theme_samples"
+      ],
+      "source_role": "component_marketplace",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://21st.dev/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://21st.dev/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://21st.dev/terms",
+      "allowed_use_scope": "**L✓** [terms](https://21st.dev/terms): mã tác giả và ảnh/demo có quyền khác nhau; cấm scrape/tái phân phối catalog. Kiểm license từng component.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Marketplace React components, templates, themes đa tác giả; bản free giới hạn lượt copy, có premium.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "components",
+        "react_templates",
+        "theme_samples",
+        "thành phần",
+        "21st.dev"
+      ],
+      "search_hint": "At 21st.dev, look for components / react templates in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "03",
+      "card": 1,
+      "slot": 3,
+      "original_label": "Shadcnblocks",
+      "original_domain": "shadcnblocks.com",
+      "original_url": "https://www.shadcnblocks.com/",
+      "canonical_label": "Shadcnblocks",
+      "canonical_url": "https://www.shadcnblocks.com/",
+      "aliases": [],
+      "category": "component_block_library",
+      "use_cases": [
+        "components",
+        "landing_layout",
+        "ecommerce_layout"
+      ],
+      "source_role": "component_block_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.shadcnblocks.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.shadcnblocks.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://www.shadcnblocks.com/terms",
+      "allowed_use_scope": "**L✓** [free terms](https://www.shadcnblocks.com/terms), [paid license](https://www.shadcnblocks.com/license): dùng free block trong end product, cấm gom lại thành kit/catalog.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React",
+        "Tailwind"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Blocks marketing/app/e-commerce dựa shadcn và Tailwind, free và Pro.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "components",
+        "landing_layout",
+        "ecommerce_layout",
+        "thành phần",
+        "landing",
+        "hero",
+        "bố cục",
+        "trang đích",
+        "Shadcnblocks"
+      ],
+      "search_hint": "At www.shadcnblocks.com, look for components / landing layout in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "04",
+      "card": 2,
+      "slot": 1,
+      "original_label": "GetLayers",
+      "original_domain": "getlayers.ai",
+      "original_url": "https://www.getlayers.ai/",
+      "canonical_label": "GetLayers",
+      "canonical_url": "https://www.getlayers.ai/",
+      "aliases": [],
+      "category": "prompt_library",
+      "use_cases": [
+        "ai_prompts",
+        "landing_layout"
+      ],
+      "source_role": "prompt_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.getlayers.ai/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.getlayers.ai/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "https://www.getlayers.ai/docs",
+      "allowed_use_scope": "**L?** [site/docs](https://www.getlayers.ai/docs) nêu free để thử và paid cho client; đây là FAQ marketing, chưa xác minh văn bản license/terms. Không lấy prompt/ảnh showcase cho sản phẩm trước khi kiểm quyền đúng gói.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_pilot; link_only in this pack",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Library prompt “layer” cho trang cinematic, gradient/3D/section; không phải code framework.",
+      "research_tags": [
+        "REF",
+        "TOOL"
+      ],
+      "research_action": "Pilot",
+      "search_terms": [
+        "ai_prompts",
+        "landing_layout",
+        "landing",
+        "hero",
+        "bố cục",
+        "trang đích",
+        "GetLayers"
+      ],
+      "search_hint": "At www.getlayers.ai, look for ai prompts / landing layout in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "05",
+      "card": 2,
+      "slot": 2,
+      "original_label": "MotionSites",
+      "original_domain": "motionsites.ai",
+      "original_url": "https://motionsites.ai/",
+      "canonical_label": "MotionSites",
+      "canonical_url": "https://motionsites.ai/",
+      "aliases": [],
+      "category": "motion_website_template_library",
+      "use_cases": [
+        "landing_layout",
+        "motion",
+        "ai_prompts"
+      ],
+      "source_role": "motion_website_template_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://motionsites.ai/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://motionsites.ai/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://motionsites.ai/terms",
+      "allowed_use_scope": "**L✓** [terms](https://motionsites.ai/terms): cho dùng prompt/code trong project, cấm bán lại bản thân nội dung; kiểm gói và asset kèm theo.",
+      "planned_use": "link_only",
+      "redistribution_status": "restricted",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Prompt, background, template website có motion; bán quyền truy cập theo gói.",
+      "research_tags": [
+        "REF",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "landing_layout",
+        "motion",
+        "ai_prompts",
+        "landing",
+        "hero",
+        "bố cục",
+        "trang đích",
+        "chuyển động",
+        "MotionSites"
+      ],
+      "search_hint": "At motionsites.ai, look for landing layout / motion in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "06",
+      "card": 2,
+      "slot": 3,
+      "original_label": "Aura",
+      "original_domain": "aura.build",
+      "original_url": "https://www.aura.build/",
+      "canonical_label": "Aura",
+      "canonical_url": "https://www.aura.build/",
+      "aliases": [],
+      "category": "ai_website_builder",
+      "use_cases": [
+        "ai_builder",
+        "landing_layout"
+      ],
+      "source_role": "ai_website_builder",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.aura.build/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.aura.build/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Cần xem gói, export và quyền output trước khi dùng deliverable; không gọi là thư viện mã mở.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "AI website builder, tham khảo workflow lên ý tưởng và bản dựng.",
+      "research_tags": [
+        "REF",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "ai_builder",
+        "landing_layout",
+        "landing",
+        "hero",
+        "bố cục",
+        "trang đích",
+        "Aura"
+      ],
+      "search_hint": "At www.aura.build, look for ai builder / landing layout in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "07",
+      "card": 3,
+      "slot": 1,
+      "original_label": "React Bits",
+      "original_domain": "reactbits.dev",
+      "original_url": "https://reactbits.dev/",
+      "canonical_label": "React Bits",
+      "canonical_url": "https://reactbits.dev/",
+      "aliases": [],
+      "category": "animated_component_library",
+      "use_cases": [
+        "motion",
+        "react_components"
+      ],
+      "source_role": "animated_component_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://reactbits.dev/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://reactbits.dev/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md",
+      "allowed_use_scope": "**L✓** [repo MIT + Commons Clause](https://github.com/DavidHDev/react-bits/blob/main/LICENSE.md): cho thương mại trong app/site/product, cấm phân phối lại chính components dưới dạng độc lập/bundle/port; giữ notice. Bản Pro có [license riêng](https://pro.reactbits.dev/license).",
+      "planned_use": "link_only",
+      "redistribution_status": "restricted",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "React snippets/component hiệu ứng chữ, background và interaction.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "motion",
+        "react_components",
+        "chuyển động",
+        "React",
+        "thành phần React",
+        "React Bits"
+      ],
+      "search_hint": "At reactbits.dev, look for motion / react components in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "08",
+      "card": 3,
+      "slot": 2,
+      "original_label": "Aceternity UI",
+      "original_domain": "ui.aceternity.com",
+      "original_url": "https://ui.aceternity.com/",
+      "canonical_label": "Aceternity UI",
+      "canonical_url": "https://ui.aceternity.com/",
+      "aliases": [],
+      "category": "animated_component_library",
+      "use_cases": [
+        "motion",
+        "react_components",
+        "landing_layout"
+      ],
+      "source_role": "animated_component_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://ui.aceternity.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://ui.aceternity.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://ui.aceternity.com/licence",
+      "allowed_use_scope": "**L✓ phạm vi Pro** [licence](https://ui.aceternity.com/licence) cho end products, cấm phân phối lại item/template marketplace và yêu cầu kiểm third-party; [catalog](https://ui.aceternity.com/ai-recommendations) tách free/Pro. Quyền cụ thể của free item cần đối chiếu tại item.",
+      "planned_use": "link_only",
+      "redistribution_status": "restricted",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React",
+        "Tailwind"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "React/Tailwind animated components và blocks; có free và Pro.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "motion",
+        "react_components",
+        "landing_layout",
+        "chuyển động",
+        "React",
+        "thành phần React",
+        "landing",
+        "hero",
+        "bố cục",
+        "trang đích",
+        "Aceternity UI"
+      ],
+      "search_hint": "At ui.aceternity.com, look for motion / react components in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "09",
+      "card": 3,
+      "slot": 3,
+      "original_label": "Magic UI",
+      "original_domain": "magicui.design",
+      "original_url": "https://magicui.design/",
+      "canonical_label": "Magic UI",
+      "canonical_url": "https://magicui.design/",
+      "aliases": [],
+      "category": "animated_component_library",
+      "use_cases": [
+        "motion",
+        "react_components",
+        "landing_layout"
+      ],
+      "source_role": "animated_component_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://magicui.design/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://magicui.design/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/magicuidesign/magicui/blob/main/LICENSE.md",
+      "allowed_use_scope": "**L✓ repo OSS** [MIT](https://github.com/magicuidesign/magicui/blob/main/LICENSE.md); asset demo, dependency và sản phẩm Pro nếu có phải xét riêng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React",
+        "Tailwind"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Component React/Tailwind thiên marketing và animation.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "motion",
+        "react_components",
+        "landing_layout",
+        "chuyển động",
+        "React",
+        "thành phần React",
+        "landing",
+        "hero",
+        "bố cục",
+        "trang đích",
+        "Magic UI"
+      ],
+      "search_hint": "At magicui.design, look for motion / react components in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "10",
+      "card": 4,
+      "slot": 1,
+      "original_label": "shadcn/ui",
+      "original_domain": "ui.shadcn.com",
+      "original_url": "https://ui.shadcn.com/docs",
+      "canonical_label": "shadcn/ui",
+      "canonical_url": "https://ui.shadcn.com/docs",
+      "aliases": [],
+      "category": "component_registry",
+      "use_cases": [
+        "react_components",
+        "design_system"
+      ],
+      "source_role": "component_registry",
+      "authority": "vendor_or_project_documentation",
+      "access_status": "official_subpage_or_index",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://ui.shadcn.com/docs",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://ui.shadcn.com/docs",
+          "checked_at": "2026-10-07",
+          "surface": "official_subpage_or_index"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/shadcn-ui/ui/blob/main/LICENSE.md",
+      "allowed_use_scope": "**L✓** [repo MIT](https://github.com/shadcn-ui/ui/blob/main/LICENSE.md); lưu notice khi phân phối mã. Khả năng truy cập phải test trên app thật.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Registry component có mã trong project; nền cho design system React.",
+      "research_tags": [
+        "RULE",
+        "TEMPLATE"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "react_components",
+        "design_system",
+        "React",
+        "thành phần React",
+        "shadcn/ui"
+      ],
+      "search_hint": "At ui.shadcn.com, look for react components / design system in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "11",
+      "card": 4,
+      "slot": 2,
+      "original_label": "daisyUI",
+      "original_domain": "daisyui.com",
+      "original_url": "https://daisyui.com/",
+      "canonical_label": "daisyUI",
+      "canonical_url": "https://daisyui.com/",
+      "aliases": [],
+      "category": "component_library",
+      "use_cases": [
+        "components",
+        "themes"
+      ],
+      "source_role": "component_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://daisyui.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://daisyui.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/saadeghi/daisyui/blob/master/LICENSE",
+      "allowed_use_scope": "**L✓ package OSS** [MIT](https://github.com/saadeghi/daisyui/blob/master/LICENSE); premium riêng. Chỉ chọn nếu hợp stack, không chồng hệ token sẵn có.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "Tailwind"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Component CSS và themes trên Tailwind, có phiên bản/giải pháp thương mại.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "components",
+        "themes",
+        "thành phần",
+        "daisyUI"
+      ],
+      "search_hint": "At daisyui.com, look for components / themes in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "12",
+      "card": 4,
+      "slot": 3,
+      "original_label": "Flowbite",
+      "original_domain": "flowbite.com",
+      "original_url": "https://flowbite.com/docs/getting-started/quickstart/",
+      "canonical_label": "Flowbite",
+      "canonical_url": "https://flowbite.com/docs/getting-started/quickstart/",
+      "aliases": [],
+      "category": "component_library",
+      "use_cases": [
+        "components",
+        "forms"
+      ],
+      "source_role": "component_library",
+      "authority": "provider_claim",
+      "access_status": "official_subpage_or_index",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://flowbite.com/docs/getting-started/quickstart/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://flowbite.com/docs/getting-started/quickstart/",
+          "checked_at": "2026-10-07",
+          "surface": "official_subpage_or_index"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/themesberg/flowbite/blob/main/content/getting-started/license.md",
+      "allowed_use_scope": "**L✓ OSS** [MIT cho released code](https://github.com/themesberg/flowbite/blob/main/content/getting-started/license.md); Pro/Figma kit và trademark có quyền riêng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "Tailwind"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Tailwind components cùng JS/React, Figma system và sản phẩm trả phí.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "components",
+        "forms",
+        "thành phần",
+        "Flowbite"
+      ],
+      "search_hint": "At flowbite.com, look for components / forms in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "13",
+      "card": 5,
+      "slot": 1,
+      "original_label": "Landbook",
+      "original_domain": "land-book.com",
+      "original_url": "https://land-book.com/",
+      "canonical_label": "Land-book",
+      "canonical_url": "https://land-book.com/",
+      "aliases": [
+        "Landbook"
+      ],
+      "category": "website_gallery",
+      "use_cases": [
+        "landing_layout",
+        "website_layout"
+      ],
+      "source_role": "website_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://land-book.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://land-book.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Chỉ soi bố cục; quyền ảnh, logo, thiết kế thuộc website gốc.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Gallery landing/website theo kiểu và ngành.",
+      "research_tags": [
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "landing_layout",
+        "website_layout",
+        "landing",
+        "hero",
+        "bố cục",
+        "trang đích",
+        "website",
+        "web layout",
+        "bố cục web",
+        "Land-book",
+        "Landbook"
+      ],
+      "search_hint": "At land-book.com, look for landing layout / website layout in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "14",
+      "card": 5,
+      "slot": 2,
+      "original_label": "Lapa Ninja",
+      "original_domain": "lapa.ninja",
+      "original_url": "https://www.lapa.ninja/",
+      "canonical_label": "Lapa Ninja",
+      "canonical_url": "https://www.lapa.ninja/",
+      "aliases": [],
+      "category": "website_gallery",
+      "use_cases": [
+        "landing_layout",
+        "hero_cta"
+      ],
+      "source_role": "website_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.lapa.ninja/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.lapa.ninja/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Screenshot không là template được cấp phép.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Gallery landing page, lọc để so hero/CTA/hierarchy.",
+      "research_tags": [
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "landing_layout",
+        "hero_cta",
+        "landing",
+        "hero",
+        "bố cục",
+        "trang đích",
+        "Lapa Ninja"
+      ],
+      "search_hint": "At www.lapa.ninja, look for landing layout / hero cta in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "15",
+      "card": 5,
+      "slot": 3,
+      "original_label": "Curated",
+      "original_domain": "curated.design",
+      "original_url": "https://curated.design/",
+      "canonical_label": "Curated",
+      "canonical_url": "https://curated.design/",
+      "aliases": [],
+      "category": "website_gallery",
+      "use_cases": [
+        "art_direction",
+        "website_layout"
+      ],
+      "source_role": "website_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://curated.design/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://curated.design/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Chỉ reference, kiểm trang gốc nếu muốn dùng asset.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Gallery site thật cho art direction/visual references.",
+      "research_tags": [
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "art_direction",
+        "website_layout",
+        "website",
+        "web layout",
+        "bố cục web",
+        "Curated"
+      ],
+      "search_hint": "At curated.design, look for art direction / website layout in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "16",
+      "card": 6,
+      "slot": 1,
+      "original_label": "Siteinspire",
+      "original_domain": "siteinspire.com",
+      "original_url": "https://www.siteinspire.com/",
+      "canonical_label": "Siteinspire",
+      "canonical_url": "https://www.siteinspire.com/",
+      "aliases": [],
+      "category": "website_gallery",
+      "use_cases": [
+        "website_layout",
+        "typography_in_context"
+      ],
+      "source_role": "website_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.siteinspire.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.siteinspire.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Không sao chép toàn bố cục/visual.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Gallery site theo phong cách, chủ đề, type.",
+      "research_tags": [
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "website_layout",
+        "typography_in_context",
+        "website",
+        "web layout",
+        "bố cục web",
+        "Siteinspire"
+      ],
+      "search_hint": "At www.siteinspire.com, look for website layout / typography in context in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "17",
+      "card": 6,
+      "slot": 2,
+      "original_label": "Dark.design",
+      "original_domain": "dark.design",
+      "original_url": "https://www.dark.design/",
+      "canonical_label": "Dark.design",
+      "canonical_url": "https://www.dark.design/",
+      "aliases": [],
+      "category": "website_gallery",
+      "use_cases": [
+        "dark_website_layout",
+        "color_in_context"
+      ],
+      "source_role": "website_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.dark.design/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.dark.design/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Luôn đo contrast và states; dark gallery không là chuẩn accessibility.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Gallery website nền tối.",
+      "research_tags": [
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "dark_website_layout",
+        "color_in_context",
+        "Dark.design"
+      ],
+      "search_hint": "At www.dark.design, look for dark website layout / color in context in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "18",
+      "card": 6,
+      "slot": 3,
+      "original_label": "Mobbin",
+      "original_domain": "mobbin.com",
+      "original_url": "https://mobbin.com/",
+      "canonical_label": "Mobbin",
+      "canonical_url": "https://mobbin.com/",
+      "aliases": [],
+      "category": "app_flow_gallery",
+      "use_cases": [
+        "app_flow",
+        "product_screens"
+      ],
+      "source_role": "app_flow_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://mobbin.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://mobbin.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Có điều kiện truy cập sản phẩm; dùng để phân tích flow, không tái phân phối screenshot.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/prototype-playbook.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Flow/screen ứng dụng thực tế, mạnh cho pattern sản phẩm.",
+      "research_tags": [
+        "REF",
+        "TOOL"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "app_flow",
+        "product_screens",
+        "app flow",
+        "luồng ứng dụng",
+        "Mobbin"
+      ],
+      "search_hint": "At mobbin.com, look for app flow / product screens in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "19",
+      "card": 7,
+      "slot": 1,
+      "original_label": "Lucide",
+      "original_domain": "lucide.dev",
+      "original_url": "https://lucide.dev/",
+      "canonical_label": "Lucide",
+      "canonical_url": "https://lucide.dev/",
+      "aliases": [],
+      "category": "icon_library",
+      "use_cases": [
+        "icons",
+        "icon_system"
+      ],
+      "source_role": "icon_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://lucide.dev/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://lucide.dev/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://lucide.dev/license",
+      "allowed_use_scope": "**L✓** [ISC](https://lucide.dev/license); giữ copyright/license notice theo điều khoản, lưu version và icon dùng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Bộ SVG icon nét đơn có package cho nhiều framework.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "icons",
+        "icon_system",
+        "icon",
+        "biểu tượng",
+        "Lucide"
+      ],
+      "search_hint": "At lucide.dev, look for icons / icon system in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "20",
+      "card": 7,
+      "slot": 2,
+      "original_label": "Phosphor",
+      "original_domain": "phosphoricons.com",
+      "original_url": "https://phosphoricons.com/",
+      "canonical_label": "Phosphor",
+      "canonical_url": "https://phosphoricons.com/",
+      "aliases": [],
+      "category": "icon_library",
+      "use_cases": [
+        "icons",
+        "icon_weights"
+      ],
+      "source_role": "icon_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://phosphoricons.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://phosphoricons.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/phosphor-icons/core/blob/main/LICENSE",
+      "allowed_use_scope": "**L✓ core repo** [MIT](https://github.com/phosphor-icons/core/blob/main/LICENSE); giữ notice, kiểm package/weight được lấy.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Icon nhiều weight cho hệ thống thị giác linh hoạt.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "icons",
+        "icon_weights",
+        "icon",
+        "biểu tượng",
+        "Phosphor"
+      ],
+      "search_hint": "At phosphoricons.com, look for icons / icon weights in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "21",
+      "card": 7,
+      "slot": 3,
+      "original_label": "Heroicons",
+      "original_domain": "heroicons.com",
+      "original_url": "https://heroicons.com/",
+      "canonical_label": "Heroicons",
+      "canonical_url": "https://heroicons.com/",
+      "aliases": [],
+      "category": "icon_library",
+      "use_cases": [
+        "icons",
+        "icon_system"
+      ],
+      "source_role": "icon_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://heroicons.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://heroicons.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/tailwindlabs/heroicons",
+      "allowed_use_scope": "**L✓** [repo MIT](https://github.com/tailwindlabs/heroicons); giữ notice và chỉ import biểu tượng cần dùng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "SVG icons outline/solid cho UI; cùng hệ Tailwind Labs.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "icons",
+        "icon_system",
+        "icon",
+        "biểu tượng",
+        "Heroicons"
+      ],
+      "search_hint": "At heroicons.com, look for icons / icon system in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "22",
+      "card": 8,
+      "slot": 1,
+      "original_label": "Google Fonts",
+      "original_domain": "fonts.google.com",
+      "original_url": "https://fonts.google.com/",
+      "canonical_label": "Google Fonts",
+      "canonical_url": "https://fonts.google.com/",
+      "aliases": [],
+      "category": "font_catalog",
+      "use_cases": [
+        "typography",
+        "en_vi_fonts"
+      ],
+      "source_role": "font_catalog",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://fonts.google.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://fonts.google.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "https://fonts.google.com/knowledge/glossary/licensing",
+      "allowed_use_scope": "**L? từng font** [licensing guide](https://fonts.google.com/knowledge/glossary/licensing); kiểm OFL/Apache/Ubuntu license, subset tiếng Việt, tải byte.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/typography-en-vi.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Catalog webfonts và metadata từng family.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "typography",
+        "en_vi_fonts",
+        "font",
+        "chữ",
+        "phông",
+        "Vietnamese font",
+        "font tiếng Việt",
+        "Google Fonts"
+      ],
+      "search_hint": "At fonts.google.com, look for typography / en vi fonts in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "23",
+      "card": 8,
+      "slot": 2,
+      "original_label": "Fontshare",
+      "original_domain": "fontshare.com",
+      "original_url": "https://www.fontshare.com/",
+      "canonical_label": "Fontshare",
+      "canonical_url": "https://www.fontshare.com/",
+      "aliases": [],
+      "category": "font_catalog",
+      "use_cases": [
+        "typography",
+        "en_vi_fonts"
+      ],
+      "source_role": "font_catalog",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.fontshare.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.fontshare.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "https://www.fontshare.com/licenses",
+      "allowed_use_scope": "**L? từng font** [license portal](https://www.fontshare.com/licenses) cần kiểm bằng trình duyệt JS; xác minh Vietnamese glyph trước chọn.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/typography-en-vi.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Catalog font từ Indian Type Foundry, nhiều family dùng miễn phí theo license riêng.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "typography",
+        "en_vi_fonts",
+        "font",
+        "chữ",
+        "phông",
+        "Vietnamese font",
+        "font tiếng Việt",
+        "Fontshare"
+      ],
+      "search_hint": "At www.fontshare.com, look for typography / en vi fonts in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "24",
+      "card": 8,
+      "slot": 3,
+      "original_label": "Typewolf",
+      "original_domain": "typewolf.com",
+      "original_url": "https://www.typewolf.com/",
+      "canonical_label": "Typewolf",
+      "canonical_url": "https://www.typewolf.com/",
+      "aliases": [],
+      "category": "font_editorial",
+      "use_cases": [
+        "font_pairing",
+        "typography_in_context"
+      ],
+      "source_role": "font_editorial",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.typewolf.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.typewolf.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Tên font/gợi ý không cấp quyền font; đối chiếu nhà phát hành.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/typography-en-vi.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Editorial curation/cặp font từ site thật.",
+      "research_tags": [
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "font_pairing",
+        "typography_in_context",
+        "font pairing",
+        "phối chữ",
+        "Typewolf"
+      ],
+      "search_hint": "At www.typewolf.com, look for font pairing / typography in context in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "25",
+      "card": 9,
+      "slot": 1,
+      "original_label": "Coolors",
+      "original_domain": "coolors.co",
+      "original_url": "https://coolors.co/",
+      "canonical_label": "Coolors",
+      "canonical_url": "https://coolors.co/",
+      "aliases": [],
+      "category": "color_tool",
+      "use_cases": [
+        "palette",
+        "color_exploration"
+      ],
+      "source_role": "color_tool",
+      "authority": "provider_claim",
+      "access_status": "official_subpage_or_index",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://coolors.co/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://coolors.co/",
+          "checked_at": "2026-10-07",
+          "surface": "official_subpage_or_index"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Màu gợi ý cần kiểm contrast và brand tokens bằng playbook hiện có.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/color-protocol.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Tạo và so palette màu nhanh.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "palette",
+        "color_exploration",
+        "Coolors",
+        "màu sắc",
+        "màu",
+        "phối màu"
+      ],
+      "search_hint": "At coolors.co, look for palette / color exploration in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "26",
+      "card": 9,
+      "slot": 2,
+      "original_label": "Realtime Colors",
+      "original_domain": "realtimecolors.com",
+      "original_url": "https://www.realtimecolors.com/",
+      "canonical_label": "Realtime Colors",
+      "canonical_url": "https://www.realtimecolors.com/",
+      "aliases": [],
+      "category": "color_preview_tool",
+      "use_cases": [
+        "palette_preview",
+        "typography_preview"
+      ],
+      "source_role": "color_preview_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.realtimecolors.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.realtimecolors.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Preview không thay đo WCAG trong giao diện thật.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/color-protocol.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Xem palette/type trên demo trang thay vì chip rời.",
+      "research_tags": [
+        "TOOL",
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "palette_preview",
+        "typography_preview",
+        "Realtime Colors",
+        "màu sắc",
+        "màu",
+        "phối màu"
+      ],
+      "search_hint": "At www.realtimecolors.com, look for palette preview / typography preview in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "27",
+      "card": 9,
+      "slot": 3,
+      "original_label": "Radix Colors",
+      "original_domain": "radix-ui.com",
+      "original_url": "https://www.radix-ui.com/colors",
+      "canonical_label": "Radix Colors",
+      "canonical_url": "https://www.radix-ui.com/colors",
+      "aliases": [],
+      "category": "color_scale_library",
+      "use_cases": [
+        "theme_tokens",
+        "light_dark_colors"
+      ],
+      "source_role": "color_scale_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.radix-ui.com/colors",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.radix-ui.com/colors",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/radix-ui/colors/blob/main/LICENSE",
+      "allowed_use_scope": "**L✓ package** [MIT](https://github.com/radix-ui/colors/blob/main/LICENSE); docs hướng dẫn trong hệ Radix, contrast vẫn phải đo tại nơi dùng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/color-protocol.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Thang màu thiết kế cho light/dark và trạng thái UI.",
+      "research_tags": [
+        "RULE",
+        "TEMPLATE"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "theme_tokens",
+        "light_dark_colors",
+        "theme",
+        "tokens",
+        "màu",
+        "Radix Colors",
+        "màu sắc",
+        "phối màu"
+      ],
+      "search_hint": "At www.radix-ui.com, look for theme tokens / light dark colors in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "28",
+      "card": 10,
+      "slot": 1,
+      "original_label": "unDraw",
+      "original_domain": "undraw.co",
+      "original_url": "https://undraw.co/",
+      "canonical_label": "unDraw",
+      "canonical_url": "https://undraw.co/",
+      "aliases": [],
+      "category": "illustration_library",
+      "use_cases": [
+        "illustration",
+        "visual_assets"
+      ],
+      "source_role": "illustration_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://undraw.co/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://undraw.co/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://undraw.co/license",
+      "allowed_use_scope": "**L✓ illustrations** [license](https://undraw.co/license) cho project thương mại không cần credit; cấm đóng pack/tái tạo dịch vụ và dùng cho ML. Plus/asset khác cần kiểm riêng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Illustration SVG đồng phong cách, đổi màu.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "illustration",
+        "visual_assets",
+        "minh họa",
+        "unDraw"
+      ],
+      "search_hint": "At undraw.co, look for illustration / visual assets in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "29",
+      "card": 10,
+      "slot": 2,
+      "original_label": "Storyset",
+      "original_domain": "storyset.com",
+      "original_url": "https://storyset.com/",
+      "canonical_label": "Storyset",
+      "canonical_url": "https://storyset.com/",
+      "aliases": [],
+      "category": "illustration_tool",
+      "use_cases": [
+        "illustration",
+        "animated_illustration"
+      ],
+      "source_role": "illustration_tool",
+      "authority": "provider_claim",
+      "access_status": "official_subpage_or_index",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://storyset.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://storyset.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_subpage_or_index"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://storyset.com/faqs",
+      "allowed_use_scope": "**L✓** [FAQ](https://storyset.com/faqs): free yêu cầu attribution, bỏ attribution cần premium Flaticon.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Illustration có chỉnh bố cục và xuất animation.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "illustration",
+        "animated_illustration",
+        "minh họa",
+        "Storyset"
+      ],
+      "search_hint": "At storyset.com, look for illustration / animated illustration in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "30",
+      "card": 10,
+      "slot": 3,
+      "original_label": "Humaaans",
+      "original_domain": "humaaans.com",
+      "original_url": "https://www.humaaans.com/",
+      "canonical_label": "Humaaans",
+      "canonical_url": "https://www.humaaans.com/",
+      "aliases": [],
+      "category": "illustration_library",
+      "use_cases": [
+        "people_illustration",
+        "visual_assets"
+      ],
+      "source_role": "illustration_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.humaaans.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.humaaans.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://pablostanley.gumroad.com/l/humaaans",
+      "allowed_use_scope": "**L✓ bộ gốc** [trang tác giả](https://pablostanley.gumroad.com/l/humaaans) ghi CC0 cho pack tải `$0`; không suy sang asset khác trong hệ Blush.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Bộ hình người mix-and-match cho minh họa.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "people_illustration",
+        "visual_assets",
+        "Humaaans"
+      ],
+      "search_hint": "At www.humaaans.com, look for people illustration / visual assets in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "31",
+      "card": 11,
+      "slot": 1,
+      "original_label": "Haikei",
+      "original_domain": "haikei.app",
+      "original_url": "https://haikei.app/",
+      "canonical_label": "Haikei",
+      "canonical_url": "https://haikei.app/",
+      "aliases": [],
+      "category": "svg_background_generator",
+      "use_cases": [
+        "backgrounds",
+        "decorative_assets"
+      ],
+      "source_role": "svg_background_generator",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://haikei.app/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://haikei.app/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm quyền output tại thời điểm dùng; test file size và giảm decorative noise.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Generator SVG abstract waves/blobs/gradients.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "backgrounds",
+        "decorative_assets",
+        "Haikei"
+      ],
+      "search_hint": "At haikei.app, look for backgrounds / decorative assets in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "32",
+      "card": 11,
+      "slot": 2,
+      "original_label": "SVG BG",
+      "original_domain": "svgbackgrounds.com",
+      "original_url": "https://www.svgbackgrounds.com/",
+      "canonical_label": "SVG Backgrounds",
+      "canonical_url": "https://www.svgbackgrounds.com/",
+      "aliases": [
+        "SVG BG"
+      ],
+      "category": "svg_background_library",
+      "use_cases": [
+        "backgrounds",
+        "decorative_assets"
+      ],
+      "source_role": "svg_background_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.svgbackgrounds.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.svgbackgrounds.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://www.svgbackgrounds.com/license/",
+      "allowed_use_scope": "**L✓** [license chung](https://www.svgbackgrounds.com/license/); mục free thường [cần attribution](https://www.svgbackgrounds.com/attribution/), paid có điều kiện riêng. Không dùng graphic trong generator/template cạnh tranh.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Pattern/background SVG có thể tùy chỉnh.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "backgrounds",
+        "decorative_assets",
+        "SVG Backgrounds",
+        "SVG BG"
+      ],
+      "search_hint": "At www.svgbackgrounds.com, look for backgrounds / decorative assets in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "33",
+      "card": 11,
+      "slot": 3,
+      "original_label": "fffuel",
+      "original_domain": "fffuel.co",
+      "original_url": "https://www.fffuel.co/",
+      "canonical_label": "fffuel",
+      "canonical_url": "https://www.fffuel.co/",
+      "aliases": [],
+      "category": "svg_background_generator",
+      "use_cases": [
+        "backgrounds",
+        "decorative_assets"
+      ],
+      "source_role": "svg_background_generator",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.fffuel.co/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.fffuel.co/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://www.fffuel.co/license/",
+      "allowed_use_scope": "**L✓** [license output](https://www.fffuel.co/license/): dùng cá nhân/thương mại, không cần credit, cấm phân phối lại bản ảnh độc lập. Ưu tiên SVG nhỏ và tương phản rõ.",
+      "planned_use": "link_only",
+      "redistribution_status": "restricted",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Nhiều generator SVG noise/grid/waves.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "backgrounds",
+        "decorative_assets",
+        "fffuel"
+      ],
+      "search_hint": "At www.fffuel.co, look for backgrounds / decorative assets in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "34",
+      "card": 12,
+      "slot": 1,
+      "original_label": "Unsplash",
+      "original_domain": "unsplash.com",
+      "original_url": "https://unsplash.com/",
+      "canonical_label": "Unsplash",
+      "canonical_url": "https://unsplash.com/",
+      "aliases": [],
+      "category": "stock_photo_library",
+      "use_cases": [
+        "content_photos"
+      ],
+      "source_role": "stock_photo_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://unsplash.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://unsplash.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://unsplash.com/license",
+      "allowed_use_scope": "**L✓ free** [license](https://unsplash.com/license); [Unsplash+](https://unsplash.com/blog/you-can-now-filter-images-by-license/) là loại riêng. Kiểm ảnh, model/trademark và không bán ảnh nguyên dạng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Kho ảnh editorial/marketing.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "content_photos",
+        "photo",
+        "ảnh nội dung",
+        "Unsplash"
+      ],
+      "search_hint": "At unsplash.com, look for content photos in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "35",
+      "card": 12,
+      "slot": 2,
+      "original_label": "Pexels",
+      "original_domain": "pexels.com",
+      "original_url": "https://www.pexels.com/",
+      "canonical_label": "Pexels",
+      "canonical_url": "https://www.pexels.com/",
+      "aliases": [],
+      "category": "stock_photo_video_library",
+      "use_cases": [
+        "content_photos",
+        "content_video"
+      ],
+      "source_role": "stock_photo_video_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.pexels.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.pexels.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://www.pexels.com/license/",
+      "allowed_use_scope": "**L✓** [license](https://www.pexels.com/license/): free sử dụng, hạn chế bán bản nguyên, endorsement, nhãn hiệu và người nhận diện.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Ảnh/video stock cho prototype và sản phẩm.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "content_photos",
+        "content_video",
+        "photo",
+        "ảnh nội dung",
+        "Pexels"
+      ],
+      "search_hint": "At www.pexels.com, look for content photos / content video in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "36",
+      "card": 12,
+      "slot": 3,
+      "original_label": "Pixabay",
+      "original_domain": "pixabay.com",
+      "original_url": "https://pixabay.com/",
+      "canonical_label": "Pixabay",
+      "canonical_url": "https://pixabay.com/",
+      "aliases": [],
+      "category": "stock_media_library",
+      "use_cases": [
+        "content_photos",
+        "content_video",
+        "vectors"
+      ],
+      "source_role": "stock_media_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://pixabay.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://pixabay.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://pixabay.com/service/license-summary/",
+      "allowed_use_scope": "**L✓** [summary](https://pixabay.com/service/license-summary/) và [terms](https://pixabay.com/service/terms/); không bán standalone, kiểm thương hiệu/người. Không gọi toàn kho CC0.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Ảnh, vector, video, âm thanh stock.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "content_photos",
+        "content_video",
+        "vectors",
+        "photo",
+        "ảnh nội dung",
+        "Pixabay"
+      ],
+      "search_hint": "At pixabay.com, look for content photos / content video in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "37",
+      "card": 13,
+      "slot": 1,
+      "original_label": "Shots",
+      "original_domain": "shots.so",
+      "original_url": "https://shots.so/",
+      "canonical_label": "Shots",
+      "canonical_url": "https://shots.so/",
+      "aliases": [],
+      "category": "device_mockup_tool",
+      "use_cases": [
+        "device_mockups",
+        "presentation"
+      ],
+      "source_role": "device_mockup_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://shots.so/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://shots.so/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm quyền xuất bản, plan và asset mockup khi dùng thật.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Tạo mockup screenshot trên khung thiết bị/browser.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "device_mockups",
+        "presentation",
+        "Shots"
+      ],
+      "search_hint": "At shots.so, look for device mockups / presentation in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "38",
+      "card": 13,
+      "slot": 2,
+      "original_label": "MockupBro",
+      "original_domain": "mockupbro.com",
+      "original_url": "https://mockupbro.com/",
+      "canonical_label": "MockupBro",
+      "canonical_url": "https://mockupbro.com/",
+      "aliases": [],
+      "category": "device_mockup_tool",
+      "use_cases": [
+        "device_mockups",
+        "presentation"
+      ],
+      "source_role": "device_mockup_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://mockupbro.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://mockupbro.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm quyền thương mại của scene; không upload ảnh riêng nếu không cần.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Mockup sản phẩm nhanh bằng ảnh upload.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "device_mockups",
+        "presentation",
+        "MockupBro"
+      ],
+      "search_hint": "At mockupbro.com, look for device mockups / presentation in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "39",
+      "card": 13,
+      "slot": 3,
+      "original_label": "MockUPhone",
+      "original_domain": "mockuphone.com",
+      "original_url": "https://mockuphone.com/",
+      "canonical_label": "MockUPhone",
+      "canonical_url": "https://mockuphone.com/",
+      "aliases": [],
+      "category": "device_mockup_tool",
+      "use_cases": [
+        "device_mockups",
+        "presentation"
+      ],
+      "source_role": "device_mockup_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://mockuphone.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://mockuphone.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://mockuphone.com/attribution/",
+      "allowed_use_scope": "**L✓ output** [CC BY 3.0](https://mockuphone.com/attribution/), phải ghi nguồn; kiểm thêm quyền screenshot đầu vào.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Đặt screenshot vào khung thiết bị.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "device_mockups",
+        "presentation",
+        "MockUPhone"
+      ],
+      "search_hint": "At mockuphone.com, look for device mockups / presentation in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "40",
+      "card": 14,
+      "slot": 1,
+      "original_label": "Shapefest",
+      "original_domain": "shapefest.com",
+      "original_url": "https://shapefest.com/",
+      "canonical_label": "Shapefest",
+      "canonical_url": "https://shapefest.com/",
+      "aliases": [],
+      "category": "3d_render_asset_library",
+      "use_cases": [
+        "3d_assets",
+        "hero_visuals"
+      ],
+      "source_role": "3d_render_asset_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://shapefest.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://shapefest.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://shapefest.com/license-agreement",
+      "allowed_use_scope": "**L✓** [Commercial+ agreement](https://shapefest.com/license-agreement): dùng project/client và UI kit theo phạm vi license, cấm bán/chia sẻ asset độc lập; kiểm gói/quyền từng file và đo byte ảnh.",
+      "planned_use": "link_only",
+      "redistribution_status": "restricted",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Library hình 3D render/shape cho hero, có free và All Access.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "3d_assets",
+        "hero_visuals",
+        "Shapefest"
+      ],
+      "search_hint": "At shapefest.com, look for 3d assets / hero visuals in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "41",
+      "card": 14,
+      "slot": 2,
+      "original_label": "Icons8",
+      "original_domain": "icons8.com",
+      "original_url": "https://icons8.com/",
+      "canonical_label": "Icons8",
+      "canonical_url": "https://icons8.com/",
+      "aliases": [],
+      "category": "multi_asset_marketplace",
+      "use_cases": [
+        "icons",
+        "illustration",
+        "3d_assets"
+      ],
+      "source_role": "multi_asset_marketplace",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://icons8.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://icons8.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L? từng asset**; phân biệt free có attribution và paid/format, kiểm page license đúng asset.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Icon, illustration, ảnh, 3D và công cụ; gói quyền khác nhau.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "icons",
+        "illustration",
+        "3d_assets",
+        "icon",
+        "biểu tượng",
+        "minh họa",
+        "Icons8"
+      ],
+      "search_hint": "At icons8.com, look for icons / illustration in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "42",
+      "card": 14,
+      "slot": 3,
+      "original_label": "3dicons V1",
+      "original_domain": "old.3dicons.co",
+      "original_url": "https://old.3dicons.co/",
+      "canonical_label": "3dicons V1",
+      "canonical_url": "https://3dicons.co/",
+      "aliases": [
+        "old.3dicons.co V1"
+      ],
+      "category": "3d_icon_library",
+      "use_cases": [
+        "3d_icons",
+        "visual_assets"
+      ],
+      "source_role": "3d_icon_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://3dicons.co/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://3dicons.co/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://old.3dicons.co/",
+      "allowed_use_scope": "**L✓ V1** [trang cũ](https://old.3dicons.co/) ghi CC0 cho V1. Không áp CC0 V1 cho mọi icon mới/premium; kiểm item/pack khi dùng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Bộ icon 3D; URL trong ảnh là V1, site mới trộn open/free/premium.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết bản mới",
+      "search_terms": [
+        "3d_icons",
+        "visual_assets",
+        "3dicons V1"
+      ],
+      "search_hint": "At 3dicons.co, look for 3d icons / visual assets in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "43",
+      "card": 15,
+      "slot": 1,
+      "original_label": "Spline",
+      "original_domain": "spline.design",
+      "original_url": "https://spline.design/",
+      "canonical_label": "Spline",
+      "canonical_url": "https://spline.design/",
+      "aliases": [],
+      "category": "interactive_3d_editor",
+      "use_cases": [
+        "interactive_3d",
+        "web_3d"
+      ],
+      "source_role": "interactive_3d_editor",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://spline.design/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://spline.design/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm plan/export/embed và quyền asset; tính WebGL, byte tải và fallback ảnh tĩnh.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_pilot; link_only in this pack",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Thiết kế 3D interactive trên trình duyệt, embed scene.",
+      "research_tags": [
+        "TOOL",
+        "REF"
+      ],
+      "research_action": "Pilot",
+      "search_terms": [
+        "interactive_3d",
+        "web_3d",
+        "3d",
+        "tương tác",
+        "Spline"
+      ],
+      "search_hint": "At spline.design, look for interactive 3d / web 3d in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "44",
+      "card": 15,
+      "slot": 2,
+      "original_label": "model-viewer",
+      "original_domain": "modelviewer.dev",
+      "original_url": "https://modelviewer.dev/",
+      "canonical_label": "model-viewer",
+      "canonical_url": "https://modelviewer.dev/",
+      "aliases": [],
+      "category": "3d_web_component",
+      "use_cases": [
+        "interactive_3d",
+        "model_display"
+      ],
+      "source_role": "3d_web_component",
+      "authority": "vendor_or_project_documentation",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://modelviewer.dev/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://modelviewer.dev/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/google/model-viewer/blob/master/LICENSE",
+      "allowed_use_scope": "**L✓ code** [Apache-2.0](https://github.com/google/model-viewer/blob/master/LICENSE); thư viện không cấp quyền model, test thiết bị và fallback.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Web component hiển thị model 3D/AR do Google phát triển.",
+      "research_tags": [
+        "RULE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "interactive_3d",
+        "model_display",
+        "3d",
+        "tương tác",
+        "model-viewer"
+      ],
+      "search_hint": "At modelviewer.dev, look for interactive 3d / model display in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "45",
+      "card": 15,
+      "slot": 3,
+      "original_label": "Vectary",
+      "original_domain": "vectary.com",
+      "original_url": "https://www.vectary.com/",
+      "canonical_label": "Vectary",
+      "canonical_url": "https://www.vectary.com/",
+      "aliases": [],
+      "category": "interactive_3d_editor",
+      "use_cases": [
+        "interactive_3d",
+        "model_presentation"
+      ],
+      "source_role": "interactive_3d_editor",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.vectary.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.vectary.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm plan export/embed, quyền model và chi phí runtime.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "3D editor/collaboration và trình bày interactive.",
+      "research_tags": [
+        "TOOL",
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "interactive_3d",
+        "model_presentation",
+        "3d",
+        "tương tác",
+        "Vectary"
+      ],
+      "search_hint": "At www.vectary.com, look for interactive 3d / model presentation in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "46",
+      "card": 16,
+      "slot": 1,
+      "original_label": "Poly Haven",
+      "original_domain": "polyhaven.com",
+      "original_url": "https://polyhaven.com/",
+      "canonical_label": "Poly Haven",
+      "canonical_url": "https://polyhaven.com/",
+      "aliases": [],
+      "category": "3d_asset_library",
+      "use_cases": [
+        "3d_assets",
+        "textures"
+      ],
+      "source_role": "3d_asset_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://polyhaven.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://polyhaven.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://polyhaven.com/license",
+      "allowed_use_scope": "**L✓** [assets CC0](https://polyhaven.com/license); website/logo/renders không cùng quyền; tối ưu model trước web.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "HDRI, texture, model 3D cho render.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "3d_assets",
+        "textures",
+        "Poly Haven"
+      ],
+      "search_hint": "At polyhaven.com, look for 3d assets / textures in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "47",
+      "card": 16,
+      "slot": 2,
+      "original_label": "ambientCG",
+      "original_domain": "ambientcg.com",
+      "original_url": "https://ambientcg.com/",
+      "canonical_label": "ambientCG",
+      "canonical_url": "https://ambientcg.com/",
+      "aliases": [],
+      "category": "3d_asset_library",
+      "use_cases": [
+        "3d_assets",
+        "textures"
+      ],
+      "source_role": "3d_asset_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://ambientcg.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://ambientcg.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://docs.ambientcg.com/license/",
+      "allowed_use_scope": "**L✓** [license](https://docs.ambientcg.com/license/) cho asset; lưu URL asset/phiên bản và nén texture.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "PBR textures, HDRI và model.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "3d_assets",
+        "textures",
+        "ambientCG"
+      ],
+      "search_hint": "At ambientcg.com, look for 3d assets / textures in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "48",
+      "card": 16,
+      "slot": 3,
+      "original_label": "Kenney",
+      "original_domain": "kenney.nl",
+      "original_url": "https://kenney.nl/",
+      "canonical_label": "Kenney",
+      "canonical_url": "https://kenney.nl/",
+      "aliases": [],
+      "category": "game_asset_library",
+      "use_cases": [
+        "game_assets",
+        "2d_3d_assets"
+      ],
+      "source_role": "game_asset_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://kenney.nl/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://kenney.nl/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://kenney.nl/assets/top-down-tanks",
+      "allowed_use_scope": "**L✓ từng pack** [ví dụ CC0](https://kenney.nl/assets/top-down-tanks); kiểm asset page, phù hợp game hơn SaaS.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "catalog_only",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Game/UI assets 2D/3D theo pack.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "game_assets",
+        "2d_3d_assets",
+        "Kenney"
+      ],
+      "search_hint": "At kenney.nl, look for game assets / 2d 3d assets in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "49",
+      "card": 17,
+      "slot": 1,
+      "original_label": "Lucide Anim.",
+      "original_domain": "lucide-animated.com",
+      "original_url": "https://lucide-animated.com/",
+      "canonical_label": "lucide-animated",
+      "canonical_url": "https://lucide-animated.com/",
+      "aliases": [
+        "Lucide Anim."
+      ],
+      "category": "animated_icon_library",
+      "use_cases": [
+        "animated_icons",
+        "react_components"
+      ],
+      "source_role": "animated_icon_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://lucide-animated.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://lucide-animated.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/pqoqubbw/icons/blob/main/LICENSE",
+      "allowed_use_scope": "**L✓ code riêng** [repo MIT](https://github.com/pqoqubbw/icons/blob/main/LICENSE); website nêu xây bằng Motion + Lucide, giữ notices dependency và kiểm reduced motion.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Animated React icon dựa hình thức Lucide.",
+      "research_tags": [
+        "TEMPLATE",
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "animated_icons",
+        "react_components",
+        "React",
+        "thành phần React",
+        "lucide-animated",
+        "Lucide Anim."
+      ],
+      "search_hint": "At lucide-animated.com, look for animated icons / react components in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "50",
+      "card": 17,
+      "slot": 2,
+      "original_label": "Lordicon",
+      "original_domain": "lordicon.com",
+      "original_url": "https://lordicon.com/",
+      "canonical_label": "Lordicon",
+      "canonical_url": "https://lordicon.com/",
+      "aliases": [],
+      "category": "animated_icon_library",
+      "use_cases": [
+        "animated_icons",
+        "motion"
+      ],
+      "source_role": "animated_icon_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://lordicon.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://lordicon.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm quyền từng download/plan, attribution và player; không dùng trong thao tác lặp liên tục.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Catalog icon động, player và gói thương mại.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "animated_icons",
+        "motion",
+        "chuyển động",
+        "Lordicon"
+      ],
+      "search_hint": "At lordicon.com, look for animated icons / motion in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "51",
+      "card": 17,
+      "slot": 3,
+      "original_label": "Rive",
+      "original_domain": "rive.app",
+      "original_url": "https://rive.app/",
+      "canonical_label": "Rive",
+      "canonical_url": "https://rive.app/",
+      "aliases": [],
+      "category": "animation_editor_runtime",
+      "use_cases": [
+        "interactive_animation",
+        "state_machine"
+      ],
+      "source_role": "animation_editor_runtime",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://rive.app/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://rive.app/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm quyền editor/runtime/asset theo plan; chỉ tạo recipe sau thử lifecycle, fallback và reduced motion.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_pilot; link_only in this pack",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Editor và runtime animation tương tác/state machine.",
+      "research_tags": [
+        "TOOL",
+        "SKILL?"
+      ],
+      "research_action": "Pilot",
+      "search_terms": [
+        "interactive_animation",
+        "state_machine",
+        "Rive"
+      ],
+      "search_hint": "At rive.app, look for interactive animation / state machine in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "52",
+      "card": 18,
+      "slot": 1,
+      "original_label": "GSAP",
+      "original_domain": "gsap.com",
+      "original_url": "https://gsap.com/",
+      "canonical_label": "GSAP",
+      "canonical_url": "https://gsap.com/",
+      "aliases": [],
+      "category": "motion_engine",
+      "use_cases": [
+        "motion_engine",
+        "timeline",
+        "scroll_animation"
+      ],
+      "source_role": "motion_engine",
+      "authority": "vendor_or_project_documentation",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://gsap.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://gsap.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://gsap.com/community/standard-license/",
+      "allowed_use_scope": "**L✓** [runtime license](https://gsap.com/community/standard-license/) khác license skill repo; pack đã có tiêu chí chọn và docs.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Engine timeline/scroll/SVG motion chuyên sâu.",
+      "research_tags": [
+        "RULE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết hiện có",
+      "search_terms": [
+        "motion_engine",
+        "timeline",
+        "scroll_animation",
+        "GSAP"
+      ],
+      "search_hint": "At gsap.com, look for motion engine / timeline in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "53",
+      "card": 18,
+      "slot": 2,
+      "original_label": "Motion",
+      "original_domain": "motion.dev",
+      "original_url": "https://motion.dev/",
+      "canonical_label": "Motion",
+      "canonical_url": "https://motion.dev/",
+      "aliases": [],
+      "category": "motion_engine",
+      "use_cases": [
+        "motion_engine",
+        "layout_animation",
+        "gestures"
+      ],
+      "source_role": "motion_engine",
+      "authority": "vendor_or_project_documentation",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://motion.dev/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://motion.dev/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/motiondivision/motion/blob/main/LICENSE.md",
+      "allowed_use_scope": "**L✓ core repo** [MIT](https://github.com/motiondivision/motion/blob/main/LICENSE.md); pack đã có nhánh motion library, kiểm bundle và package thực dùng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "JavaScript",
+        "React"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Animation JS/React cho layout, spring, gestures.",
+      "research_tags": [
+        "RULE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết hiện có",
+      "search_terms": [
+        "motion_engine",
+        "layout_animation",
+        "gestures",
+        "Motion"
+      ],
+      "search_hint": "At motion.dev, look for motion engine / layout animation in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "54",
+      "card": 18,
+      "slot": 3,
+      "original_label": "Anime.js",
+      "original_domain": "animejs.com",
+      "original_url": "https://animejs.com/",
+      "canonical_label": "Anime.js",
+      "canonical_url": "https://animejs.com/",
+      "aliases": [],
+      "category": "motion_engine",
+      "use_cases": [
+        "motion_engine",
+        "timeline",
+        "svg_animation"
+      ],
+      "source_role": "motion_engine",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://animejs.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://animejs.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Chỉ đánh giá nếu CSS/WAAPI hoặc engine đang dùng không đủ; tránh thêm engine thứ hai.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "JavaScript"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/motion-playbook.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Engine JS animation/timeline và SVG.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "motion_engine",
+        "timeline",
+        "svg_animation",
+        "Anime.js"
+      ],
+      "search_hint": "At animejs.com, look for motion engine / timeline in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "55",
+      "card": 19,
+      "slot": 1,
+      "original_label": "CodePen",
+      "original_domain": "codepen.io",
+      "original_url": "https://codepen.io/",
+      "canonical_label": "CodePen",
+      "canonical_url": "https://codepen.io/",
+      "aliases": [],
+      "category": "code_demo_gallery",
+      "use_cases": [
+        "creative_effects",
+        "code_examples"
+      ],
+      "source_role": "code_demo_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://codepen.io/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://codepen.io/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://blog.codepen.io/documentation/licensing/",
+      "allowed_use_scope": "**L✓ public Pen code** [MIT mặc định](https://blog.codepen.io/documentation/licensing/); private Pen không có license ngầm, ảnh/font/dependency riêng. Kiểm notice và mã của từng Pen.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Sandbox demo code và hiệu ứng do nhiều tác giả đăng.",
+      "research_tags": [
+        "REF",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "creative_effects",
+        "code_examples",
+        "CodePen"
+      ],
+      "search_hint": "At codepen.io, look for creative effects / code examples in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "56",
+      "card": 19,
+      "slot": 2,
+      "original_label": "Codrops",
+      "original_domain": "tympanus.net",
+      "original_url": "https://tympanus.net/codrops/",
+      "canonical_label": "Codrops",
+      "canonical_url": "https://tympanus.net/codrops/",
+      "aliases": [],
+      "category": "frontend_tutorial_gallery",
+      "use_cases": [
+        "creative_effects",
+        "frontend_tutorials"
+      ],
+      "source_role": "frontend_tutorial_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://tympanus.net/codrops/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://tympanus.net/codrops/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L? từng demo**; kiểm repo/license/ảnh và không copy hiệu ứng nặng nguyên khối.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_pilot; link_only in this pack",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Tutorial/demo creative front-end theo bài.",
+      "research_tags": [
+        "REF",
+        "SKILL?"
+      ],
+      "research_action": "Pilot bài cụ thể",
+      "search_terms": [
+        "creative_effects",
+        "frontend_tutorials",
+        "Codrops"
+      ],
+      "search_hint": "At tympanus.net, look for creative effects / frontend tutorials in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "57",
+      "card": 19,
+      "slot": 3,
+      "original_label": "Hoverstat.es",
+      "original_domain": "hoverstat.es",
+      "original_url": "https://www.hoverstat.es/",
+      "canonical_label": "Hoverstat.es",
+      "canonical_url": "https://www.hoverstat.es/",
+      "aliases": [
+        "hoverstat.es"
+      ],
+      "category": "interactive_website_gallery",
+      "use_cases": [
+        "creative_effects",
+        "website_layout"
+      ],
+      "source_role": "interactive_website_gallery",
+      "authority": "editorial_or_gallery",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.hoverstat.es/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.hoverstat.es/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Dùng làm ví dụ tương tác; quyền mã/ảnh của từng site thuộc chủ thể riêng. URL không `www` lỗi trong web tool, bản `www` mở được.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Gallery site thử nghiệm/interactive và [archive](https://www.hoverstat.es/archive/) có lọc theo năm, ngành, animation; tên không có nghĩa chỉ chứa hover effects.",
+      "research_tags": [
+        "REF"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "creative_effects",
+        "website_layout",
+        "website",
+        "web layout",
+        "bố cục web",
+        "Hoverstat.es"
+      ],
+      "search_hint": "At www.hoverstat.es, look for creative effects / website layout in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "58",
+      "card": 20,
+      "slot": 1,
+      "original_label": "tweakcn",
+      "original_domain": "tweakcn.com",
+      "original_url": "https://tweakcn.com/",
+      "canonical_label": "tweakcn",
+      "canonical_url": "https://tweakcn.com/",
+      "aliases": [],
+      "category": "theme_editor",
+      "use_cases": [
+        "theme_tokens",
+        "shadcn_theme"
+      ],
+      "source_role": "theme_editor",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://tweakcn.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://tweakcn.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm export/license; giữ mapping sang tokens của project.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React",
+        "Tailwind"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/color-protocol.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Theme editor cho tokens shadcn/ui.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "theme_tokens",
+        "shadcn_theme",
+        "theme",
+        "tokens",
+        "màu",
+        "tweakcn",
+        "màu sắc",
+        "phối màu"
+      ],
+      "search_hint": "At tweakcn.com, look for theme tokens / shadcn theme in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "59",
+      "card": 20,
+      "slot": 2,
+      "original_label": "ZippyStarter",
+      "original_domain": "zippystarter.com",
+      "original_url": "https://zippystarter.com/",
+      "canonical_label": "ZippyStarter",
+      "canonical_url": "https://zippystarter.com/",
+      "aliases": [],
+      "category": "starter_template_library",
+      "use_cases": [
+        "nextjs_starter",
+        "react_components"
+      ],
+      "source_role": "starter_template_library",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://zippystarter.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://zippystarter.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm plan/license từng starter; không đưa vào static artifact HTML.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React",
+        "Next.js"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Starter/template shadcn + Next.js, reusable blocks và registry riêng.",
+      "research_tags": [
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "nextjs_starter",
+        "react_components",
+        "React",
+        "thành phần React",
+        "ZippyStarter"
+      ],
+      "search_hint": "At zippystarter.com, look for nextjs starter / react components in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "60",
+      "card": 20,
+      "slot": 3,
+      "original_label": "shadcn.io",
+      "original_domain": "shadcn.io",
+      "original_url": "https://www.shadcn.io/",
+      "canonical_label": "shadcn.io",
+      "canonical_url": "https://www.shadcn.io/",
+      "aliases": [],
+      "category": "component_theme_aggregator",
+      "use_cases": [
+        "shadcn_components",
+        "theme_tokens"
+      ],
+      "source_role": "component_theme_aggregator",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.shadcn.io/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.shadcn.io/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L? từng mục/tác giả**; không thừa hưởng MIT của shadcn/ui, kiểm CSS/config xuất ra.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React",
+        "Tailwind"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Website bên thứ ba có theme generator và tổng hợp component/blocks; **khác** `ui.shadcn.com`.",
+      "research_tags": [
+        "REF",
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "shadcn_components",
+        "theme_tokens",
+        "theme",
+        "tokens",
+        "màu",
+        "shadcn.io",
+        "màu sắc",
+        "phối màu"
+      ],
+      "search_hint": "At www.shadcn.io, look for shadcn components / theme tokens in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "61",
+      "card": 21,
+      "slot": 1,
+      "original_label": "Typescale",
+      "original_domain": "typescale.com",
+      "original_url": "https://typescale.com/",
+      "canonical_label": "Typescale",
+      "canonical_url": "https://typescale.com/",
+      "aliases": [],
+      "category": "type_scale_tool",
+      "use_cases": [
+        "type_scale"
+      ],
+      "source_role": "type_scale_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://typescale.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://typescale.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Kết quả là điểm bắt đầu; kiểm EN/VI và kích thước trên viewport thật.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/typography-en-vi.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Công cụ lập tỷ lệ chữ/CSS theo scale.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "type_scale",
+        "Typescale"
+      ],
+      "search_hint": "At typescale.com, look for type scale in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "62",
+      "card": 21,
+      "slot": 2,
+      "original_label": "Utopia",
+      "original_domain": "utopia.fyi",
+      "original_url": "https://utopia.fyi/",
+      "canonical_label": "Utopia",
+      "canonical_url": "https://utopia.fyi/",
+      "aliases": [],
+      "category": "fluid_type_spacing_tool",
+      "use_cases": [
+        "fluid_typography",
+        "fluid_spacing"
+      ],
+      "source_role": "fluid_type_spacing_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://utopia.fyi/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://utopia.fyi/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Hướng dẫn fluid scale có phạm vi của Utopia; công thức `clamp()` cần thử min/max và tiếng Việt, không là luật toàn cục.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/typography-en-vi.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Fluid typography/spacing generator.",
+      "research_tags": [
+        "TOOL",
+        "RULE"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "fluid_typography",
+        "fluid_spacing",
+        "Utopia"
+      ],
+      "search_hint": "At utopia.fyi, look for fluid typography / fluid spacing in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "63",
+      "card": 21,
+      "slot": 3,
+      "original_label": "Modular Scale",
+      "original_domain": "modularscale.com",
+      "original_url": "https://www.modularscale.com/",
+      "canonical_label": "Modular Scale",
+      "canonical_url": "https://www.modularscale.com/",
+      "aliases": [],
+      "category": "type_ratio_calculator",
+      "use_cases": [
+        "type_scale",
+        "modular_ratio"
+      ],
+      "source_role": "type_ratio_calculator",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.modularscale.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.modularscale.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Ratio là công cụ, không thay visual QA.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/typography-en-vi.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Calculator modular type ratios.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "type_scale",
+        "modular_ratio",
+        "Modular Scale"
+      ],
+      "search_hint": "At www.modularscale.com, look for type scale / modular ratio in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "64",
+      "card": 22,
+      "slot": 1,
+      "original_label": "Squoosh",
+      "original_domain": "squoosh.app",
+      "original_url": "https://squoosh.app/",
+      "canonical_label": "Squoosh",
+      "canonical_url": "https://squoosh.app/",
+      "aliases": [],
+      "category": "image_compression_tool",
+      "use_cases": [
+        "image_optimization",
+        "format_conversion"
+      ],
+      "source_role": "image_compression_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://squoosh.app/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://squoosh.app/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Đo byte và chất lượng ở kích thước hiển thị; xử lý ảnh đầu vào có quyền dùng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Nén/đổi format ảnh ngay trong trình duyệt.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "image_optimization",
+        "format_conversion",
+        "image compression",
+        "nén ảnh",
+        "Squoosh"
+      ],
+      "search_hint": "At squoosh.app, look for image optimization / format conversion in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "65",
+      "card": 22,
+      "slot": 2,
+      "original_label": "iLoveIMG",
+      "original_domain": "iloveimg.com",
+      "original_url": "https://www.iloveimg.com/",
+      "canonical_label": "iLoveIMG",
+      "canonical_url": "https://www.iloveimg.com/",
+      "aliases": [],
+      "category": "batch_image_tool",
+      "use_cases": [
+        "image_resize",
+        "image_conversion"
+      ],
+      "source_role": "batch_image_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.iloveimg.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.iloveimg.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Với dữ liệu nội bộ cần cân nhắc upload bên thứ ba, không mặc định đưa ảnh riêng lên.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Resize/crop/convert ảnh theo lô trên web.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "image_resize",
+        "image_conversion",
+        "iLoveIMG"
+      ],
+      "search_hint": "At www.iloveimg.com, look for image resize / image conversion in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "66",
+      "card": 22,
+      "slot": 3,
+      "original_label": "Photopea",
+      "original_domain": "photopea.com",
+      "original_url": "https://www.photopea.com/",
+      "canonical_label": "Photopea",
+      "canonical_url": "https://www.photopea.com/",
+      "aliases": [],
+      "category": "raster_image_editor",
+      "use_cases": [
+        "image_editing",
+        "psd_editing"
+      ],
+      "source_role": "raster_image_editor",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.photopea.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.photopea.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Kiểm quyền asset đầu vào; giữ file nguồn và export tối ưu.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Trình biên tập ảnh PSD/raster trong browser.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "image_editing",
+        "psd_editing",
+        "Photopea"
+      ],
+      "search_hint": "At www.photopea.com, look for image editing / psd editing in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "67",
+      "card": 23,
+      "slot": 1,
+      "original_label": "Mockaroo",
+      "original_domain": "mockaroo.com",
+      "original_url": "https://www.mockaroo.com/",
+      "canonical_label": "Mockaroo",
+      "canonical_url": "https://www.mockaroo.com/",
+      "aliases": [],
+      "category": "mock_data_generator",
+      "use_cases": [
+        "placeholder_content",
+        "schema_mock_data"
+      ],
+      "source_role": "mock_data_generator",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.mockaroo.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.mockaroo.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Kiểm quota/terms nếu dùng API; đánh dấu data synthetic rõ ràng.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/prototype-playbook.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Tạo dataset mock theo schema/format và API.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "placeholder_content",
+        "schema_mock_data",
+        "Mockaroo"
+      ],
+      "search_hint": "At www.mockaroo.com, look for placeholder content / schema mock data in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "68",
+      "card": 23,
+      "slot": 2,
+      "original_label": "DummyJSON",
+      "original_domain": "dummyjson.com",
+      "original_url": "https://dummyjson.com/",
+      "canonical_label": "DummyJSON",
+      "canonical_url": "https://dummyjson.com/",
+      "aliases": [],
+      "category": "fake_api",
+      "use_cases": [
+        "placeholder_content",
+        "fake_rest_api"
+      ],
+      "source_role": "fake_api",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://dummyjson.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://dummyjson.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L?** Không dùng làm dữ liệu production; test failure/empty/latency ngoài happy path.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/prototype-playbook.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Fake REST API cho prototype.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "placeholder_content",
+        "fake_rest_api",
+        "DummyJSON"
+      ],
+      "search_hint": "At dummyjson.com, look for placeholder content / fake rest api in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "69",
+      "card": 23,
+      "slot": 3,
+      "original_label": "DiceBear",
+      "original_domain": "dicebear.com",
+      "original_url": "https://www.dicebear.com/",
+      "canonical_label": "DiceBear",
+      "canonical_url": "https://www.dicebear.com/",
+      "aliases": [],
+      "category": "avatar_generator",
+      "use_cases": [
+        "avatars",
+        "placeholder_content"
+      ],
+      "source_role": "avatar_generator",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.dicebear.com/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.dicebear.com/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L? từng style**; mã thư viện, style và output có thể khác license; giữ seed và provenance.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/image-sourcing.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Avatar generator/library/API với styles.",
+      "research_tags": [
+        "TOOL",
+        "TEMPLATE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "avatars",
+        "placeholder_content",
+        "DiceBear"
+      ],
+      "search_hint": "At www.dicebear.com, look for avatars / placeholder content in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "70",
+      "card": 24,
+      "slot": 1,
+      "original_label": "React Skeleton",
+      "original_domain": "github.com",
+      "original_url": "https://github.com/dvtng/react-loading-skeleton",
+      "canonical_label": "React Loading Skeleton",
+      "canonical_url": "https://github.com/dvtng/react-loading-skeleton",
+      "aliases": [
+        "React Skeleton"
+      ],
+      "category": "react_skeleton_component",
+      "use_cases": [
+        "loading",
+        "react_components"
+      ],
+      "source_role": "react_skeleton_component",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://github.com/dvtng/react-loading-skeleton",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://github.com/dvtng/react-loading-skeleton",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/dvtng/react-loading-skeleton/blob/master/LICENSE",
+      "allowed_use_scope": "**L✓** [repo license kiểu MIT](https://github.com/dvtng/react-loading-skeleton/blob/master/LICENSE), giữ notice; kiểm version và reduced motion.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React"
+      ],
+      "decision": "link_only_candidate; inspect a task-relevant item before recommending use",
+      "target_reference": "references/prototype-playbook.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Component skeleton tự thích nghi với text/layout; đây là repo `dvtng`, không phải khái niệm chung “ReactSkeleton”.",
+      "research_tags": [
+        "TEMPLATE",
+        "TOOL"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "loading",
+        "react_components",
+        "đang tải",
+        "React",
+        "thành phần React",
+        "React Loading Skeleton",
+        "React Skeleton"
+      ],
+      "search_hint": "At github.com, look for loading / react components in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "71",
+      "card": 24,
+      "slot": 2,
+      "original_label": "PatternFly",
+      "original_domain": "patternfly.org",
+      "original_url": "https://www.patternfly.org/",
+      "canonical_label": "PatternFly",
+      "canonical_url": "https://www.patternfly.org/",
+      "aliases": [],
+      "category": "enterprise_design_system",
+      "use_cases": [
+        "enterprise_components",
+        "b2b_patterns"
+      ],
+      "source_role": "enterprise_design_system",
+      "authority": "contextual_design_system",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://www.patternfly.org/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://www.patternfly.org/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L? code/assets**; thẩm quyền là hệ PatternFly, không áp thiết kế của họ lên mọi app.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "React"
+      ],
+      "decision": "candidate_for_later_pilot; link_only in this pack",
+      "target_reference": "references/library-selection.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Design system B2B/enterprise, patterns và React components.",
+      "research_tags": [
+        "RULE",
+        "TEMPLATE"
+      ],
+      "research_action": "Pilot",
+      "search_terms": [
+        "enterprise_components",
+        "b2b_patterns",
+        "PatternFly"
+      ],
+      "search_hint": "At www.patternfly.org, look for enterprise components / b2b patterns in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "72",
+      "card": 24,
+      "slot": 3,
+      "original_label": "GOV.UK",
+      "original_domain": "service.gov.uk",
+      "original_url": "https://design-system.service.gov.uk/",
+      "canonical_label": "GOV.UK Design System",
+      "canonical_url": "https://design-system.service.gov.uk/",
+      "aliases": [
+        "GOV.UK"
+      ],
+      "category": "service_design_system",
+      "use_cases": [
+        "service_forms",
+        "error_summary",
+        "government_service_patterns"
+      ],
+      "source_role": "service_design_system",
+      "authority": "contextual_design_system",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://design-system.service.gov.uk/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://design-system.service.gov.uk/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "unverified_per_item",
+      "license_verified": false,
+      "license_url": "unknown",
+      "allowed_use_scope": "**L? code/asset**; guidance có bối cảnh UK government; dùng như case có bằng chứng, đối chiếu chuẩn W3C.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/prototype-playbook.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Pattern/service guidance cho dịch vụ công Anh; thẻ minh họa [Error summary](https://design-system.service.gov.uk/components/error-summary/). URL ảnh `service.gov.uk` là rút gọn/sai.",
+      "research_tags": [
+        "RULE",
+        "REF"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "service_forms",
+        "error_summary",
+        "government_service_patterns",
+        "GOV.UK Design System",
+        "GOV.UK"
+      ],
+      "search_hint": "At design-system.service.gov.uk, look for service forms / error summary in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "73",
+      "card": 25,
+      "slot": 1,
+      "original_label": "WebAIM",
+      "original_domain": "webaim.org",
+      "original_url": "https://webaim.org/",
+      "canonical_label": "WebAIM",
+      "canonical_url": "https://webaim.org/",
+      "aliases": [],
+      "category": "accessibility_guidance",
+      "use_cases": [
+        "accessibility_guidance",
+        "contrast_check"
+      ],
+      "source_role": "accessibility_guidance",
+      "authority": "explanatory_guidance",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://webaim.org/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://webaim.org/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "https://www.w3.org/TR/WCAG22/",
+      "allowed_use_scope": "**L∅** Nguồn giáo dục, không phải tiêu chuẩn gốc; [WCAG 2.2 W3C](https://www.w3.org/TR/WCAG22/) là chuẩn ngoài ảnh để đối chiếu.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/uat-report-schema.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Tài liệu accessibility; thẻ minh họa [Contrast Checker](https://webaim.org/resources/contrastchecker/).",
+      "research_tags": [
+        "RULE",
+        "TOOL"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "accessibility_guidance",
+        "contrast_check",
+        "WebAIM"
+      ],
+      "search_hint": "At webaim.org, look for accessibility guidance / contrast check in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "74",
+      "card": 25,
+      "slot": 2,
+      "original_label": "WAVE",
+      "original_domain": "wave.webaim.org",
+      "original_url": "https://wave.webaim.org/",
+      "canonical_label": "WAVE",
+      "canonical_url": "https://wave.webaim.org/",
+      "aliases": [],
+      "category": "accessibility_test_tool",
+      "use_cases": [
+        "accessibility_qa",
+        "rendered_page_errors"
+      ],
+      "source_role": "accessibility_test_tool",
+      "authority": "provider_claim",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://wave.webaim.org/",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://wave.webaim.org/",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Kết quả tự động chỉ nêu vấn đề phát hiện; vẫn cần kiểm bàn phím, screen reader, nội dung và ngữ cảnh.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/uat-report-schema.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Công cụ kiểm tra lỗi accessibility trên trang render.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "accessibility_qa",
+        "rendered_page_errors",
+        "accessibility",
+        "kiểm khả năng truy cập",
+        "WAVE"
+      ],
+      "search_hint": "At wave.webaim.org, look for accessibility qa / rendered page errors in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    },
+    {
+      "id": "75",
+      "card": 25,
+      "slot": 3,
+      "original_label": "DevTools",
+      "original_domain": "developer.chrome.com",
+      "original_url": "https://developer.chrome.com/docs/devtools",
+      "canonical_label": "Chrome DevTools",
+      "canonical_url": "https://developer.chrome.com/docs/devtools",
+      "aliases": [
+        "DevTools"
+      ],
+      "category": "browser_developer_tool",
+      "use_cases": [
+        "interface_qa",
+        "runtime_inspection",
+        "performance"
+      ],
+      "source_role": "browser_developer_tool",
+      "authority": "vendor_or_project_documentation",
+      "access_status": "official_page",
+      "checked_at": "2026-10-07",
+      "overview_verified": true,
+      "evidence_url": "https://developer.chrome.com/docs/devtools",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://developer.chrome.com/docs/devtools",
+          "checked_at": "2026-10-07",
+          "surface": "official_page"
+        }
+      ],
+      "license_status": "not_applicable_reference_or_tool",
+      "license_verified": false,
+      "license_url": "not_applicable",
+      "allowed_use_scope": "**L∅** Dùng đo runtime/render thật; một điểm Lighthouse không chứng minh toàn flow đạt chuẩn.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/uat-report-schema.md",
+      "confidence": "identity_verified; rights_need_item_review",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Inspect DOM/CSS, Network, Performance, Lighthouse và thiết bị.",
+      "research_tags": [
+        "TOOL"
+      ],
+      "research_action": "Cập nhật",
+      "search_terms": [
+        "interface_qa",
+        "runtime_inspection",
+        "performance",
+        "inspect",
+        "kiểm giao diện",
+        "Chrome DevTools",
+        "DevTools"
+      ],
+      "search_hint": "At developer.chrome.com, look for interface qa / runtime inspection in navigation or site search if available; inspect the exact item page and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
+    }
+  ]
+}
