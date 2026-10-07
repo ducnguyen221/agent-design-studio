@@ -20,7 +20,7 @@ three looks it produces for everyone. Not because the model lacks taste — beca
 in the request forced a choice. There was no brief, no alternative to reject, no floor to
 clear, and no reviewer.
 
-This pack supplies all four. It is one skill and fourteen references: a router that decides
+This pack supplies all four. It is one skill and sixteen references: a router that decides
 what happens next, and playbooks that carry the actual craft — decision orders, thresholds,
 curve values, colour maths, and the parts that tell the agent to stop and build nothing.
 
@@ -106,6 +106,21 @@ For English/Vietnamese type decisions, use the
 [typography reference](skills/design-routing/references/typography-en-vi.md): contextual
 font shortlists, starting sizes and checks for real glyphs, loading and text resizing.
 
+For outside UI/UX examples, start with links in your brief and then use the
+[resource index](skills/design-routing/references/resource-index.md). It routes to a
+75-source [JSON catalog](skills/design-routing/resources/uiux-catalog.json). Shortlist
+two or three fitting sources, inspect relevant samples when needed, and choose a
+direction together at Step 4. The catalog is link-only: entry pages do not establish
+observed demos, runtime results, or permission to reuse code and assets. Optional local
+filtering: `python scripts/verify-resource-pack.py --query "loading" --stack React`;
+`--self-test` checks the pack without fetching sites.
+
+For a supplied UI image, link, or sample content that needs analysis before a build, use
+the [reference distillation guide](skills/design-routing/references/reference-distill.md)
+and its [Markdown template](skills/design-routing/templates/reference-design.md). It
+separates observation, inference and unknowns, then carries your chosen constraints into
+the design process. Analysis alone does not start a render gate.
+
 On whole-interface asks it usually triggers on its own:
 
 > "Build me a landing page for our scheduling tool."
@@ -115,7 +130,7 @@ On whole-interface asks it usually triggers on its own:
 When many design skills are installed, invoking `design-routing` directly is the reliable
 path.
 
-It deliberately stays out of narrow single-step work — critiquing an existing page,
+It deliberately stays out of other narrow single-step work — critiquing an existing page,
 converting an approved design to HTML, picking a palette, drawing charts, or tuning the
 layout of an existing deck. Those have better-suited tools, and this process would be
 overkill. Designing a new deck, report, or infographic as a whole surface is a different
@@ -139,12 +154,15 @@ skills/design-routing/
     ├── typography-en-vi.md     contextual font choices, type scale and EN/VI checks
     ├── motion-playbook.md      the full motion lifecycle, and what to refuse
     ├── motion-patterns.md      six purpose-led recipes with failure and reduced-motion states
+    ├── resource-index.md       source shortlist by task; catalog loads only on demand
+    ├── reference-distill.md    supplied sample to Markdown design reference
     ├── library-selection.md    choosing a dependency, or not adding one
     └── uat-report-schema.md    the scored review and the hard floor
 └── templates/
     ├── 06-motion-spec.md        traceable motion decision template
     ├── static-motion-demo.html  original CSS/WAAPI example
-    └── react-motion-demo.tsx    original React example; no extra motion package
+    ├── react-motion-demo.tsx    original React example; no extra motion package
+    └── reference-design.md      one-file reference analysis template
 ```
 
 The router loads only the current step's references, so context stays lean.

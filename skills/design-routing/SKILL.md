@@ -1,6 +1,6 @@
 ---
 name: design-routing
-description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Not for narrow single-step asks: critiquing an existing page, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, tuning the layout of an existing deck, or generating standalone images."
+description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Also use to distill a user-supplied UI image, URL, or sample content into a reusable Markdown design reference before building. Not for other narrow single-step asks: critiquing an existing page, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, tuning the layout of an existing deck, or generating standalone images."
 ---
 
 # Design Routing
@@ -11,6 +11,15 @@ step's references. The substance lives in `references/`.
 
 **Core rule: no step starts before the one before it produced its artifact.** Skipping
 forward is how interfaces end up beautiful and wrong, or correct and forgettable.
+
+## Reference-only preparation
+
+If the request is to distill a supplied image, URL or sample content into Markdown without
+building a new interface, load `references/reference-distill.md` and
+`templates/reference-design.md`. Produce one reference design Markdown file. This does not
+start the seven-step build or its gates. If implementation is requested later, carry the
+chosen constraints into Step 1–4. If the sample accompanies a build request, distill it
+as an input during intake, then continue the seven steps and normal rendered gate.
 
 ## Step 0 — Set the target mode
 
@@ -90,6 +99,13 @@ in `06-motion-spec.md`. `05-implementation.md` is the sole ledger of packages ac
 added, their bundle cost, license, and exit plan, linking back to the motion decision.
 For a starting point, `templates/static-motion-demo.html` and
 `templates/react-motion-demo.tsx` are original examples, not required dependencies.
+
+When an outside UI/UX source would help, start with the brief and any user-supplied links,
+then load `references/resource-index.md` and filter its catalog by task and stack. Keep at
+most three fitting links. Inspect a specific sample only when needed; report its direct
+URL, observation, fit and trade-off before the existing Step 4 direction gate. A source
+homepage is not an observed sample. The shortlist informs the three rendered directions;
+the user still chooses at that gate. Catalog links grant no code or asset rights.
 
 All artifacts live in one folder: `<project>/design/<YYYY-MM-DD>-<slug>/`.
 
