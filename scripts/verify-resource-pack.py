@@ -11,6 +11,7 @@ import tempfile
 import unicodedata
 from datetime import date
 from pathlib import Path
+from unittest.mock import patch
 from urllib.parse import urlsplit
 
 
@@ -20,6 +21,7 @@ INDEX = SKILL / "references/resource-index.md"
 ROUTER = SKILL / "SKILL.md"
 DISTILL = SKILL / "references/reference-distill.md"
 DISTILL_TEMPLATE = SKILL / "templates/reference-design.md"
+SYSTEM_SKILL = Path("skills/design-system/SKILL.md")
 REQUIRED = {
     "id", "card", "slot", "original_label", "original_url", "canonical_label",
     "canonical_url", "aliases", "category", "use_cases", "source_role",
@@ -32,12 +34,49 @@ PRIVATE = re.compile(r"(?i)(?:[a-z]:[/\\]users[/\\]|/users/[^/]+/|/home/[^/]+/|o
 ID = re.compile(r"\b(?:0[1-9]|[1-6][0-9]|7[0-5])\b")
 
 
-def _read(root: Path, relative: Path, errors: list[str]) -> str | None:
-    target = root / relative
+def _sensitive_segment(part: str) -> bool:
+    name = part.casefold().rstrip(" .")
+    return (
+        name in {".secret", "auth.json", "oauth_creds.json"}
+        or name.startswith(".env")
+        or name.endswith((".credentials.json", ".pem", ".key"))
+    )
+
+
+def _safe_target(root: Path, relative: Path, errors: list[str]) -> Path | None:
     try:
-        if not target.resolve().is_relative_to(root.resolve()):
+        resolved_root = root.resolve()
+        if any(_sensitive_segment(part) for part in resolved_root.parts):
+            errors.append("sensitive root not allowed")
+            return None
+        current = root
+        for part in relative.parts:
+            if part in {".", ".."} or part.rstrip(" .") != part or _sensitive_segment(part):
+                errors.append(f"unsafe path segment: {relative.as_posix()}")
+                return None
+            current = current / part
+            if current.is_symlink() or (hasattr(current, "is_junction") and current.is_junction()):
+                errors.append(f"link not allowed: {relative.as_posix()}")
+                return None
+        target = current
+        resolved = target.resolve()
+        if not resolved.is_relative_to(resolved_root):
             errors.append(f"path escapes root: {relative.as_posix()}")
             return None
+        if any(_sensitive_segment(part) for part in resolved.relative_to(resolved_root).parts):
+            errors.append(f"sensitive target not allowed: {relative.as_posix()}")
+            return None
+        return target
+    except (OSError, RuntimeError, ValueError) as exc:
+        errors.append(f"cannot inspect {relative.as_posix()}: {exc.__class__.__name__}")
+        return None
+
+
+def _read(root: Path, relative: Path, errors: list[str]) -> str | None:
+    target = _safe_target(root, relative, errors)
+    if target is None:
+        return None
+    try:
         return target.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
         errors.append(f"cannot read {relative.as_posix()}: {exc.__class__.__name__}")
@@ -205,16 +244,25 @@ def verify(root: Path) -> list[str]:
         errors.append("missing router route: references/resource-index.md")
     if router is not None and ("references/reference-distill.md" not in router or "templates/reference-design.md" not in router):
         errors.append("missing reference distill route")
+    if router is not None and "agent-design-studio:design-system" not in router:
+        errors.append("missing Design System skill route")
+    system_skill = _read(root, SYSTEM_SKILL, errors)
+    if system_skill is not None and not all(f"`{mode}`" in system_skill for mode in ("create", "extract", "audit", "extend")):
+        errors.append("Design System skill missing mode")
     distill = _read(root, DISTILL, errors)
     template = _read(root, DISTILL_TEMPLATE, errors)
     if distill is not None:
         for guide in ("direction-gate.md", "prototype-playbook.md", "typography-en-vi.md", "color-protocol.md", "image-sourcing.md", "motion-playbook.md"):
             if guide not in distill:
                 errors.append(f"reference distill missing canonical guide: {guide}")
+        if "Design System handoff" not in distill or "design-system" not in distill:
+            errors.append("reference distill missing Design System handoff route")
     if template is not None:
         for marker in ("## Sources and access", "## What the material shows", "Observed evidence", "Design inference to test", "Unknown / how to check", "## Adapt for this project"):
             if marker not in template:
                 errors.append(f"reference template missing: {marker}")
+        if "## Design System handoff" not in template or "**Selected source IDs:**" not in template:
+            errors.append("reference template missing Design System handoff")
     for readme in (Path("README.md"), Path("README.vi.md")):
         text = _read(root, readme, errors)
         if text is not None and ("sixteen references" if readme.name == "README.md" else "mười sáu tài liệu tham chiếu") not in text:
@@ -223,8 +271,8 @@ def verify(root: Path) -> list[str]:
             for link in (INDEX.as_posix(), CATALOG.as_posix(), DISTILL.as_posix(), DISTILL_TEMPLATE.as_posix(), "scripts/verify-resource-pack.py"):
                 if link not in text:
                     errors.append(f"{readme}: missing resource link {link}")
-    reference_dir = root / SKILL / "references"
-    if len(list(reference_dir.glob("*.md"))) != 16:
+    reference_dir = _safe_target(root, SKILL / "references", errors)
+    if reference_dir is not None and len(list(reference_dir.glob("*.md"))) != 16:
         errors.append("reference count must be 16")
     return errors
 
@@ -266,6 +314,24 @@ def self_test(root: Path) -> list[str]:
     errors = verify(root)
     if errors:
         return ["valid fixture failed: " + "; ".join(errors)]
+    test_path = root / SYSTEM_SKILL
+    opened: list[Path] = []
+    actual_read = Path.read_text
+    actual_is_symlink = Path.is_symlink
+
+    def mark_link(path: Path) -> bool:
+        return path == test_path or actual_is_symlink(path)
+
+    def spy_read(path: Path, *args, **kwargs) -> str:
+        if path == test_path:
+            opened.append(path)
+        return actual_read(path, *args, **kwargs)
+
+    probe_errors: list[str] = []
+    with patch.object(Path, "is_symlink", mark_link), patch.object(Path, "read_text", spy_read):
+        _read(root, SYSTEM_SKILL, probe_errors)
+    if opened or not any("link not allowed" in item for item in probe_errors):
+        errors.append("negative Design System skill link was read")
     records = _records(root, errors)
     if [item["id"] for item in query(records, use_case="app_flow")] != ["18"]:
         errors.append("query app_flow must select Mobbin, not website galleries")
@@ -283,14 +349,24 @@ def self_test(root: Path) -> list[str]:
         errors.append("no-match query must return an empty list")
     with tempfile.TemporaryDirectory(prefix="resource-pack-") as temp:
         target = Path(temp)
-        for relative in (CATALOG, INDEX, ROUTER, DISTILL_TEMPLATE, Path("README.md"), Path("README.vi.md")):
+        for relative in (CATALOG, INDEX, ROUTER, DISTILL_TEMPLATE, SYSTEM_SKILL, Path("README.md"), Path("README.vi.md")):
+            source = _safe_target(root, relative, errors)
+            if source is None:
+                return errors
             destination = target / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
-            destination.write_bytes((root / relative).read_bytes())
-        for relative in (root / SKILL / "references").glob("*.md"):
-            if relative.name != INDEX.name:
-                destination = target / SKILL / "references" / relative.name
-                destination.write_bytes(relative.read_bytes())
+            destination.write_bytes(source.read_bytes())
+        source_dir = _safe_target(root, SKILL / "references", errors)
+        if source_dir is None:
+            return errors
+        for source_file in source_dir.glob("*.md"):
+            if source_file.name != INDEX.name:
+                relative = SKILL / "references" / source_file.name
+                source = _safe_target(root, relative, errors)
+                if source is None:
+                    return errors
+                destination = target / relative
+                destination.write_bytes(source.read_bytes())
         catalog_file = target / CATALOG
         original = json.loads(catalog_file.read_text(encoding="utf-8"))
 
@@ -345,11 +421,19 @@ def self_test(root: Path) -> list[str]:
         if not any("missing router route" in item for item in verify(target)):
             errors.append("negative router route did not fail")
         router.write_text(before, encoding="utf-8")
+        router.write_text(before.replace("agent-design-studio:design-system", "design-system-missing"), encoding="utf-8")
+        if not any("missing Design System skill route" in item for item in verify(target)):
+            errors.append("negative Design System route did not fail")
+        router.write_text(before, encoding="utf-8")
         template = target / DISTILL_TEMPLATE
         template_before = template.read_text(encoding="utf-8")
         template.write_text(template_before.replace("Observed evidence", "Unlabeled notes"), encoding="utf-8")
         if not any("reference template missing: Observed evidence" in item for item in verify(target)):
             errors.append("negative reference template did not fail")
+        template.write_text(template_before, encoding="utf-8")
+        template.write_text(template_before.replace("## Design System handoff", "## Other handoff"), encoding="utf-8")
+        if not any("reference template missing Design System handoff" in item for item in verify(target)):
+            errors.append("negative Design System handoff did not fail")
         template.write_text(template_before, encoding="utf-8")
     return errors
 

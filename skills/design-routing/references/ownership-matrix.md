@@ -18,8 +18,8 @@ generate color, or both rewrite the same component. The rule:
 | Structure | `wireframe-playbook.md` | — | A visual skill restyling the wireframe |
 | Direction | `direction-gate.md` | A style library supplying raw material | Any tool that picks the winner without a human or a recorded policy |
 | Visual taste / anti-generic | `taste-calibration.md`, or the host's `taste-canon` | A style-knowledge library | Two taste authorities in one project |
-| Color and brand assets | `brand-asset-protocol.md` + `color-protocol.md` | — | Any other step inventing a hex value |
-| Tokens / design system | Step 5, after Gate 1 | Existing tokens read at intake | Generating tokens before the direction is chosen |
+| New palette candidates and brand assets for a UI build | `brand-asset-protocol.md` + `color-protocol.md` | `design-system` checks token authority | Any other step inventing a hex value |
+| Reusable tokens / Design System contract | `agent-design-studio:design-system`; Step 5 owns the timing after Gate 1 | Existing product token/component source read at intake | Creating a second canonical source or promoting a proposal before owner/reviewer checks |
 | Implementation | The host's `codegen`, or direct authorship; in `existing-product` mode the product's own codebase | A library-selection reference | Two agents writing the same component in one pass |
 | Motion | `motion-playbook.md` | — | Motion added during implementation without the motion step |
 | Review and fixes | `uat-report-schema.md`, or the host's `visual-reviewer` | A static linter; a motion-only reviewer | A second reviewer editing files in parallel |
@@ -45,9 +45,12 @@ wastes both. Ask:
 5. Any reference you like — a URL, a product, a feeling.
 6. Any hard constraint: must-include elements, forbidden elements, deadline, platform.
 
-If the reply never comes, do not idle. Fill the gaps with explicit assumptions, label
-each one `ASSUMPTION:` in the brief, and keep moving. Rendered work provokes better
-answers than more questions do.
+If the reply never comes, record unanswered choices as `pending` in the brief. Continue
+independent read-only research and label reversible working assumptions
+`ASSUMPTION:`. A missing reference choice, brand direction, asset right or approval
+cannot become an approved token, direction or Design System through silence. Resume
+the dependent design work when the user chooses or a pre-existing session grant
+explicitly covers that decision.
 
 ### Read before you ask
 
@@ -82,6 +85,10 @@ Date: YYYY-MM-DD
 
 **Existing material.** Tokens / components / brand assets found, with paths. "None" is
 a valid answer, and it changes Step 4.
+**Reference selection.** User link/image/template and decision to use/reject it, or
+`pending`; proposed samples (at most three) are not selected by silence.
+**Output scope.** Reference / screen / flow / system; name the surface and target.
+**Asset rights.** Known allowed use or `unknown`; viewing does not grant redistribution.
 **Constraints.** Must include, must avoid, platform, deadline.
 **Assumptions.** Each labeled, each falsifiable.
 **Out of scope.** What this explicitly is not.

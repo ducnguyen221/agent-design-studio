@@ -4,9 +4,10 @@
 
 **Your agent can already write UI. This teaches it to design.**
 
-A seven-step design process an AI coding agent runs end to end — intake, fidelity,
-wireframe, three real directions, a token system, motion, review. Every step leaves an
-artifact on disk. Two steps stop and wait for a person.
+A seven-step UI design process an AI coding agent runs end to end — intake, fidelity,
+wireframe, three real directions, a token system, motion, review. A separate Design System
+skill creates, extracts, audits, and extends systems owned by a product. Both leave
+traceable artifacts; the UI process keeps its two human decision gates.
 
 🔗 **[ducnguyen221.github.io/agent-design-studio](https://ducnguyen221.github.io/agent-design-studio)** ·
 🇻🇳 **[Tiếng Việt](README.vi.md)**
@@ -20,13 +21,15 @@ three looks it produces for everyone. Not because the model lacks taste — beca
 in the request forced a choice. There was no brief, no alternative to reject, no floor to
 clear, and no reviewer.
 
-This pack supplies all four. It is one skill and sixteen references: a router that decides
-what happens next, and playbooks that carry the actual craft — decision orders, thresholds,
-curve values, colour maths, and the parts that tell the agent to stop and build nothing.
+This pack supplies all four through two skills. `design-routing` is the UI workflow and its
+sixteen references carry the craft — decision orders, thresholds, curve values, colour
+maths, and the parts that tell the agent to stop and build nothing. `design-system` owns
+reusable system work across products and codebases.
 
 **Every capability is a slot.** If your setup has a stronger specialist for a step, the
-router uses it; if not, the built-in playbook runs. No second pack is required to get the
-whole process.
+router uses it; if not, the built-in playbook runs. The two skills have separate jobs:
+the router owns a UI build or reference-only analysis; the Design System skill owns
+long-lived system work.
 
 ## The seven steps
 
@@ -89,6 +92,7 @@ codex plugin add agent-design-studio@agent-design-studio
 ```bash
 git clone https://github.com/ducnguyen221/agent-design-studio
 cp -r agent-design-studio/skills/design-routing ~/.agents/skills/
+cp -r agent-design-studio/skills/design-system ~/.agents/skills/
 ```
 
 No package dependencies and no build step. A browser is what turns renders into verified
@@ -120,6 +124,23 @@ the [reference distillation guide](skills/design-routing/references/reference-di
 and its [Markdown template](skills/design-routing/templates/reference-design.md). It
 separates observation, inference and unknowns, then carries your chosen constraints into
 the design process. Analysis alone does not start a render gate.
+
+For a reusable product Design System, invoke `design-system` directly. It has four modes:
+`create` from selected references or brand material, `extract` from a codebase,
+`audit` an existing system against implementation, and `extend` an approved system.
+The result starts as a run-scoped proposal/report; existing canonical sources stay in
+charge until the owner confirms a promotion and a reviewer checks it.
+
+Use this handoff when reference analysis should inform a reusable system: first select
+references with the user, distill them with the guide and
+[reference template](skills/design-routing/templates/reference-design.md), then pass the
+selected source IDs, observed/inferred/unknown claims, rights status, and owner questions
+to `design-system`. A reference shortlist or distill does not approve brand decisions.
+For the product-owned folder contract, see
+[system-contract.md](skills/design-system/references/system-contract.md); start at
+[design-index.md](skills/design-system/templates/design-index.md), then use the
+[component spec](skills/design-system/templates/component-spec.md) and
+[audit report](skills/design-system/templates/audit-report.md) as needed.
 
 On whole-interface asks it usually triggers on its own:
 
@@ -165,7 +186,32 @@ skills/design-routing/
     └── reference-design.md      one-file reference analysis template
 ```
 
-The router loads only the current step's references, so context stays lean.
+```
+skills/design-system/
+├── SKILL.md                    create / extract / audit / extend router
+├── references/
+│   ├── system-contract.md      canonical ownership, lifecycle and promotion rules
+│   ├── source-code-audit.md    scoped source evidence and coverage
+│   └── token-contract.md       supported token subset and existing-source rules
+└── templates/
+    ├── design-index.md         system entrypoint, canonical map and ownership
+    ├── component-spec.md       reusable component contract
+    └── audit-report.md         run-scoped evidence, coverage and drift
+```
+
+`design-routing` retains its sixteen references and its UI build/reference-only scope.
+`design-system` is a separate entrypoint for product-owned, reusable system work. Each skill
+loads only the references for its current task, so context stays lean.
+
+## Verify a Design System contract
+
+From this repository, run `python scripts/verify-design-system.py --self-test` for
+the contract tests, or `python scripts/verify-design-system.py` for the skill pack.
+For a product index, use `--root <project> --manifest <relative-manifest.json>`;
+all manifest paths are relative to that project root. `--tokens <relative.json>`
+checks the supported DTCG subset; `--legacy-tokens <relative.json>` only checks a
+legacy map. These checks never fetch external pointers or generate CSS. Structural
+success does not verify rendering, source coverage, accessibility or asset rights.
 
 ## This site was designed by the process
 

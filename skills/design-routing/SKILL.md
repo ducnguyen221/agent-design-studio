@@ -12,6 +12,27 @@ step's references. The substance lives in `references/`.
 **Core rule: no step starts before the one before it produced its artifact.** Skipping
 forward is how interfaces end up beautiful and wrong, or correct and forgettable.
 
+## Choose the output before the seven steps
+
+Read the brief and existing brand/code material first. Record whether the requested
+output is a reference, screen, flow, or reusable system. Ask once for the missing
+audience, task, surface, constraints, reference/template preference and asset rights.
+Offer at most three specific samples when useful; let the user send a link or image and
+record the source they select or reject. If a missing choice could change the brand or
+system, keep selection `pending` and continue only independent read-only work. Silence
+is not approval and does not authorize invented brand rules.
+
+| Output | Route |
+| --- | --- |
+| Reference analysis only | Distill one Markdown below and stop. |
+| Design System from selected reference/brand material | Distill with a conditional Design System handoff, then use `agent-design-studio:design-system` `create`; no screen directions or build. |
+| Design System from source code | Declare repo/commit/dirty baseline, allowed scope and a run output directory; use `agent-design-studio:design-system` `extract`. Keep source and approved DS unchanged. No screen directions or build. |
+| Audit or extend an existing Design System | Use `agent-design-studio:design-system` `audit` or `extend` according to the requested change. |
+| New screen or flow | Continue Step 0 and the seven steps below. |
+
+The Design System skill owns its long-lived contract and canonical map. This router
+owns the timing and gates of a UI build; it does not write a second canonical system.
+
 ## Reference-only preparation
 
 If the request is to distill a supplied image, URL or sample content into Markdown without
@@ -19,7 +40,9 @@ building a new interface, load `references/reference-distill.md` and
 `templates/reference-design.md`. Produce one reference design Markdown file. This does not
 start the seven-step build or its gates. If implementation is requested later, carry the
 chosen constraints into Step 1–4. If the sample accompanies a build request, distill it
-as an input during intake, then continue the seven steps and normal rendered gate.
+as an input during intake, then continue the seven steps and normal rendered gate. If
+the user asks for a reusable Design System, include the conditional handoff and route
+to the Design System skill.
 
 ## Step 0 — Set the target mode
 
@@ -75,7 +98,7 @@ which for one reference below is earlier than the step that writes its artifact.
 | 2 | Fidelity — how finished this needs to be, and why | `choosing-fidelity.md`, then `image-sourcing.md` if images are content | `01-fidelity.md` |
 | 3 | Wireframe — structure only, deliberately unfinished | `wireframe-playbook.md` | `02-wireframe.html` + `.png` |
 | 4 | Direction gate — three genuinely different real renders, each with up to two static motion hypotheses | `direction-gate.md`; `typography-en-vi.md` when EN/VI type is a direction decision | `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, `03-direction-decision.md` |
-| 5 | Design system + static build, confirmed in a browser before animation | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md`; `typography-en-vi.md` for EN/VI font and scale choices | `04-design-system/{tokens.json,components.md,assets-manifest.md}`, `05-implementation.md` |
+| 5 | Design System delta + static build, confirmed in a browser before animation | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md`; `typography-en-vi.md` for EN/VI font and scale choices; `agent-design-studio:design-system` `create/extend` for the system contract | `04-design-system/` proposal and canonical pointer, `05-implementation.md` |
 | 6 | Motion pass — decide and implement only after the static page works | `motion-playbook.md`, then `references/motion-patterns.md` and `templates/06-motion-spec.md` | `06-motion-spec.md` |
 | 7 | Review loop | `uat-report-schema.md`; `typography-en-vi.md` for EN/VI type verification | `07-uat-report.md` |
 
@@ -100,6 +123,14 @@ added, their bundle cost, license, and exit plan, linking back to the motion dec
 For a starting point, `templates/static-motion-demo.html` and
 `templates/react-motion-demo.tsx` are original examples, not required dependencies.
 
+At Step 5, pass the approved direction, selected reference handoff, brand/asset rights,
+surface, current token/component source and target Design System baseline to
+`agent-design-studio:design-system` `create` or `extend`. Keep its draft/delta and
+evidence in the run's `04-design-system/`; existing product CSS/TS/Figma sources retain
+their declared authority. The router can implement the static screen, but only the
+Design System skill authors the system contract. Promote approved deltas to the stable
+system after the Step 7 ship review; unresolved owner/reviewer decisions stay pending.
+
 When an outside UI/UX source would help, start with the brief and any user-supplied links,
 then load `references/resource-index.md` and filter its catalog by task and stack. Keep at
 most three fitting links. Inspect a specific sample only when needed; report its direct
@@ -107,7 +138,10 @@ URL, observation, fit and trade-off before the existing Step 4 direction gate. A
 homepage is not an observed sample. The shortlist informs the three rendered directions;
 the user still chooses at that gate. Catalog links grant no code or asset rights.
 
-All artifacts live in one folder: `<project>/design/<YYYY-MM-DD>-<slug>/`.
+UI run artifacts live in `<project>/design/<YYYY-MM-DD>-<slug>/`. A reusable Design
+System lives at the product's declared canonical location, normally
+`<project>/design-system/` for a new product. The run holds proposals and pointers;
+it never silently replaces the canonical source.
 
 ## The two gates
 

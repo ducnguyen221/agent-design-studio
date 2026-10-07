@@ -1,10 +1,15 @@
 # Color protocol
 
-Step 5, second half. Derive the palette instead of picking one. Runs after the brand
-asset protocol and before any component is styled.
+Step 5, second half of a new UI build. Derive a **palette candidate** after the brand
+asset protocol and before any component is styled. Existing-product token values
+remain as-is unless the owner approves a change; an extract/audit does not run this
+protocol to rewrite its colors.
 
-Output: the `color` section of `04-design-system/tokens.json`, plus one written
-justification sentence.
+Output: a palette candidate with one written justification sentence per key color,
+source and intended role, passed to `agent-design-studio:design-system` `create/extend`.
+That skill declares the canonical token source and any delta. The run may retain a
+legacy `04-design-system/tokens.json` map for existing examples, but it is not
+DTCG data or a second canonical source.
 
 ## The rule
 
@@ -81,7 +86,9 @@ chroma on screen borrows that memory.
 
 ### 3 — Justify
 
-Write **one sentence** per key color, into `tokens.json` comments and the handoff:
+Write **one sentence** per key color in the handoff. If the chosen canonical token
+source is DTCG JSON, the Design System skill can place the rationale in
+`$description` or `$extensions`; JSON has no comments:
 
 > "Primary sampled from the ochre in the client's logo, chroma lowered to 0.09 so large
 > fills read as ink rather than plastic."
@@ -91,7 +98,13 @@ Write **one sentence** per key color, into `tokens.json` comments and the handof
 This is a gate, not a ritual. It is the cheapest available detector of a palette that
 came from nowhere.
 
-## Token output
+## Legacy example of a palette candidate
+
+The JSON below illustrates the previous `_why` map shape used by older runs. Its
+CSS color strings and `_why` entries are **not** valid `$value` tokens in the
+supported DTCG subset. New systems follow the Design System skill's
+`references/token-contract.md`; do not relabel this map as DTCG or copy it into a
+new canonical `tokens.json`.
 
 ```json
 {

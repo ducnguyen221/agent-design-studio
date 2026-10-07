@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "system": {"id": "anonymous-source", "version": "0.1.0", "status": "approved"},
+  "canonical": {
+    "brand": {"kind": "file", "path": "design-system/brand/identity.md"},
+    "tokens": {"kind": "file", "path": "src/tokens.css"},
+    "components": {"kind": "repo-path", "path": "src/Button.js"},
+    "patterns": {"kind": "file", "path": "design-system/patterns/action-feedback.md"},
+    "screens": {"kind": "file", "path": "design-system/surfaces/web/screens/index.md"},
+    "rights": {"kind": "file", "path": "design-system/assets/manifest.md"}
+  },
+  "sections": [
+    {"id": "brand", "path": "design-system/brand/identity.md", "status": "as-is"},
+    {"id": "colors", "path": "design-system/foundations/colors.md", "status": "as-is"},
+    {"id": "button", "path": "design-system/components/button.md", "status": "as-is"},
+    {"id": "feedback", "path": "design-system/patterns/action-feedback.md", "status": "as-is"},
+    {"id": "entry", "path": "design-system/surfaces/web/screens/index.md", "status": "as-is"},
+    {"id": "rights", "path": "design-system/assets/manifest.md", "status": "as-is"}
+  ]
+}
