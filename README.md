@@ -198,3 +198,7 @@ Thank you to their authors.
 ## License
 
 [MIT](LICENSE) © 2026 Duc Nguyen
+
+## 🤝 ACD Ecosystem Integration
+
+Khai báo vai của repo trong hệ thống nhiều repo ACD (Role, Upstream, Downstream, Bundles, Handoff) tại [ECOSYSTEM.md](ECOSYSTEM.md).
