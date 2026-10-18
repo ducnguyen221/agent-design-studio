@@ -195,9 +195,15 @@ is separate from the MIT license of its [official agent skills](https://github.c
 
 Thank you to their authors.
 
+## Author
+
+**Nguyễn Quang Đức** (Tobi) — founder and CEO of KPIM and co-founder of COMPA Class; Data/AI practitioner and instructor in Vietnam.
+
+Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducnguyen221) · Contact: ducnguyen.ams@gmail.com
+
 ## License
 
-[MIT](LICENSE) © 2026 Duc Nguyen
+[MIT](LICENSE) © 2026 Nguyễn Quang Đức
 
 ## 🤝 ACD Ecosystem Integration
 

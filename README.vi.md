@@ -194,6 +194,12 @@ khác với MIT của [skill GSAP chính thức](https://github.com/greensock/gs
 
 Cảm ơn các tác giả.
 
+## Tác giả
+
+**Nguyễn Quang Đức** (Tobi) — nhà sáng lập, CEO KPIM và đồng sáng lập COMPA Class; chuyên gia Data/AI và giảng viên công nghệ tại Việt Nam.
+
+Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducnguyen221) · Liên hệ: ducnguyen.ams@gmail.com
+
 ## Giấy phép
 
-[MIT](LICENSE) © 2026 Duc Nguyen
+[MIT](LICENSE) © 2026 Nguyễn Quang Đức
