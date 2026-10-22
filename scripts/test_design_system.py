@@ -6,6 +6,7 @@ import unittest
 import json
 import io
 import os
+import shutil
 import re
 import sys
 import time
@@ -1306,6 +1307,28 @@ class CliV3Tests(unittest.TestCase):
                 page = (package / 'viewer.html').read_text(encoding='utf-8')
                 counts = tuple(page.count(f'data-{kind}="') for kind in ('token', 'component', 'asset'))
                 self.assertEqual(counts, expected)
+
+    def test_template_readme_is_one_paragraph_without_headings(self):
+        readme = (TEMPLATE.parent / 'README.md').read_text(encoding='utf-8')
+        self.assertEqual([line for line in readme.splitlines() if line.lstrip().startswith('#')], [])
+
+    def test_template_readme_survives_blank_line_formatting(self):
+        # A formatter that puts a blank line around every line must not break the minimal profile.
+        with tempfile.TemporaryDirectory() as tmp:
+            package = Path(tmp) / 'pkg'
+            shutil.copytree(TEMPLATE.parent, package)
+            lines = (TEMPLATE.parent / 'README.md').read_text(encoding='utf-8').splitlines()
+            (package / 'README.md').write_text('\n\n'.join(lines) + '\n', encoding='utf-8')
+            errors, _ = v3.verify_package(package, 'minimal')
+            self.assertEqual([e for e in errors if e.startswith('minimal_profile_violation')], [])
+
+    def test_cover_radius_goes_through_a_class(self):
+        for package in (TEMPLATE.parent, FIXTURE.parent):
+            with self.subTest(package=package.name):
+                page = (package / 'components/Cover/preview.html').read_text(encoding='utf-8')
+                self.assertNotIn(' rx="', page)
+                self.assertIn('.radius-md { rx: 8px; }', page)
+                self.assertIn('class="fill-accent radius-md"', page)
 
 
 class BoundedInputTests(unittest.TestCase):

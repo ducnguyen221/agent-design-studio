@@ -55,11 +55,13 @@ spacing:
 
 Sample Studio is a plain, calm starter system with a single light theme. Pages sit on `bg`, panels on `surface`, and the one blue accent `accent` is kept for the primary action, so the eye always finds the next step first.
 
+To grow this starter into profile `full`, add three sections to README.md: Content fundamentals (how copy is written: tone, casing, person and length, with two good and two bad example lines), Visual foundations (how colour, type, spacing, corners and surfaces are used, each naming the tokens that carry it) and Iconography (the icon set, its stroke and size, and the source and licence of every file).
+
 - Read order: Claude Design → README.md → tokens.json → components/*/README.md; other agents → DESIGN.md → tokens.json → canonical-map.json → components/
 - Owner: Sample Studio maintainers
 - Version: 0.1.0
 - Status: draft
-- Canonical by domain: brand → README.md; tokens → tokens.json; components → canonical-map.json (components)
+- Canonical by domain: brand → README.md; tokens → tokens.json; components → none yet (Cover only)
 
 ## Colors
 

@@ -65,7 +65,7 @@ Fixture Studio is an original, quiet system for tests: a light and a dark theme,
 
 Start here: [Brand book](README.md), [Button](components/Button/README.md), [Action feedback](patterns/ActionFeedback.md), [Web surface rules](surfaces/web/rules.md), [Icons](assets/Icons/README.md).
 
-Paths are relative to the fixture project root, one level above this folder. Extract and audit must leave this baseline unchanged. Intentional drift: the accent token here differs from the accent custom property in src/tokens.css. An audit must report both and keep the owner decision pending. Runtime, accessibility and token-to-render parity stay unverified until a browser run.
+Markdown links are relative to this folder (design-system/); only repo paths such as src/Button.js are relative to the project root, one level above it. Extract and audit must leave this baseline unchanged. Intentional drift: the accent token here differs from the accent custom property in src/tokens.css. An audit must report both and keep the owner decision pending. Runtime, accessibility and token-to-render parity stay unverified until a browser run.
 
 ## Colors
 
