@@ -3407,6 +3407,67 @@ class ViewerGuardTests(unittest.TestCase):
             self.assertEqual(safe(target), target, target)
 
 
+class SizeCapAndContractDocTests(unittest.TestCase):
+    """TK10: one condition prints one code; long contract references carry a short table of contents."""
+
+    def _codes(self, root):
+        errors, warnings = v3.verify_package(Path(root), 'full')
+        return errors, warnings
+
+    def test_index_over_cap_prints_one_code(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            doc = json.loads((Path(directory) / 'design-system.json').read_text(encoding='utf-8'))
+            doc['padding'] = 'x' * 600_000
+            put(directory, 'design-system.json', doc)
+            errors, warnings = self._codes(directory)
+        sized = [e for e in errors if e.startswith('invalid_index_value: design-system.json: size:')]
+        self.assertEqual(len(sized), 1, errors)
+        self.assertRegex(sized[0], r'size: \d+ > 512000$')
+        self.assertFalse([w for w in warnings if 'design-system.json' in w], warnings)
+
+    def test_canonical_map_over_cap_prints_one_code(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            doc = json.loads((Path(directory) / 'canonical-map.json').read_text(encoding='utf-8'))
+            doc['decisions'] = [{'note': 'x' * 600_000}]
+            put(directory, 'canonical-map.json', doc)
+            errors, warnings = self._codes(directory)
+        sized = [e for e in errors if e.startswith('invalid_manifest: canonical-map.json: size:')]
+        self.assertEqual(len(sized), 1, errors)
+        self.assertFalse([w for w in warnings if 'canonical-map.json' in w], warnings)
+
+    def test_other_kept_file_over_cap_still_warns(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put_d(directory, 'CHANGELOG.md', '# Changes\n\n' + 'line of text\n' * 45_000)
+            errors, warnings = self._codes(directory)
+        self.assertTrue(any(w.startswith('kept_file_large: CHANGELOG.md') for w in warnings), warnings)
+
+    def test_contract_docs_have_contents(self):
+        folder = ROOT / 'skills/design-system/references'
+        checked = 0
+        for path in sorted(folder.glob('*.md')):
+            lines = path.read_text(encoding='utf-8').splitlines()
+            if len(lines) <= 100:
+                continue
+            checked += 1
+            head = lines[:25]
+            self.assertIn('## Contents', head, path.name)
+            start = head.index('## Contents')
+            entries = []
+            for line in lines[start + 1:]:
+                if line.startswith('#'):
+                    break
+                if line.startswith('- '):
+                    entries.append(line[2:].split(' — ')[0].strip())
+            headings = {line[3:].strip() for line in lines if line.startswith('## ')}
+            self.assertTrue(1 <= len(entries) <= 12, (path.name, len(entries)))
+            for name in entries:
+                self.assertIn(name, headings, (path.name, name))
+        self.assertGreaterEqual(checked, 2)
+
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'skills/design-system/tests/fixture/design-system/design-system.json'
 TEMPLATE = ROOT / 'skills/design-system/templates/brand-v3/design-system.json'

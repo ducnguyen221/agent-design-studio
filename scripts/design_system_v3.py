@@ -1595,7 +1595,7 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
 
     kept_exempt = ('assets/', 'fonts/')
     for rel, raw in sorted(files.items()):
-        if rel not in skip and not rel.startswith(kept_exempt) and rel not in {'tokens.json', 'viewer.html', 'README.md'} \
+        if rel not in skip and not rel.startswith(kept_exempt) and rel not in {'tokens.json', 'viewer.html', 'README.md', 'design-system.json', 'canonical-map.json'} \
                 and not rel.endswith('/preview.html') and raw > CAP_TOKENS:
             warnings.append(f'kept_file_large: {_label(rel)}: {raw} > {CAP_TOKENS}')
     total = sum(_stored_size(rel, raw) for rel, raw in files.items() if rel not in skip)

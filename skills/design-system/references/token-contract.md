@@ -47,7 +47,7 @@ Example (three colour tokens, with an alias and an `oklch()` value):
 
 ## Limits
 
-Each count above its cap is one `limit_exceeded`; one condition has exactly one code. File sizes follow the "Size caps" section of `system-contract.md`.
+Each count above its cap is one `limit_exceeded`, except the alias chain, which is `alias_too_deep`; one condition has exactly one code. File sizes follow the "Size caps" section of `system-contract.md`.
 
 | Limit | Value | Code when exceeded |
 |---|---|---|

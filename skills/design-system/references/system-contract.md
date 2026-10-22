@@ -1,5 +1,17 @@
 # System contract: the design-system package
 
+## Contents
+
+Find a section: `grep -n "^## " system-contract.md`
+- Package tree — building or changing the folder layout
+- Required, conditional, optional — checking what one entry must hold
+- Read order — deciding which file an agent opens first
+- Section budget — adding Markdown files outside components
+- Canonical map — writing canonical-map.json
+- Agent adapters live in the parent folder — wiring AGENTS.md, CLAUDE.md, GEMINI.md
+- Refused and generated paths — a path is refused or generated
+- Code index — looking up an error code
+
 One folder, `design-system/`, serves two readers: Claude Design (package format `v:3`, read on 2026-10-22, research preview) and any coding agent. This file is the folder tree and the rules around it. Token grammar: `token-contract.md`. `DESIGN.md` shape: `design-md-spec.md`. Why this shape: ADR 0001 and ADR 0002 under `docs/architecture/adr/`.
 
 Errors print as `<code>: <path>[: detail]` on stderr; warnings print as `WARN <code>: <path>[: detail]` on stdout; paths are relative to the package root with `/` separators. Size caps and how they are measured: section "Size caps" below. Every code, with its level and path, is listed once more in "Code index" at the end.
@@ -68,11 +80,15 @@ All caps are decimal: 64 KB = 64 000 bytes, 256 KB = 256 000, 512 KB = 512 000, 
 - Text files (`.md`, `.mdx`, `.json`, `.html`, `.css`, `.svg`, `.txt`, `.js`, `.ts`, `.yml`, `.yaml`, `.csv`): the cap is checked on the raw bytes of the file. The escaping the page adds when it stores text is not modelled.
 - Binary files (every file under `fonts/`, and every asset that is not a text file): the cap is checked on the stored-size estimate `stored = 4 * ceil(raw / 3)`. A font therefore passes up to 750 000 raw bytes and an asset up to 9 000 000. The error detail prints both numbers: `<raw> raw, <stored> stored > <cap>`.
 - Package total: the sum of the stored sizes of every file in the package (text raw, binary estimate) above 14 000 000 gives `WARN package_total_large: <n> > 14000000`. A warning, not an error, because in the `files` layout the page keeps the files outside its own table.
+- `kept_file_large` is measured on the raw bytes of every file it covers, binary files outside `fonts/` and `assets/` included; no stored-size estimate applies to it.
+- `design-system.json` and `canonical-map.json` are read in full up to 512 000 bytes. A larger file cannot be checked, so it is an error (`invalid_index_value` or `invalid_manifest`, detail `size: <n> > 512000`) and never also a `kept_file_large` warning.
+- `DESIGN.md` is scanned up to 512 000 bytes; a heading that starts after that point counts as missing.
 
 | Cap | Applies to | Code |
 |---|---|---|
 | 200 000 | `README.md` | `readme_too_large` |
 | 512 000 | `tokens.json`; `viewer.html` (target 300 000); any other file kept without UI | `limit_exceeded`; `viewer_too_large`, warning `viewer_large`; warning `kept_file_large` |
+| 512 000 | `design-system.json`, `canonical-map.json` | `invalid_index_value`, `invalid_manifest` (detail `size: <n> > 512000`) |
 | 256 000 | every `preview.html` | `preview_too_large` |
 | 64 000 | `components/<Comp>/README.md` | warning `component_readme_large` |
 | 1 000 000 stored | `fonts/<file>` | `font_file_too_large` |
@@ -92,9 +108,21 @@ Text and surface pairs are declared in `canonical-map.json` under `checks.contra
 
 ### Cover folder is bare
 
-`components/Cover/` holds `preview.html` and nothing else. Any sibling (`README.md`, `Cover.d.ts`, `index.html`), or a `@ds-bundle` header in `components/bundle.js` that lists `Cover`, turns the cover into an ordinary component and the system loses its cover. The verifier reports `cover_not_bare: components/Cover/<file>` (detail `bundle header lists Cover` for the bundle case).
+`components/Cover/` holds `preview.html` and nothing else. Any sibling (`README.md`, `Cover.d.ts`, `index.html`), or a `@ds-bundle` header in `components/bundle.js` that lists `Cover`, turns the cover into an ordinary component and the system loses its cover. The verifier reports `cover_not_bare: components/Cover/<file>`; for the bundle case the path is `components/bundle.js` with the detail `bundle header lists Cover`.
 
 Cover rule: line 1 is `<!-- @dsCard height=N -->` with N from 240 to 360 (outside it: `WARN card_marker_height`); the frame is a fixed 960 by N; exactly one inline `<svg>` (any other count: `cover_shape: components/Cover/preview.html: <n> svg`) plus two text elements, the name and a one-line tagline (not machine-checked); no gradient, shadow or motion; every `fill`, `stroke` and `rx` goes through a class bound to a token.
+
+### Viewer rules
+
+`viewer.html` is a static page the build writes; the verifier regenerates it and matches the bytes. These are the rules of the generator, so that a reader knows why the page looks as it does.
+
+- The cover SVG and any SVG asset pass an allow-list: drawing elements, text, gradients, clip and mask, simple filters. No `script`, `style`, `title`, `image`, `a`, `animate` or `foreignObject`, no comment or CDATA section, and `href` or `url()` may point only at an `#id` of the same file. Cover ids get the prefix `cover-` so that they cannot clash with ids of the page. An SVG that fails the list is shown by name only and the build prints `WARN viewer_asset_skipped: <path>`.
+- An image is embedded when it is at most 65 536 bytes, and all embedded images together stay under 250 000 characters of data URI. Anything beyond is listed by name with the same warning.
+- The root `README.md` is not shown. A component README is cut at 64 000 bytes. In shown text `=` and `//` are written as numeric entities. A Markdown link survives only when it points at a relative file inside the package, after percent-decoding; any other link keeps its text and loses its target. The page makes no network call.
+- `data-token`, `data-component` and `data-asset` count the objects of the package: tokens; every folder under `components/` except `Cover`, `lib` and `src`; every file under `assets/` except `assets/<Group>/README.md`. The verifier counts the same way (`viewer_coverage`).
+- The stale and coverage checks run only when `design-system.json` and `tokens.json` are valid. A page over 512 000 bytes is reported as `viewer_too_large` and nothing else about it.
+- The content-security meta is `default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'`. A meta policy cannot carry `frame-ancestors`, `sandbox` or `report-uri`, so none is written. A stricter policy will change this line and the verifier together.
+- The page lists the files of the package but not itself, and its own comments are neutral.
 
 ### Recognised, never generated
 
@@ -175,6 +203,8 @@ Files the page generates itself are `generated_file_present: <path>`: `manifest.
 
 Sensitive or escaping paths (`.env*`, `*.pem`, `credentials`, a path leaving the package, a link) are refused with `refused_sensitive_path` and never opened. The refused-path check runs right after that one and before any read.
 
+A link or junction at `viewer.html` or `DESIGN.md` is `refused_sensitive_path`; a folder with either name makes the build print `input_error: PermissionError`. The build writes in place, not atomically, and follows hard links, so run it on a package you own.
+
 ## Code index
 
 Every code the package verifier can print, with its level. `tokens.json` codes are defined in `token-contract.md` and `DESIGN.md` codes in `design-md-spec.md`; they are listed here by name only. Detail text after the path is free; the path itself is fixed.
@@ -188,20 +218,28 @@ Every code the package verifier can print, with its level. `tokens.json` codes a
 | `missing_required_file` | error | `<path>` |
 | `unsupported_format_version` | error | `design-system.json: v` |
 | `missing_index_key` | error | `design-system.json: <key>` |
-| `invalid_index_value` | error | `design-system.json: <key>` (`layout`, `title`, `namespace`, `createdOnFiles.v`, `createdOnFiles.at`) |
+| `invalid_index_value` | error | `design-system.json: <key>` (`layout`, `title`, `namespace`, `createdOnFiles.v`, `createdOnFiles.at`, `size`) |
 | `index_marker_missing` | warning | `design-system.json: createdOnFiles` |
 | `readme_missing_section` | error | `README.md: <heading>` |
 | `readme_too_large` | error | `README.md: <n> > 200000` |
 | `readme_forbidden_section` | error | `README.md: <heading>` |
 | `readme_unknown_token` | warning | `README.md: <name>` |
-| `token_shape`, `token_name_invalid`, `duplicate_name`, `missing_usage`, `invalid_value`, `forbidden_color_syntax`, `missing_target`, `reference_cycle`, `alias_too_deep`, `limit_exceeded`, `unsupported_family` | error | `tokens.json: ...` as in `token-contract.md` |
+| `token_shape`, `token_name_invalid`, `duplicate_name`, `missing_usage`, `invalid_value`, `forbidden_color_syntax`, `missing_target`, `reference_cycle`, `alias_too_deep`, `limit_exceeded`, `unsupported_family` | error (`missing_usage` on a text style: warning) | `tokens.json: ...` as in `token-contract.md` |
 | `font_file_missing`, `font_file_invalid`, `font_file_too_large` | error | `fonts/<file>` |
 | `design_md_missing`, `design_md_stale`, `design_md_section_missing`, `design_md_section_order`, `design_md_broken_ref`, `design_md_overview_incomplete` | error | `DESIGN.md[: detail]` as in `design-md-spec.md` |
 | `design_md_color_passthrough` | warning (build) | `<token name>` |
-| `invalid_manifest`, `invalid_canonical`, `invalid_external`, `invalid_status`, `invalid_id`, `invalid_path`, `missing_path` | error | `canonical-map.json: <json path>` |
-| `viewer_missing`, `viewer_stale`, `viewer_missing_csp` | error | `viewer.html` |
+| `invalid_manifest`, `invalid_canonical`, `invalid_external`, `invalid_status`, `invalid_id`, `invalid_path`, `missing_path` | error | `canonical-map.json: <json path>` (`invalid_manifest` also `canonical-map.json: size: <n> > 512000`) |
+| `viewer_missing`, `viewer_stale` | error | `viewer.html` |
+| `viewer_missing_csp` | error | `viewer.html` (no content-security meta whose policy holds `default-src 'none'`) |
 | `viewer_too_large` | error | `viewer.html: <n> > 512000` |
-| `viewer_external_ref`, `viewer_forbidden_tag`, `viewer_inline_handler`, `viewer_forbidden_api`, `viewer_a11y`, `viewer_coverage`, `viewer_leak` | error | `viewer.html: <detail>` |
+| `viewer_external_ref` | error | `viewer.html: src/href/url() leaves the page` |
+| `viewer_forbidden_tag` | error | `viewer.html: <tag>`, one of `iframe`, `frameset`, `frame`, `object`, `embed`, `portal`, `form`, `base`, `applet`, `link rel=stylesheet`, `meta refresh` |
+| `viewer_inline_handler` | error | `viewer.html: on* attribute` |
+| `viewer_forbidden_api` | error | `viewer.html: <name>`, one of `fetch`, `XMLHttpRequest`, `import(`, `importScripts`, `eval(`, `new Function`, `WebSocket`, `EventSource`, `serviceWorker`, `sendBeacon`, `new Worker`, `window.open`, `document.write` |
+| `viewer_a11y` | error | `viewer.html: lang missing`, `title missing`, `h1 count <n>` or `img alt missing` |
+| `viewer_coverage` | error | `viewer.html: <attribute> <found> != <expected>` |
+| `viewer_leak` | error | `viewer.html: <label>`, one of `user profile path`, `home path`, `file URL`, `local host name`, `loopback address`, `workstation folder`, `network share path` |
+| `viewer_asset_skipped` | warning (build) | `<path>` |
 | `viewer_large` | warning | `viewer.html: <n> > 300000` |
 | `cover_missing` | error | `components/Cover/preview.html` |
 | `cover_shape` | error | `components/Cover/preview.html: <n> svg` |

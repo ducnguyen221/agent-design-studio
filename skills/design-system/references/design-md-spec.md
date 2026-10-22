@@ -1,5 +1,15 @@
 # DESIGN.md: what this skill emits and what the verifier checks
 
+## Contents
+
+Find a section: `grep -n "^## " design-md-spec.md`
+- Source — checking which upstream versions are pinned
+- Sections in order — writing or reviewing the body of DESIGN.md
+- Front matter keys we emit — reading or changing the generated block
+- Mapping from tokens.json — working out why a value came out as it did
+- What the verifier checks — reading a design_md error
+- Not checked — judging how far a pass can be trusted
+
 `DESIGN.md` is the package's entry file for agents (ADR 0002). Its front matter is generated from `tokens.json`; its body is written by hand. This file pins the shape the generator produces and the verifier checks. It is written in our own words; it is not a copy of the upstream specification.
 
 ## Source
@@ -50,7 +60,19 @@ Serialisation rules, so that regeneration is byte-stable and the verifier can ch
 
 - Two-space indentation; no blank lines, no comments, no timestamps inside the block.
 - A key is written bare when it matches `^[A-Za-z_][A-Za-z0-9_-]*$` and is not, ignoring case, one of the YAML words `true`, `false`, `yes`, `no`, `on`, `off`, `y`, `n`, `null`, `~`; otherwise it is double-quoted (token names may start with a digit, contain `.`, or spell one of those words).
-- String values are always double-quoted and escaped the JSON way: `\` becomes `\\`, `"` becomes `\"`, a control character becomes `\n`, `\t` or `\u00XX`; nothing else is escaped. A YAML double-quoted scalar reads exactly these escapes, so a reader with a YAML parser and the string-equality check of the verifier agree on the bytes. The same escaping applies to a quoted key. Numbers are bare. `version: alpha` is the only bare string.
+- String values are always double-quoted. The escapes are exactly these, and a YAML double-quoted scalar reads them all, so a reader with a YAML parser and the string-equality check of the verifier agree on the bytes. The same escaping applies to a quoted key. `version: alpha` is the only bare string.
+
+  | Character | Written as |
+  |---|---|
+  | backslash, double quote | `\\`, `\"` |
+  | line feed, tab | `\n`, `\t` |
+  | carriage return, backspace, form feed | `\u000d`, `\u0008`, `\u000c` |
+  | any other C0 control, DEL (0x7F), C1 controls (0x80 to 0x9F), U+2028, U+2029, U+FFFE, U+FFFF, a lone surrogate | `\uXXXX`, lower-case hex |
+
+- Numbers are bare and written as plain decimals, never with an exponent: a YAML 1.1 reader takes `1e-05` for a string. A string that holds only a number is normalised: `"+4"` becomes `"4px"`, `"007"` becomes `"7px"`, `"12.50"` becomes `"12.5px"`, `"0.0"` and `"-0"` become `"0"`. A `fontWeight` or `lineHeight` string that holds only a number becomes a bare number.
+- A text style with none of the four emitted fields is written `name: {}`, so that `{typography.name}` in the body still resolves.
+- Colour channels are rounded with `round(c * 255)`, which rounds halves to the even neighbour. A browser rounds halves up, so a few percentage inputs differ by one step (`rgb(30%, 0%, 0%)` gives `#4c0000`). The verifier uses the same function, so it never reports a difference between the generator and itself.
+- A byte order mark at the start of `DESIGN.md` is dropped when the front matter is rewritten, with or without a block after it.
 - Within each group, entries keep the order of `tokens.json`; typography entries keep group order, then style order.
 - Line endings are `\n`; the block ends with `---\n`.
 
@@ -98,7 +120,7 @@ Run by `verify-design-system.py` as part of `verify_package` (the `DESIGN.md` en
 | `design_md_broken_ref` | a `{colors.x}`, `{typography.x}`, `{rounded.x}` or `{spacing.x}` in the body (outside fenced code) names a key that is not in the front matter |
 | `design_md_overview_incomplete` | the Overview section lacks a `- Read order:`, `- Owner:` or `- Status:` line |
 
-`build-design-system.py --design-md --check` reports the same `design_md_stale` and exits 1 without writing. `build-design-system.py --design-md` replaces only the front matter block and leaves the body untouched; on a file without a front matter block it prepends one.
+`build-design-system.py --design-md --check` reports the same `design_md_stale` and exits 1 without writing; on a package without `DESIGN.md` it reports `design_md_missing: DESIGN.md`. `build-design-system.py --design-md` replaces only the front matter block and leaves the body untouched; on a file without a front matter block it prepends one.
 
 ## Not checked
 
