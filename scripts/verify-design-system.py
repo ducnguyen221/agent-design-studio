@@ -189,8 +189,19 @@ def verify_pack(root: Path) -> list[str]:
     return errors
 
 
-def _load(root: Path, name: str) -> object:
-    return json.loads(safe_path(root, name).read_text(encoding='utf-8'))
+class InputError(ValueError):
+    """A command-line argument that cannot be used; printed as ``input_error: <flag>: <reason>``."""
+
+
+def _load(root: Path, name: str, flag: str = 'input') -> object:
+    try:
+        with safe_path(root, name).open('rb') as handle:
+            raw = handle.read(v3.CAP_JSON + 1)
+    except (ValueError, RuntimeError) as exc:
+        raise InputError(f'{flag}: {exc}') from None
+    if len(raw) > v3.CAP_JSON:
+        raise InputError(f'{flag}: file larger than {v3.CAP_JSON} bytes')
+    return json.loads(raw.decode('utf-8'))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -225,22 +236,26 @@ def main(argv: list[str] | None = None) -> int:
             errors.extend(package_errors)
             warnings.extend(package_warnings)
         if args.tokens:
-            errors.extend(v3.validate_tokens_v3(_load(args.root, args.tokens), args.package))
+            errors.extend(v3.validate_tokens_v3(_load(args.root, args.tokens, '--tokens'), args.package))
         if args.dtcg:
-            errors.extend(validate_tokens(_load(args.root, args.dtcg)))
+            errors.extend(validate_tokens(_load(args.root, args.dtcg, '--dtcg')))
         if args.manifest:
             warnings.append('deprecated_flag: --manifest')
         if map_file:
-            errors.extend(v3.validate_canonical_map(_load(args.root, map_file), args.package or args.root))
+            errors.extend(v3.validate_canonical_map(_load(args.root, map_file, '--canonical-map' if args.canonical_map else '--manifest'),
+                                      args.package or args.root))
         if args.legacy_tokens:
-            legacy = _load(args.root, args.legacy_tokens)
+            legacy = _load(args.root, args.legacy_tokens, '--legacy-tokens')
             if not isinstance(legacy, dict) or not legacy:
                 errors.append('invalid_legacy: expected nonempty map')
             else:
                 print('legacy: readable map; DTCG validation not applied')
         if args.package is None and not any((args.tokens, args.dtcg, map_file, args.legacy_tokens)):
             errors.extend(verify_pack(args.root))
-    except (OSError, ValueError, RuntimeError) as exc:
+    except InputError as exc:
+        print(f'input_error: {exc}', file=sys.stderr)
+        return 1
+    except (OSError, ValueError, RuntimeError, RecursionError) as exc:
         print(f'input_error: {type(exc).__name__}', file=sys.stderr)
         return 1
     for warning in warnings:

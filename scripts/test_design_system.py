@@ -4,7 +4,9 @@ import tempfile
 import unittest
 import json
 import io
+import os
 import sys
+import time
 from contextlib import redirect_stderr, redirect_stdout
 from unittest.mock import patch
 from pathlib import Path
@@ -102,7 +104,7 @@ class PathTests(unittest.TestCase):
                 self.assertEqual(verifier.main(['--root', directory, '--legacy-tokens', 'tokens.json']), 0)
                 self.assertEqual(verifier.main(['--root', directory, '--dtcg', '.env']), 1)
             self.assertIn('legacy:', output.getvalue())
-            self.assertEqual(errors.getvalue().strip(), 'input_error: ValueError')
+            self.assertEqual(errors.getvalue().strip(), 'input_error: --dtcg: excluded_path')
             for document in [None, {}, {'schemaVersion': '1', 'system': {'id': 'a', 'version': '1', 'status': 'bad'},
                              'canonical': {'tokens': {'path': '../outside'}}},
                              {'sections': [{'id': 'same'}, {'id': 'same'}]}, {'status': []}]:
@@ -496,8 +498,20 @@ class TokensV3Tests(unittest.TestCase):
             self.assertEqual(v3.validate_tokens_v3(doc), [])
             doc['type']['fonts'] = [{'file': '../escape.woff2'}, {'file': '.env'}]
             errors = v3.validate_tokens_v3(doc, Path(directory))
-            self.assertIn('font_file_missing: fonts/../escape.woff2', errors)
-            self.assertIn('font_file_missing: fonts/.env', errors)
+            self.assertIn('refused_sensitive_path: fonts/../escape.woff2', errors)
+            self.assertIn('refused_sensitive_path: fonts/.env', errors)
+            self.assertNotIn('font_file_missing: fonts/.env', errors)
+
+    def test_font_sensitive_or_escaping_paths_are_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            doc = base_files()['tokens.json']
+            for name in ('../escape.woff2', '.env', 'x.pem', 'sub/../../secret.txt', 'C:/Windows/win.ini', '..\\.env',
+                         'credentials.woff2', '%2e%2e/.env', 'dist/a.woff2'):
+                doc['type']['fonts'] = [{'file': name}]
+                with self.subTest(name=name):
+                    self.assertEqual(v3.validate_tokens_v3(doc, Path(directory)), [f'refused_sensitive_path: fonts/{name}'])
+            doc['type']['fonts'] = [{'file': 'plain-missing.woff2'}]
+            self.assertEqual(v3.validate_tokens_v3(doc, Path(directory)), ['font_file_missing: fonts/plain-missing.woff2'])
 
     def test_font_file_invalid_and_too_large(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -719,6 +733,26 @@ class ContrastTests(unittest.TestCase):
         errors, _ = self.pairs('#999999', '#ffffff', large=True)
         self.assertEqual(errors, ['contrast_below_min: canonical-map.json: checks.contrast[0]@light: 2.85 < 3.0'])
         self.assertEqual(self.pairs('#777777', '#ffffff', min=4.0), ([], []))
+
+    def test_contrast_pins_wcag_channel_coefficients(self):
+        # Each pure channel on white: (1 + 0.05) / (coefficient + 0.05); swapping R and B changes both numbers.
+        self.assertEqual(round(v3.contrast_ratio('#0000ff', '#ffffff'), 2), 8.59)
+        self.assertEqual(round(v3.contrast_ratio('#ff0000', '#ffffff'), 2), 4.00)
+        self.assertEqual(round(v3.contrast_ratio('#00ff00', '#ffffff'), 2), 1.37)
+        self.assertEqual(round(v3.contrast_ratio('#ffffff', '#0000ff'), 2), 8.59)
+
+    def test_theme_inheritance_takes_the_first_theme_not_the_nearest_or_last(self):
+        ids = ['a', 'b', 'c']
+        token = {'name': 'x', 'value': {'a': '#111111', 'b': '#222222'}}
+        self.assertEqual(v3._theme_value(token, ids, 'c'), '#111111')
+        self.assertEqual(v3._theme_value({'name': 'y', 'value': {'c': '#333333'}}, ids, 'a'), '#333333')
+        self.assertEqual(v3._theme_value({'name': 'y', 'value': {'b': '#222222', 'c': '#333333'}}, ids, 'a'), '#222222')
+        self.assertIsNone(v3._theme_value({'name': 'z', 'value': {}}, ids, 'a'))
+        doc = tok(color=[color('fg', {'a': '#ffffff', 'b': '#111111'}), color('bg', '#ffffff')])
+        doc['color']['themes'] = [{'id': t, 'name': t} for t in ids]
+        errors, _ = v3.check_contrast(doc, [{'fg': 'fg', 'bg': 'bg'}])
+        self.assertEqual(errors, ['contrast_below_min: canonical-map.json: checks.contrast[0]@a: 1.00 < 4.5',
+                                  'contrast_below_min: canonical-map.json: checks.contrast[0]@c: 1.00 < 4.5'])
 
     def test_parse_color_forms(self):
         near = lambda a, b: all(abs(x - y) < 0.01 for x, y in zip(a, b))
@@ -1208,6 +1242,19 @@ class CliV3Tests(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertIn('font_file_missing: fonts/Brand.woff2', err)
 
+    def test_cli_unreadable_input_names_the_flag(self):
+        with tempfile.TemporaryDirectory() as directory:
+            put(directory, 'tokens.json', base_files()['tokens.json'])
+            put(directory, 'big.json', {'pad': 'x' * 512000})
+            code, out, err = cli('--root', directory, '--tokens', str(Path(directory, 'tokens.json')))
+            self.assertEqual((code, out), (1, ''))
+            self.assertTrue(err.startswith('input_error: --tokens: '), err)
+            self.assertNotIn('ValueError', err)
+            code, out, err = cli('--root', directory, '--canonical-map', '../x.json')
+            self.assertEqual((code, out, err.strip()), (1, '', 'input_error: --canonical-map: path_escape'))
+            code, out, err = cli('--root', directory, '--tokens', 'big.json')
+            self.assertEqual((code, out, err.strip()), (1, '', 'input_error: --tokens: file larger than 512000 bytes'))
+
     def test_cli_legacy_pack_still_runs_without_flags(self):
         code, out, err = cli('--root', str(Path(__file__).resolve().parents[1]))
         self.assertIn(code, (0, 1))
@@ -1220,6 +1267,156 @@ class CliV3Tests(unittest.TestCase):
     def test_template_minimal_passes(self):
         self.assertTrue(TEMPLATE.is_file())
         errors, _ = v3.verify_package(TEMPLATE.parent, 'minimal')
+        self.assertEqual(errors, [])
+
+
+class BoundedInputTests(unittest.TestCase):
+    """Hostile input stays cheap: sizes are capped before any pattern runs, and every pattern runs in linear time."""
+    BUDGET = 1.0
+
+    def fast(self, call, label, budget=None):
+        start = time.perf_counter()
+        result = call()
+        elapsed = time.perf_counter() - start
+        self.assertLess(elapsed, budget or self.BUDGET, f'{label}: {elapsed:.2f} s')
+        return result
+
+    def test_overview_label_search_is_linear(self):
+        for filler in ('\n' * 2000, ' \n' * 1000):
+            errors = self.fast(lambda: v3.validate_design_md_structure('## Overview\n' + filler), 'overview blank lines')
+            for label in ('Read order', 'Owner', 'Status'):
+                self.assertIn(f'design_md_overview_incomplete: DESIGN.md: {label}', errors)
+        valid = design_md(overview='\n' * 2000 + OVERVIEW + '\n' * 2000)
+        self.assertEqual(self.fast(lambda: v3.validate_design_md_structure(valid), 'valid overview with gaps'), [])
+
+    def test_heading_scan_is_linear(self):
+        for text in ('# a' + ' ' * 2000 + 'x', '# a' + '\t ' * 1000 + 'x', '# a' + '#' * 2000 + 'x', '#' + ' ' * 2000):
+            self.fast(lambda: v3._headings(text), 'headings')
+            self.fast(lambda: v3.validate_readme(text, len(text), 'full', set()), 'readme headings')
+            self.fast(lambda: v3.validate_design_md_structure('## Overview\n' + text), 'design headings')
+        self.assertEqual(v3._headings('# a' + ' ' * 2000 + 'x'), [(1, 'a' + ' ' * 2000 + 'x')])
+
+    def test_colour_function_split_is_linear(self):
+        for value in ('rgb(' + ' ' * 2000 + 'x', 'rgb(' + ' ' * 2000, 'hsl(' + '\t' * 2000 + ')x', 'oklch(' + ' ' * 2000 + '1 2 3))'):
+            self.assertEqual(self.fast(lambda: v3._classify_color(value), 'classify colour'), 'invalid')
+            with self.assertRaises(ValueError) as caught:
+                self.fast(lambda: v3.parse_color(value), 'parse colour')
+            self.assertEqual(str(caught.exception), 'invalid_color')
+        self.assertEqual(v3._classify_color('  RGB( 1 2 3 )  '), 'ok')
+        self.assertEqual(v3._classify_color('rgb(1 2 3))'), 'invalid')
+        self.assertEqual(v3._classify_color('rgb (1 2 3)'), 'invalid')
+
+    def test_number_and_length_patterns_are_linear(self):
+        digits = '1' * 12000
+        self.assertFalse(self.fast(lambda: v3._valid_length(digits + 'x'), 'length'))
+        self.assertFalse(self.fast(lambda: v3._valid_line_height(digits + 'x'), 'line height'))
+        with self.assertRaises(ValueError):
+            self.fast(lambda: v3.parse_color('rgb(' + digits + 'x 0 0)'), 'colour number')
+        errors = self.fast(lambda: v3.validate_tokens_v3(tok(spacing=[color('s', digits + 'x')])), 'spacing token')
+        self.assertEqual(errors, ['invalid_value: tokens.json: spacing.s'])
+        for ok in ('12', '12.', '12.5', '.5', '+1.5px', '-3rem', 0, '0'):
+            self.assertTrue(v3._valid_length(ok), ok)
+        for bad in ('1..2', '.', '1e', 'px', '1 px', ''):
+            self.assertFalse(v3._valid_length(bad), bad)
+
+    def test_readme_paragraph_split_is_linear(self):
+        text = 'one paragraph of words\n' + ' \n' * 20000 + 'tail'
+        errors, _ = self.fast(lambda: v3.validate_readme(text, len(text), 'minimal', set()), 'minimal readme')
+        self.assertEqual(errors, ['minimal_profile_violation: README.md: 2 paragraphs, expected 1'])
+
+    def test_many_distinct_findings_stay_linear(self):
+        refs = ' '.join('{colors.k%d}' % i for i in range(20000))
+        errors = self.fast(lambda: v3.check_design_md_refs('---\n---\n' + refs, set()), 'broken refs')
+        self.assertEqual(len(errors), 20000)
+        urls = ' '.join(f'https://unpkg.com/p{i}' for i in range(9500))
+        page = '<!-- @dsCard height=300 -->\n<svg></svg>\n' + urls
+        found = self.fast(lambda: v3.validate_preview(page, 'components/Cover/preview.html'), 'unpinned urls')
+        self.assertEqual(len([e for e in found if e.startswith('unpinned_cdn')]), 9500)
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n<svg></svg>\n' + urls)
+            errors, _ = self.fast(lambda: v3.verify_package(Path(directory)), 'package with many findings', 2.0)
+        self.assertEqual(len([e for e in errors if e.startswith('unpinned_cdn')]), 9500)
+
+    def test_long_alias_chain_does_not_crash(self):
+        count = 3000
+        chain = [color(f'a{i}', '{a%d}' % (i + 1)) for i in range(count)] + [color(f'a{count}', '#000000')]
+        errors = self.fast(lambda: v3.validate_tokens_v3(tok(color=chain)), 'alias chain', 2.0)
+        self.assertIn('limit_exceeded: tokens.json: color.tokens: 3001 > 600', errors)
+        ok = [color(f'a{i}', '{a%d}' % (i + 1)) for i in range(15)] + [color('a15', '#000000')]
+        self.assertEqual(v3.validate_tokens_v3(tok(color=ok)), [])
+
+    def test_hostile_json_does_not_crash(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, design__system__json='[' * 100000, tokens__json='{"a":' * 60000, canonical__map__json='[' * 100000)
+            errors = v3.verify_package(Path(directory))[0]
+        self.assertIn('invalid_index_value: design-system.json: json', errors)
+        self.assertIn('token_shape: tokens.json: json', errors)
+        self.assertIn('invalid_manifest: canonical-map.json: json', errors)
+
+    def read_sizes(self, directory):
+        reads = []
+        real_open = io.open
+
+        class Spy:
+            def __init__(self, handle):
+                self.handle = handle
+
+            def __enter__(self):
+                self.handle.__enter__()
+                return self
+
+            def __exit__(self, *exc):
+                return self.handle.__exit__(*exc)
+
+            def read(self, size=-1):
+                reads.append(size)
+                return self.handle.read(size)
+
+            def __getattr__(self, name):
+                return getattr(self.handle, name)
+
+        def spy_open(file, mode='r', *args, **kwargs):
+            handle = real_open(file, mode, *args, **kwargs)
+            return Spy(handle) if 'b' in mode else handle
+
+        with patch('io.open', spy_open):
+            result = v3.verify_package(Path(directory))
+        return result, reads
+
+    def test_reads_are_bounded_before_any_check(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, README__md='## Content fundamentals\n' + 'x' * 300000)
+            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'][0].update(usage='x' * 600000))
+            edit_json(directory, 'design-system.json', lambda d: d.update(pad='x' * 600000))
+            edit_json(directory, 'canonical-map.json', lambda d: d.update(pad='x' * 600000))
+            put(directory, 'components/Cover/preview.html', '<!-- @dsCard height=300 -->\n<svg></svg>\n' + 'x' * 300000)
+            sizes = {n: os.path.getsize(Path(directory, n)) for n in
+                     ('README.md', 'tokens.json', 'design-system.json', 'canonical-map.json', 'components/Cover/preview.html')}
+            (errors, _warnings), reads = self.read_sizes(directory)
+        self.assertTrue(reads)
+        self.assertTrue(all(0 < size <= 512001 for size in reads), sorted(set(reads)))
+        self.assertIn(f'readme_too_large: README.md: {sizes["README.md"]} > 200000', errors)
+        self.assertIn(f'limit_exceeded: tokens.json: file size: {sizes["tokens.json"]} > 512000', errors)
+        self.assertIn(f'invalid_index_value: design-system.json: size: {sizes["design-system.json"]} > 512000', errors)
+        self.assertIn(f'invalid_manifest: canonical-map.json: size: {sizes["canonical-map.json"]} > 512000', errors)
+        self.assertIn(f'preview_too_large: components/Cover/preview.html: {sizes["components/Cover/preview.html"]} > 256000', errors)
+
+    def test_oversized_design_md_is_read_in_part_and_warned(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, DESIGN__md=design_md(extra='\n' + 'x' * 600000))
+            size = os.path.getsize(Path(directory, 'DESIGN.md'))
+            (errors, warnings), reads = self.read_sizes(directory)
+        self.assertTrue(all(0 < n <= 512001 for n in reads), sorted(set(reads)))
+        self.assertEqual(errors, [])
+        self.assertIn(f'kept_file_large: DESIGN.md: {size} > 512000', warnings)
+
+    def test_oversized_asset_readme_is_read_in_part(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'assets/G/README.md', 'a.png\n' + 'x' * 600000)
+            put(directory, 'assets/G/a.png', b'\x89PNG')
+            (errors, _warnings), reads = self.read_sizes(directory)
+        self.assertTrue(all(0 < n <= 512001 for n in reads), sorted(set(reads)))
         self.assertEqual(errors, [])
 
 

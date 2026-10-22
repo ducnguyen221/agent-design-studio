@@ -40,6 +40,7 @@ FORBIDDEN_TAGS = ('iframe', 'frame', 'object', 'embed', 'portal', 'noscript')
 MAX_THEMES, MAX_COLORS, MAX_FAMILIES, MAX_GROUPS, MAX_STYLES, MAX_OTHER = 8, 600, 12, 12, 80, 60
 CAP_README, CAP_TOKENS, CAP_PREVIEW, CAP_COMPONENT_README = 200_000, 512_000, 256_000, 64_000
 CAP_FONT_STORED, CAP_ASSET_STORED, CAP_SVG_RAW, CAP_PACKAGE_STORED = 1_000_000, 12_000_000, 2_000_000, 14_000_000
+CAP_JSON = CAP_KEPT = 512_000  # design-system.json and canonical-map.json; DESIGN.md and other kept text files
 MAX_SECTIONS, MAX_FILES, MAX_DEPTH = 24, 1000, 16
 
 
@@ -109,10 +110,21 @@ def _is_number(value: object) -> bool:
 
 _HEX = re.compile(r'^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$')
 _ALIAS = re.compile(r'^\{([A-Za-z0-9][A-Za-z0-9_.-]{0,63})\}$')
-_FUNC = re.compile(r'^(rgba?|hsla?|oklch|oklab|lab|lch|color)\(\s*([^()]*?)\s*\)$', re.IGNORECASE)
-_NUMBER = re.compile(r'^([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)(%|deg)?$')
+_FUNC_NAMES = {'rgb', 'rgba', 'hsl', 'hsla', 'oklch', 'oklab', 'lab', 'lch', 'color'}
+_NUMBER = re.compile(r'^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)(%|deg)?$')
 _FORBIDDEN_COLOR = re.compile(r'(?i)\b(?:var|url|color-mix)\s*\(')
 _BARE_WORD = re.compile(r'^[A-Za-z]+$')
+
+
+def _func(text: str) -> tuple[str, str] | None:
+    """(lower-case name, trimmed arguments) of ``name( ... )`` with no nested parentheses; one pass, no backtracking."""
+    opening = text.find('(')
+    if opening < 1 or not text.endswith(')'):
+        return None
+    name, inner = text[:opening].lower(), text[opening + 1:-1]
+    if name not in _FUNC_NAMES or '(' in inner or ')' in inner:
+        return None
+    return name, inner.strip()
 
 
 def _split_function(name: str, args: str) -> tuple[list[tuple[float, str]], tuple[float, str] | None, str | None]:
@@ -191,11 +203,11 @@ def _parse_color_alpha(value: str) -> tuple[float, float, float, float]:
             digits = ''.join(c * 2 for c in digits)
         channels = [int(digits[i:i + 2], 16) / 255 for i in range(0, len(digits), 2)]
         return channels[0], channels[1], channels[2], channels[3] if len(channels) == 4 else 1.0
-    match = _FUNC.match(text)
-    if not match:
+    parts = _func(text)
+    if not parts:
         raise ValueError('invalid_color')
-    name = match[1].lower()
-    numbers, alpha_token, _space = _split_function(name, match[2])
+    name, args = parts
+    numbers, alpha_token, _space = _split_function(name, args)
     alpha = _alpha(alpha_token)
     if name in {'lab', 'lch', 'color'}:
         raise ValueError('unsupported_space')
@@ -231,10 +243,10 @@ def _classify_color(value: object) -> str:
         return 'alias'
     if _HEX.match(text):
         return 'ok'
-    match = _FUNC.match(text)
-    if match:
+    parts = _func(text)
+    if parts:
         try:
-            _split_function(match[1].lower(), match[2])
+            _split_function(*parts)
         except ValueError:
             return 'invalid'
         return 'ok'
@@ -258,7 +270,7 @@ def contrast_ratio(fg: str, bg: str) -> float:
 
 # --------------------------------------------------------------------------- tokens
 
-_LENGTH = re.compile(r'^[+-]?(?:\d+\.?\d*|\.\d+)(?:px|rem|em|%|pt|vw|vh|ch|ex)?$')
+_LENGTH = re.compile(r'^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:px|rem|em|%|pt|vw|vh|ch|ex)?$')
 _WEIGHT_RANGE = re.compile(r'^(\d{1,4})(?:\s+(\d{1,4}))?$')
 
 
@@ -304,15 +316,20 @@ def _font_rel(file: str) -> str:
 
 
 def _check_font(root: Path, rel: str) -> list[str]:
-    """Existence, four-byte signature and stored size of one font file; sensitive names are never opened."""
+    """Existence, four-byte signature and stored size of one font file; a sensitive or escaping path is refused, never opened."""
     try:
         path = safe_path(root, rel)
+    except ValueError:
+        return [f'refused_sensitive_path: {_label(rel)}']
+    except (OSError, RuntimeError):
+        return [f'font_file_missing: {_label(rel)}']
+    try:
         if not path.is_file():
             return [f'font_file_missing: {_label(rel)}']
         raw = path.stat().st_size
         with path.open('rb') as handle:
             head = handle.read(4)
-    except (ValueError, OSError, RuntimeError):
+    except (OSError, RuntimeError):
         return [f'font_file_missing: {_label(rel)}']
     errors = []
     if head not in FONT_MAGIC:
@@ -498,6 +515,7 @@ def validate_tokens_v3(doc: object, root: Path | None = None) -> list[str]:
     style_names: dict[str, str] = {}
     aliases: dict[str, list[str]] = {}
     color_names: list[str] = []
+    color_seen: set[str] = set()
     for family, body in doc.items():
         if not isinstance(family, str) or family == 'motion' or not NAME_RE.match(family):
             errors.append(f'unsupported_family: tokens.json: {_label(family)}')
@@ -530,7 +548,8 @@ def validate_tokens_v3(doc: object, root: Path | None = None) -> list[str]:
                 errors.append(f'missing_usage: tokens.json: {where}')
             value = token['value']
             if family == 'color':
-                if name not in color_names:
+                if name not in color_seen and len(color_names) < MAX_COLORS:  # beyond the cap is already an error
+                    color_seen.add(name)
                     color_names.append(name)
                 _color_token(name, value, theme_ids, errors, aliases)
             elif family in {'spacing', 'radius'}:
@@ -785,8 +804,22 @@ def validate_canonical_map(doc: object, package_root: Path) -> list[str]:
 
 # --------------------------------------------------------------------------- Markdown helpers
 
-_ATX = re.compile(r'^(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$')
 _FENCE = re.compile(r'^\s*(```|~~~)')
+
+
+def _atx(line: str) -> tuple[int, str] | None:
+    """(level, text) of an ATX heading line such as ``## Name ##``, else None; one pass, no backtracking."""
+    if not line.startswith('#'):
+        return None
+    level = len(line) - len(line.lstrip('#'))
+    if level > 6 or level == len(line) or line[level] not in ' \t':
+        return None
+    rest = line[level:]
+    body = rest.lstrip(' \t')
+    if not body:
+        return (level, '') if len(rest) > 1 else None
+    text = body.rstrip(' \t').rstrip('#').rstrip(' \t')
+    return level, (text or body[0]).strip()
 
 
 def _headings(text: str) -> list[tuple[int, str]]:
@@ -797,9 +830,9 @@ def _headings(text: str) -> list[tuple[int, str]]:
         if _FENCE.match(line):
             fenced = not fenced
         elif not fenced:
-            match = _ATX.match(line)
-            if match:
-                out.append((len(match[1]), match[2].strip()))
+            heading = _atx(line)
+            if heading:
+                out.append(heading)
     return out
 
 
@@ -815,9 +848,10 @@ def _strip_fences(text: str) -> str:
 
 
 def validate_readme(text: str, size: int, profile: str, token_names: set[str], title: str | None = None) -> tuple[list[str], list[str]]:
-    """README.md rules; ``title`` (the index title) enables the repeated level-1 heading check."""
+    """README.md rules; ``title`` (the index title) enables the repeated level-1 heading check. Only the first CAP_README characters are scanned."""
     errors: list[str] = []
     warnings: list[str] = []
+    text = text[:CAP_README]
     if size > CAP_README:
         errors.append(f'readme_too_large: README.md: {size} > {CAP_README}')
     headings = _headings(text)
@@ -827,8 +861,18 @@ def validate_readme(text: str, size: int, profile: str, token_names: set[str], t
         if level == 1 and title and heading.casefold() == title.strip().casefold():
             errors.append(f'readme_forbidden_section: README.md: # {_label(heading)}')
     if profile == 'minimal':
-        plain = '\n'.join(line for line in _strip_fences(text).split('\n') if not _ATX.match(line))
-        paragraphs = [' '.join(p.split()) for p in re.split(r'\n\s*\n', plain) if p.strip()]
+        paragraphs: list[str] = []
+        current: list[str] = []
+        for line in _strip_fences(text).split('\n'):
+            if _atx(line) is not None:
+                continue
+            if line.strip():
+                current.append(line)
+            elif current:
+                paragraphs.append(' '.join(' '.join(current).split()))
+                current = []
+        if current:
+            paragraphs.append(' '.join(' '.join(current).split()))
         if len(paragraphs) > 1:
             errors.append(f'minimal_profile_violation: README.md: {len(paragraphs)} paragraphs, expected 1')
         else:
@@ -890,21 +934,26 @@ def _unpinned(url: str) -> bool:
     return False
 
 
-def validate_preview(text: str, rel: str) -> list[str]:
-    """Marker on line 1, size cap, no embedding tags, CDN urls pinned to an exact version."""
+def validate_preview(text: str, rel: str, size: int | None = None) -> list[str]:
+    """Marker on line 1, size cap, no embedding tags, CDN urls pinned to an exact version.
+
+    ``size`` is the byte size of the whole file when ``text`` holds only its first CAP_PREVIEW bytes; only that much is scanned.
+    """
     errors = []
     if not _marker(text):
         errors.append(f'card_marker_missing: {_label(rel)}')
-    size = len(text.encode('utf-8'))
+    if size is None:
+        size = len(text.encode('utf-8'))
+    text = text[:CAP_PREVIEW]
     if size > CAP_PREVIEW:
         errors.append(f'preview_too_large: {_label(rel)}: {size} > {CAP_PREVIEW}')
     for tag in FORBIDDEN_TAGS:
         if re.search(rf'<\s*{tag}\b', text, re.IGNORECASE):
             errors.append(f'forbidden_tag: {_label(rel)}: {tag}')
-    seen: list[str] = []
+    seen: set[str] = set()
     for url in _URL.findall(text):
-        if _unpinned(url) and url not in seen:
-            seen.append(url)
+        if url not in seen and _unpinned(url):
+            seen.add(url)
             errors.append(f'unpinned_cdn: {_label(rel)}: {_label(url)}')
     return errors
 
@@ -939,18 +988,30 @@ def _section_lines(body: str, name: str) -> list[str]:
         if _FENCE.match(line):
             fenced = not fenced
         elif not fenced:
-            match = _ATX.match(line)
-            if match and len(match[1]) == 2:
-                inside = match[2].strip() == name
+            heading = _atx(line)
+            if heading and heading[0] == 2:
+                inside = heading[1] == name
                 continue
         if inside:
             lines.append(line)
     return lines
 
 
+def _labelled(line: str, label: str) -> bool:
+    """True when ``line`` reads ``[-*] [**]Label[**]:`` in any letter case; one pass, no backtracking."""
+    text = line.lstrip()
+    for start in (text, text[1:] if text[:1] in ('-', '*') else None):
+        if start is None:
+            continue
+        start = start.lstrip().lstrip('*')
+        if start[:len(label)].casefold() == label.casefold() and start[len(label):].lstrip('*').lstrip().startswith(':'):
+            return True
+    return False
+
+
 def validate_design_md_structure(text: str) -> list[str]:
-    """Eight level-2 sections in order, and the three Overview lines."""
-    _front, body = _front_matter_split(text)
+    """Eight level-2 sections in order, and the three Overview lines. Only the first CAP_KEPT characters are scanned."""
+    _front, body = _front_matter_split(text[:CAP_KEPT])
     found = [h for level, h in _headings(body) if level == 2 and h in SECTION_NAMES]
     errors = [f'design_md_section_missing: DESIGN.md: {name}' for name in SECTION_NAMES if name not in found]
     if not errors:
@@ -963,9 +1024,9 @@ def validate_design_md_structure(text: str) -> list[str]:
                     errors.append(f'design_md_section_order: DESIGN.md: {before} before {after}')
                     break
     if 'Overview' in found:
-        overview = '\n'.join(_section_lines(body, 'Overview'))
+        overview = _section_lines(body, 'Overview')
         for label in OVERVIEW_LINES:
-            if not re.search(rf'(?im)^\s*[-*]?\s*\**{re.escape(label)}\**\s*:', overview):
+            if not any(_labelled(line, label) for line in overview):
                 errors.append(f'design_md_overview_incomplete: DESIGN.md: {label}')
     return errors
 
@@ -990,13 +1051,14 @@ def design_md_token_keys(tokens: object) -> set[str]:
 
 def check_design_md_refs(text: str, keys: set[str]) -> list[str]:
     """References in the body (outside fenced code) that name a key the front matter lacks."""
-    _front, body = _front_matter_split(text)
+    _front, body = _front_matter_split(text[:CAP_KEPT])
     errors: list[str] = []
+    reported: set[str] = set()
     for match in _REF.finditer(_strip_fences(body)):
         reference = match[0]
-        line = f'design_md_broken_ref: DESIGN.md: {reference}'
-        if reference[1:-1] not in keys and line not in errors:
-            errors.append(line)
+        if reference[1:-1] not in keys and reference not in reported:
+            reported.add(reference)
+            errors.append(f'design_md_broken_ref: DESIGN.md: {reference}')
     return errors
 
 
@@ -1117,36 +1179,46 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
     root = Path(root)
     errors: list[str] = []
     warnings: list[str] = []
+    reported: set[str] = set()
 
     def err(line: str) -> None:
-        if line not in errors:
+        if line not in reported:
+            reported.add(line)
             errors.append(line)
 
-    def read(rel: str) -> bytes | None:
+    def read(rel: str, cap: int) -> bytes | None:
+        """At most cap + 1 bytes: one byte past the cap is enough to know the file is too large."""
         try:
-            return safe_path(root, rel).read_bytes()
+            with safe_path(root, rel).open('rb') as handle:
+                return handle.read(cap + 1)
         except (ValueError, RuntimeError):
             err(f'refused_sensitive_path: {_label(rel)}')
         except OSError:
             pass
         return None
 
-    def load(rel: str, bad_json: str) -> tuple[object, int]:
+    def load(rel: str, bad_json: str, cap: int, too_large) -> tuple[object, int]:
         if rel not in files:
             err(f'missing_required_file: {rel}')
             return _FAIL, 0
-        raw = read(rel)
+        raw = read(rel, cap)
         if raw is None:
+            return _FAIL, 0
+        if len(raw) > cap:
+            err(too_large(max(len(raw), files.get(rel, 0))))
             return _FAIL, 0
         try:
             return json.loads(raw.decode('utf-8')), len(raw)
-        except (ValueError, UnicodeError):
+        except (ValueError, UnicodeError, RecursionError):
             err(bad_json)
             return _FAIL, 0
 
-    def text_of(rel: str) -> tuple[str, int] | None:
-        raw = read(rel) if rel in files else None
-        return (raw.decode('utf-8', errors='replace'), len(raw)) if raw is not None else None
+    def text_of(rel: str, cap: int) -> tuple[str, int] | None:
+        """(text of the first cap bytes, byte size of the whole file)."""
+        raw = read(rel, cap) if rel in files else None
+        if raw is None:
+            return None
+        return raw[:cap].decode('utf-8', errors='replace'), (max(len(raw), files.get(rel, 0)) if len(raw) > cap else len(raw))
 
     entries, files, dirs, links = _walk(root)
     sensitive = [e for e in entries if e not in links and any(SENSITIVE.search(p) for p in e.split('/'))]
@@ -1160,7 +1232,8 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
     if len(files) > MAX_FILES:
         warnings.append(f'file_count_high: {len(files)} > {MAX_FILES}')
 
-    index, _ = load('design-system.json', 'invalid_index_value: design-system.json: json')
+    index, _ = load('design-system.json', 'invalid_index_value: design-system.json: json', CAP_JSON,
+                    lambda n: f'invalid_index_value: design-system.json: size: {n} > {CAP_JSON}')
     title = None
     if index is not _FAIL:
         problems = validate_index(index)
@@ -1173,19 +1246,19 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
             if 'createdOnFiles' not in index:
                 warnings.append('index_marker_missing: design-system.json: createdOnFiles')
 
-    cmap, _ = load('canonical-map.json', 'invalid_manifest: canonical-map.json: json')
+    cmap, _ = load('canonical-map.json', 'invalid_manifest: canonical-map.json: json', CAP_JSON,
+                   lambda n: f'invalid_manifest: canonical-map.json: size: {n} > {CAP_JSON}')
     if cmap is not _FAIL:
         for line in validate_canonical_map(cmap, root):
             err(line)
     chosen = profile or (cmap.get('profile') if isinstance(cmap, dict) and cmap.get('profile') in PROFILES else None) or 'full'
     components_map = cmap.get('components') if isinstance(cmap, dict) and isinstance(cmap.get('components'), dict) else {}
 
-    tokens, tokens_size = load('tokens.json', 'token_shape: tokens.json: json')
+    tokens, _ = load('tokens.json', 'token_shape: tokens.json: json', CAP_TOKENS,
+                     lambda n: f'limit_exceeded: tokens.json: file size: {n} > {CAP_TOKENS}')
     tokens_ok = False
     if tokens is not _FAIL:
         token_errors = validate_tokens_v3(tokens, root)
-        if tokens_size > CAP_TOKENS:
-            token_errors.append(f'limit_exceeded: tokens.json: file size: {tokens_size} > {CAP_TOKENS}')
         for line in token_errors:
             err(line)
         tokens_ok = not token_errors
@@ -1199,7 +1272,7 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
                 err(line)
     token_names = _token_names(tokens) if tokens is not _FAIL else set()
 
-    readme = text_of('README.md') if 'README.md' in files else None
+    readme = text_of('README.md', CAP_README) if 'README.md' in files else None
     if 'README.md' not in files:
         err('missing_required_file: README.md')
     if readme:
@@ -1211,7 +1284,7 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
     if 'DESIGN.md' not in files:
         err('design_md_missing: DESIGN.md')
     else:
-        design = text_of('DESIGN.md')
+        design = text_of('DESIGN.md', CAP_KEPT)
         if design:
             for line in validate_design_md_structure(design[0]):
                 err(line)
@@ -1223,9 +1296,9 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
     if cover not in files:
         err(f'cover_missing: {cover}')
     else:
-        page = text_of(cover)
+        page = text_of(cover, CAP_PREVIEW)
         if page:
-            for line in validate_preview(page[0], cover):
+            for line in validate_preview(page[0], cover, page[1]):
                 err(line)
             warnings.extend(preview_warnings(page[0], cover))
             count = len(re.findall(r'<svg\b', page[0], re.IGNORECASE))
@@ -1251,9 +1324,9 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
             continue
         if not JS_IDENT.match(comp):
             err(f'component_name_invalid: {_label(base)}')
-        preview = text_of(f'{base}/preview.html')
+        preview = text_of(f'{base}/preview.html', CAP_PREVIEW)
         if preview:
-            for line in validate_preview(preview[0], f'{base}/preview.html'):
+            for line in validate_preview(preview[0], f'{base}/preview.html', preview[1]):
                 err(line)
             warnings.extend(preview_warnings(preview[0], f'{base}/preview.html'))
             if is_template_preview(preview[0]):
@@ -1269,7 +1342,7 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
 
     for group in sorted(d.split('/')[1] for d in dirs if d.startswith('assets/') and d.count('/') == 1 and d not in skip):
         base = f'assets/{group}'
-        readme_text = text_of(f'{base}/README.md')
+        readme_text = text_of(f'{base}/README.md', CAP_KEPT)
         if f'{base}/README.md' not in files:
             err(f'asset_group_readme_missing: {_label(base)}/README.md')
         for rel in sorted(f for f in files if f.startswith(f'{base}/') and f != f'{base}/README.md' and f not in skip):
