@@ -134,7 +134,7 @@ def main(argv: list[str] | None = None) -> int:
     except Refused as exc:
         print(exc, file=sys.stderr)
         return 1
-    except (OSError, ValueError, RuntimeError, RecursionError) as exc:
+    except Exception as exc:  # whatever else a hostile package provokes ends as one line, never a traceback
         print(f'input_error: {type(exc).__name__}', file=sys.stderr)
         return 1
     for warning in warnings:

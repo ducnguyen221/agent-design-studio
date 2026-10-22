@@ -2553,6 +2553,201 @@ class ViewerBuildTests(unittest.TestCase):
         self.assertIn(f'<code>preview.html</code> <span class="mut">{size} bytes</span>', files)
         self.assertIn('<details open>', files)
 
+    # ---- fix 1 (round one review): linear links, percent-decoded targets, SVG ids, read budget, mutant-killing escapes
+
+    def test_markdown_secondary_link_inputs_run_in_linear_time(self):
+        # Quadratic before fix 1: every link head searched the closing parentheses behind it again.
+        def times(unit, size):
+            return unit * (size // len(unit))
+
+        shapes = {
+            'heads then pairs': lambda n: times('[a](', n * 4 // 10) + times('(x)', n * 6 // 10),
+            'heads then opens': lambda n: times('[a](', n // 2) + '(' * (n // 2),
+            'heads then ticks': lambda n: times('[a](', n // 2) + '`' * (n // 2),
+            'bang heads then pairs': lambda n: times('![a](', n // 2) + times('(x)', n // 2),
+            'double open heads': lambda n: times('[a]((', n // 2) + times('x)', n // 2),
+            'heads then open pairs': lambda n: times('[a](', n // 2) + times('(x', n // 2),
+            'nested brackets': lambda n: '[' * (n // 3) + '](' * (n // 6) + ')' * (n // 6),
+            'ticks between heads': lambda n: times('`[a](`', n // 2) + times('(x)', n // 2),
+            'stars between heads': lambda n: times('**[a](**', n // 2) + times('(x)', n // 2),
+            'labels with brackets': lambda n: times('[a[b]](', n // 2) + times('(x)', n // 2),
+        }
+        for size in (63000, 48000):
+            for label, make_text in shapes.items():
+                start = time.perf_counter()
+                self.build.render_markdown(make_text(size))
+                elapsed = time.perf_counter() - start
+                self.assertLess(elapsed, 2.0, f'{label} {size}: {elapsed:.2f} s')
+        start = time.perf_counter()
+        self.build.render_markdown(shapes['heads then pairs'](512000))
+        elapsed = time.perf_counter() - start
+        self.assertLess(elapsed, 2.0, f'DESIGN.md size: {elapsed:.2f} s')
+
+    def test_viewer_links_hostile_readme_and_design_run_in_linear_time(self):
+        hostile = '[a](' * 7000 + '(x)' * 11000
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, DESIGN__md='---\nversion: alpha\n---\n## Overview\n' + '[a](' * 5000 + '(x)' * 9000 + '\n')
+            put(directory, 'components/C/README.md', hostile)
+            put(directory, 'assets/G/README.md', hostile)
+            start = time.perf_counter()
+            text, _data = self.page(directory)
+            elapsed = time.perf_counter() - start
+        self.assertLess(elapsed, 2.0, f'{elapsed:.2f} s')
+        self.assertEqual(self.sections(text), EIGHT)
+
+    def test_markdown_balanced_link_targets_behave(self):
+        render = self.build.render_markdown
+        self.assertEqual(render('[a](x(1).md)'), '<p>a</p>')
+        self.assertEqual(render('[a]((x))'), '<p>a</p>')
+        self.assertEqual(render('[a](x.md'), '<p>[a](x.md</p>')
+        self.assertEqual(render('[a](x.md))'), '<p><a href="x.md">a</a>)</p>')
+        self.assertEqual(render('[a](q [b](c.md)'), '<p>[a](q <a href="c.md">b</a></p>')
+        self.assertEqual(render('[a](x.md) (note) [b](y.md)'), '<p><a href="x.md">a</a> (note) <a href="y.md">b</a></p>')
+        self.assertEqual(render('[a]( [b](c.md) )'), '<p>a</p>')  # the outer target balances, and it is not a file name
+        self.assertEqual(render('text ) [a](x.md)'), '<p>text ) <a href="x.md">a</a></p>')
+
+    def test_safe_href_decodes_percent_escapes_first(self):
+        safe = self.build._safe_href
+        refused = ['a/%2e%2e/b.md', 'a/%2E%2E/b.md', 'a/.%2e/b.md', 'a/%2e./b.md', 'a/%2e/b.md', 'a/%2e%2E/%2e%2e/x.md',
+                   'a%2F%2Fb.md', 'a/%2F/b.md', 'a%2f%2fb.md', 'C%3A/x', 'c%3a/x', 'a%3Ab', 'a%5Cb.md', 'a%5cb.md', 'a/..%5Cb.md',
+                   'a%00b', 'a%0Ab', 'a%0db.md', 'a%7Fb', 'a%1Fb', 'a%3Fq=1', 'a%23x', 'javascript%3Aalert', 'a/%252e%252e/b.md',
+                   'a/%25252e%25252e/b.md', 'a/%2525252525252e%2525252525252e/b.md', 'a/%2e%2e', 'a/b/%2e%2e/%2e%2e/%2e%2e/c.md',
+                   'a/%2e%2e%2fb.md', '%2e%2e/x.md']
+        for target in refused:
+            self.assertIsNone(safe(target), target)
+            self.assertEqual(self.build.render_markdown(f'[up]({target})'), '<p>up</p>', target)
+        for target in ('components/Button/README.md', 'notes/a%20b.md', 'x.md#part', 'a%C3%A9.md', 'a/b%2Bc.md', 'a%2525b.md'):
+            self.assertEqual(safe(target), target, target)
+        self.assertEqual(self.build.render_markdown('[b](components/Button/README.md)'),
+                         '<p><a href="components/Button/README.md">b</a></p>')
+
+    def test_cover_svg_ids_stay_out_of_the_page_ids(self):
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 10">'
+               '<defs><linearGradient id="grad"><stop offset="0" stop-color="#fff"/></linearGradient></defs>'
+               '<g id="colors"><rect id="q" width="4" height="4" fill="url(#grad)" style="stroke:url( #grad )"/>'
+               '<use href="#colors"/><use xlink:href="#q"/></g><text id="overview">Title</text><text ID="h-colors">Tagline</text></svg>')
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + svg + '\n')
+            text, data = self.page(directory)
+        ids = re.findall(r'\sid="([^"]*)"', text)
+        self.assertEqual(sorted(i for i in set(ids) if ids.count(i) > 1), [])
+        self.assertEqual(self.sections(text), EIGHT)
+        inside = text.split('<figure aria-label="Cover">')[1].split('</figure>')[0]
+        self.assertEqual(sorted(re.findall(r'\sid="([^"]*)"', inside)), ['cover-colors', 'cover-grad', 'cover-h-colors', 'cover-overview', 'cover-q'])
+        self.assertIn('fill="url(#cover-grad)"', inside)
+        self.assertIn('stroke:url( #cover-grad )', inside)
+        self.assertIn('<use href="#cover-colors"/>', inside)
+        self.assertIn('<use xlink:href="#cover-q"/>', inside)
+        self.assertNotIn('"#colors"', inside)
+        self.assertEqual(text.count('<section id="colors"'), 1)
+        self.assertEqual(text.count('id="q"'), 1)
+        self.assertEqual(data['cover_svg'], svg)  # the collected data is the checked original; the page applies the prefix
+        for bad in ('<svg><g id=""/></svg>', '<svg><g id="a b"/></svg>', '<svg><g id="a\'b"/></svg>', '<svg><g id="' + 'a' * 65 + '"/></svg>'):
+            self.assertIsNone(self.build.sanitize_svg(bad), bad)
+        self.assertEqual(self.build.sanitize_svg('<svg><g id="a"/></svg>'), '<svg><g id="a"/></svg>')
+
+    def test_render_viewer_checks_cover_again(self):
+        data = {'cover_svg': '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'}
+        text = self.build.render_viewer(data)
+        self.assertNotIn('alert(1)', text)
+        self.assertIn('No cover image', text)
+
+    def test_canonical_contrast_minimum_out_of_range_is_a_clean_error(self):
+        for minimum in ('1' + '0' * 400, '1e999', '-1e999'):
+            with tempfile.TemporaryDirectory() as directory:
+                make(directory)
+                edit_json(directory, 'canonical-map.json', lambda d: d['checks']['contrast'].append({'fg': 'text', 'bg': 'bg', 'min': 0}))
+                path = Path(directory, 'canonical-map.json')
+                path.write_text(path.read_text(encoding='utf-8').replace('"min": 0', f'"min": {minimum}'), encoding='utf-8')
+                code, out, err = self.run_cli('--package', directory, '--viewer')
+            self.assertEqual((code, out), (1, ''), minimum)
+            self.assertEqual(len(err.strip().splitlines()), 1, err)
+            self.assertTrue(err.startswith('invalid_manifest: canonical-map.json: checks.contrast'), err)
+        data = {'canonical': {'checks': {'contrast': [{'fg': 'a', 'bg': 'b', 'min': 10 ** 400}]}},
+                'tokens': {'color': {'tokens': [{'name': 'a', 'value': '#000000'}, {'name': 'b', 'value': '#ffffff'}]}}}
+        self.assertEqual(self.build.render_viewer(data).count('<section '), 8)  # hostile data straight into the page does not raise
+
+    def test_cli_turns_any_unexpected_error_into_one_line(self):
+        for error in (ZeroDivisionError('x'), KeyError('k'), OverflowError('o'), TypeError('t'), AttributeError('a')):
+            with tempfile.TemporaryDirectory() as directory:
+                make(directory)
+                with patch.object(self.build, 'collect_package', side_effect=error):
+                    code, out, err = self.run_cli('--package', directory, '--viewer')
+            self.assertEqual((code, out, err), (1, '', f'input_error: {type(error).__name__}\n'))
+
+    def test_package_read_budget_is_total(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            body = ('word ' * 12700)[:63500]
+            for n in range(400):
+                put(directory, f'components/C{n:03d}/README.md', body)
+            reads = []
+            real = self.build._text_of
+
+            def counting(root, rel, cap):
+                reads.append(rel)
+                return real(root, rel, cap)
+
+            start = time.perf_counter()
+            with patch.object(self.build, '_text_of', counting):
+                code, out, err = self.run_cli('--package', directory, '--viewer')
+            elapsed = time.perf_counter() - start
+        self.assertEqual((code, out), (1, ''))
+        self.assertRegex(err, r'^viewer_too_large: viewer\.html: \d+ > 512000\n$')
+        self.assertLess(elapsed, 5.0, f'{elapsed:.2f} s')
+        self.assertLess(len([r for r in reads if r.endswith('/README.md')]), 40, len(reads))
+
+    def test_markdown_code_and_alt_escapes_are_checked_individually(self):
+        out = self.build.render_markdown('`<script>x</script>` and **<img onerror=x>** and [<img onerror=x>](a.md) and `<img src=x onerror=alert(1)>`')
+        self.assertIn('<code>&lt;script&gt;x&lt;/script&gt;</code>', out)
+        self.assertIn('<strong>&lt;img onerror&#61;x&gt;</strong>', out)
+        self.assertIn('<a href="a.md">&lt;img onerror&#61;x&gt;</a>', out)
+        self.assertIn('<code>&lt;img src&#61;x onerror&#61;alert(1)&gt;</code>', out)
+        self.assertNotRegex(out, r'<(?!/?(?:p|code|strong|a)\b)')
+        self.assertNotIn('<script', out)
+        self.assertNotIn('<img', out)
+        data = {'assets': [{'group': 'G', 'path': 'assets/G/a"onerror="x.png', 'size': 1, 'inline': 'data:image/png;base64,AAAA'},
+                           {'group': 'G', 'path': "assets/G/b'x<y>.png", 'size': 1, 'inline': 'data:image/png;base64,AAAA'}]}
+        text = self.build.render_viewer(data)
+        self.assertIn('<img alt="assets/G/a&quot;onerror&#61;&quot;x.png"', text)
+        self.assertIn('<img alt="assets/G/b&#x27;x&lt;y&gt;.png"', text)
+        self.assertNotIn('alt="assets/G/a"', text)
+
+    def test_cover_extraction_ignores_length_changing_case_folds(self):
+        padding = '<p>' + 'İ' * 5 + '</p>'
+        self.assertEqual(self.build.extract_cover_svg(padding + CLEAN_SVG + padding), CLEAN_SVG)
+        self.assertEqual(self.build.extract_cover_svg(padding + CLEAN_SVG.upper()), CLEAN_SVG.upper())
+        self.assertIsNone(self.build.extract_cover_svg('<ſvg></svg>'))
+        self.assertIsNone(self.build.extract_cover_svg('<svg></ſvg>'))
+
+    def test_leading_byte_order_marks_are_all_dropped(self):
+        two = '﻿﻿'
+        self.assertEqual(self.build.split_front_matter(two + '---\nversion: alpha\n---\n## Overview\n'),
+                         (two + '---\nversion: alpha\n---\n', '## Overview\n'))
+        text = self.build.render_design_md(two + '## Overview\n', tok(), INDEX)
+        self.assertNotIn('﻿', text)
+        self.assertTrue(text.endswith('---\n## Overview\n'))
+        text = self.build.render_design_md(two + '---\nversion: alpha\n---\n## Overview\n', tok(), INDEX)
+        self.assertNotIn('﻿', text)
+
+    def test_key_and_vault_file_names_are_sensitive(self):
+        names = ['id_rsa', 'id_ed25519', 'id_ecdsa', 'id_dsa', 'ID_RSA', 'id_rsa.pub', 'work.p12', 'work.pfx', 'vault.kdbx', 'vault.KDBX', 'key.ppk']
+        for name in names:
+            self.assertTrue(v3.SENSITIVE.search(name), name)
+        for name in ('identity.png', 'valid_rsa.md', 'rsa.md', 'kdbx.md', 'idea.png'):
+            self.assertFalse(v3.SENSITIVE.search(name), name)
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'assets/G/README.md', 'a.png')
+            put(directory, 'assets/G/id_rsa', 'SECRET_VALUE')
+            put(directory, 'assets/G/vault.kdbx', 'SECRET_VALUE')
+            put(directory, 'components/Button/id_ed25519', 'SECRET_VALUE')
+            text, data = self.page(directory)
+        self.assertNotIn('SECRET_VALUE', text)
+        for name in ('id_rsa', 'kdbx', 'id_ed25519'):
+            self.assertNotIn(name, text)
+        self.assertTrue(all('id_' not in f['path'] for f in data['files']))
+
     def test_count_tokens(self):
         self.assertEqual(self.build.count_tokens({}), 0)
         self.assertEqual(self.build.count_tokens(None), 0)

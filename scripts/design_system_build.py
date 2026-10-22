@@ -12,9 +12,10 @@ import json
 import math
 import re
 import sys
+from bisect import bisect_left
 from decimal import Decimal
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import design_system_v3 as v3  # noqa: E402
@@ -73,9 +74,9 @@ def _number_text(value: object) -> str | None:
 def split_front_matter(text: str) -> tuple[str, str]:
     """(front matter block including both fences and the newline after the closing one, rest); ("", text) without a block.
 
-    A leading byte order mark stays with the block. Lines are cut at "\\n" only, so the body keeps every byte.
+    Leading byte order marks stay with the block. Lines are cut at "\\n" only, so the body keeps every byte.
     """
-    pos = 1 if text.startswith('﻿') else 0
+    pos = len(text) - len(text.lstrip(BOM))
     end = text.find('\n', pos)
     if end < 0 or text[pos:end].strip() != '---':
         return '', text
@@ -278,8 +279,8 @@ def render_design_md(existing: str, tokens: dict, index: dict) -> str:
         _sample, body = split_front_matter(TEMPLATE.read_bytes().decode('utf-8').replace('\r\n', '\n'))
         return head + body
     front, body = split_front_matter(existing)
-    if not front and body.startswith(BOM):
-        body = body[1:]  # a BOM kept in front of no block would end up in the middle of the new file
+    if not front:
+        body = body.lstrip(BOM)  # a BOM kept in front of no block would end up in the middle of the new file
     return head + body
 
 
@@ -342,23 +343,76 @@ _HREF_PATH = re.compile(r'[A-Za-z0-9_][A-Za-z0-9._~/%@+,=-]*')
 _HREF_FRAGMENT = re.compile(r'[A-Za-z0-9_.-]*')
 
 
+_DECODE_ROUNDS = 5
+
+
+def _decoded(path: str) -> str | None:
+    """The path with its percent escapes undone, again and again until it stops changing; None when it never settles."""
+    for _ in range(_DECODE_ROUNDS):
+        plain = unquote(path)
+        if plain == path:
+            return path
+        path = plain
+    return None
+
+
 def _safe_href(target: str) -> str | None:
-    """A relative file link or None. No scheme, no leading slash, no parent step, no query, nothing but a short safe alphabet."""
+    """A relative file link or None. No scheme, no leading slash, no parent step, no query, nothing but a short safe alphabet.
+
+    A browser reads ``%2e%2e`` as a parent step and ``%2F`` as a slash, so the rules are applied twice: to the text as written
+    and to the text with its percent escapes undone (to a fixed point, a few rounds at most).
+    """
     target = target.strip()
     if not target or len(target) > 300:
         return None
     path, hash_mark, fragment = target.partition('#')
     if not _HREF_PATH.fullmatch(path) or '//' in path or (hash_mark and not _HREF_FRAGMENT.fullmatch(fragment)):
         return None
-    if any(part in ('..', '.') for part in path.split('/')):
+    plain = _decoded(path)
+    if plain is None or '//' in plain or any(not c.isprintable() or c in '\\:?#' for c in plain):
+        return None
+    if any(part in ('..', '.') or (part and not part.strip(' .')) for part in plain.split('/')):
         return None
     return target
+
+
+_PAREN = re.compile(r'[()]')
+
+
+class _Parens:
+    """Where the parenthesis that closes an opening one sits, answered from one pass over the text.
+
+    ``closer(start)`` is the first ``)`` at or after ``start`` that balances a ``(`` standing just before ``start``, or -1.
+    The running depth after each parenthesis is kept; the closer is the first later parenthesis that leaves a lower depth
+    than the one before ``start``, found with the usual next-smaller-value stack. Building costs one pass, asking costs a
+    binary search, so no link head ever scans the text behind it again.
+    """
+
+    def __init__(self, text: str) -> None:
+        self.where = [m.start() for m in _PAREN.finditer(text)]
+        depth, levels = 0, [0]
+        for at in self.where:
+            depth += 1 if text[at] == '(' else -1
+            levels.append(depth)
+        self.lower = [-1] * len(levels)
+        waiting: list[int] = []
+        for index, level in enumerate(levels):
+            while waiting and levels[waiting[-1]] > level:
+                self.lower[waiting.pop()] = index
+            waiting.append(index)
+
+    def closer(self, start: int) -> int:
+        first = bisect_left(self.where, start)
+        if first >= len(self.where) or self.lower[first] < 0:
+            return -1
+        return self.where[self.lower[first] - 1]
 
 
 def _inline(text: str) -> str:
     """Inline Markdown to HTML: code spans, ``**bold**``, relative links; everything else is escaped text. One left-to-right pass."""
     out: list[str] = []
     seek = _Seek(text)
+    parens: _Parens | None = None
     size, pos, run = len(text), 0, 0
 
     def flush(upto: int) -> None:
@@ -387,14 +441,8 @@ def _inline(text: str) -> str:
             close = seek.find(']', opener + 1)
             other = seek.find('[', opener + 1)
             if close > 0 and (other < 0 or other > close) and text.startswith('(', close + 1):
-                end, depth, scan = -1, 1, close + 2
-                while depth:  # the closing parenthesis that balances the opening one; the stretches scanned never overlap
-                    hit = seek.find(')', scan)
-                    if hit < 0:
-                        break
-                    depth += text.count('(', scan, hit) - 1
-                    scan = hit + 1
-                    end = hit if depth == 0 else -1
+                parens = parens or _Parens(text)
+                end = parens.closer(close + 2)  # the closing parenthesis that balances the opening one
                 if end > 0:
                     flush(pos)
                     label = _esc(text[opener + 1:close])
@@ -615,6 +663,10 @@ def _svg_attrs_ok(attrs: list[tuple[str, str]]) -> bool:
         low = ''.join(value.split()).casefold()
         if name.startswith(('on', 'data-')) or name in _SVG_BAD_ATTRS:
             return False
+        if name == 'id':
+            if not _SVG_LOCAL_REF.fullmatch('#' + value):
+                return False
+            continue
         if name in ('href', 'xlink:href'):
             if not _SVG_LOCAL_REF.fullmatch(value):
                 return False
@@ -680,16 +732,52 @@ def _scan_svg(text: object) -> list[str] | None:
     return [' '.join(t.split()) for t in texts]
 
 
+_SVG_OPEN = re.compile(r'<svg', re.IGNORECASE | re.ASCII)
+_SVG_CLOSE = re.compile(r'</svg>', re.IGNORECASE | re.ASCII)
+
+
 def extract_cover_svg(text: str) -> str | None:
-    """The first ``<svg>...</svg>`` element of a preview page, or None. Plain ``str.find`` on a lower-cased copy."""
+    """The first ``<svg>...</svg>`` element of a preview page, or None. Searched in the text as it is: a lower-cased copy can
+    change length (U+0130), and a Unicode-aware match would take U+017F for an ``s``."""
     if not isinstance(text, str):
         return None
-    low = text.lower()
-    start = low.find('<svg')
-    if start < 0:
+    start = _SVG_OPEN.search(text)
+    if not start:
         return None
-    end = low.find('</svg>', start)
-    return None if end < 0 else text[start:end + 6]
+    end = _SVG_CLOSE.search(text, start.start())
+    return None if end is None else text[start.start():end.end()]
+
+
+_SVG_ID_PREFIX = 'cover-'
+_SVG_TAG_TEXT = re.compile(r'<[^<>]*>')
+_SVG_ATTR_TEXT = re.compile(r"""(\s+)([A-Za-z_:][A-Za-z0-9_:.-]*)(\s*=\s*)(?:"([^"]*)"|'([^']*)')""")
+_SVG_URL_REF = re.compile(r'(url\(\s*#)([A-Za-z0-9_.:-]{1,64})', re.IGNORECASE)
+_SVG_ID_LISTS = frozenset(('aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns', 'aria-details', 'aria-flowto',
+                           'aria-activedescendant'))
+
+
+def isolate_svg_ids(svg: str) -> str:
+    """An SVG that passed ``sanitize_svg`` with every id carrying the prefix ``cover-``, and every reference to one (``#id`` in a
+    link, ``url(#id)`` in a value, the id lists of ARIA attributes) carrying it too. An inline SVG shares its ids with the page
+    around it: without the prefix a cover with ``<g id="colors">`` would take the place of the page's own anchor.
+
+    Only attribute values of tags change; the tags are read with the same strict grammar the check used.
+    """
+    def fix(attr: re.Match) -> str:
+        lead, name, equals = attr[1], attr[2], attr[3]
+        quote_mark, value = ('"', attr[4]) if attr[4] is not None else ("'", attr[5])
+        low = name.casefold()
+        if low == 'id':
+            name, value = 'id', _SVG_ID_PREFIX + value  # written in lower case: a scanner that looks for ``id=`` sees it
+        elif low in ('href', 'xlink:href') and value.startswith('#'):
+            value = '#' + _SVG_ID_PREFIX + value[1:]
+        elif low in _SVG_ID_LISTS:
+            value = ' '.join(_SVG_ID_PREFIX + token if token else token for token in value.split(' '))
+        else:
+            value = _SVG_URL_REF.sub(lambda m: m[1] + _SVG_ID_PREFIX + m[2], value)
+        return f'{lead}{name}{equals}{quote_mark}{value}{quote_mark}'
+
+    return _SVG_TAG_TEXT.sub(lambda tag: _SVG_ATTR_TEXT.sub(fix, tag[0]), svg)
 
 
 def sanitize_svg(text: str) -> str | None:
@@ -802,6 +890,7 @@ def collect_package(root: Path) -> dict:
         raise PackageError('input_error: design-system.json and tokens.json must hold objects')
     if not isinstance(canonical, dict):
         canonical = {}
+    _check_canonical(canonical)
     _entries, sizes, dirs, _links = v3._walk(root)
     names = sorted(rel for rel in sizes if _listed(rel) and rel != 'viewer.html')
     if len(names) > MAX_LISTED:
@@ -817,8 +906,11 @@ def collect_package(root: Path) -> dict:
         warnings.append('viewer_asset_skipped: components/Cover/preview.html')
 
     components = []
+    spent = 0  # characters of README HTML so far; the page holds all of it, so the total is bounded, not only each README
     for name in sorted({rel.split('/')[1] for rel in dirs if rel.startswith('components/') and rel.count('/') == 1
                         and rel.split('/')[1] not in {'Cover', 'lib', 'src'} and _listed(rel)}):
+        if spent > VIEWER_MAX:
+            raise PackageError(f'viewer_too_large: viewer.html: {spent} > {VIEWER_MAX}')
         base = f'components/{name}'
         body = _text_of(root, f'{base}/README.md', v3.CAP_COMPONENT_README) if f'{base}/README.md' in sizes else ''
         if sizes.get(f'{base}/README.md', 0) > v3.CAP_COMPONENT_README:
@@ -826,8 +918,10 @@ def collect_package(root: Path) -> dict:
         head = _text_of(root, f'{base}/preview.html', 4096) if f'{base}/preview.html' in sizes else ''
         match = v3._marker(head) if head else None
         group = re.search(r'''\bgroup\s*=\s*["']([^"']{1,60})["']''', match[1]) if match else None
+        shown = render_markdown(body, 4) if body else ''
+        spent += len(shown)
         components.append({'name': name, 'group': _line(group[1], 60) if group else 'Components',
-                           'summary': _summary(body), 'readme_html': render_markdown(body, 4) if body else '',
+                           'summary': _summary(body), 'readme_html': shown,
                            'marker': _line('@dsCard ' + match[1], 200) if match else '',
                            'rel': f'{base}/preview.html' if f'{base}/preview.html' in sizes else ''})
 
@@ -836,7 +930,10 @@ def collect_package(root: Path) -> dict:
         parts = rel.split('/')
         group = parts[1] if len(parts) > 2 else ''
         if len(parts) == 3 and parts[2] == 'README.md':
+            if spent > VIEWER_MAX:
+                raise PackageError(f'viewer_too_large: viewer.html: {spent} > {VIEWER_MAX}')
             asset_readmes[group] = render_markdown(_text_of(root, rel, v3.CAP_COMPONENT_README), 4)
+            spent += len(asset_readmes[group])
             continue
         inline = None
         if Path(rel).suffix.casefold() in IMAGE_TYPES:
@@ -936,6 +1033,30 @@ def _table(head: list[str], rows: list[str], caption: str) -> str:
             f'<tbody>{"".join(rows)}</tbody></table></div>')
 
 
+def _contrast_floor(pair: dict) -> float:
+    """The minimum ratio a pair declares, or the default for its size; a number too large for a float counts as not declared."""
+    try:
+        declared = float(pair['min']) if v3._is_number(pair.get('min')) and pair['min'] > 0 else 0.0
+    except OverflowError:
+        declared = 0.0
+    return declared if declared > 0 else (3.0 if pair.get('large') is True else 4.5)
+
+
+def _check_canonical(canonical: dict) -> None:
+    """Refuse a contrast minimum that is beyond float range or infinite; it would stop the page build."""
+    checks = canonical.get('checks') if isinstance(canonical.get('checks'), dict) else {}
+    pairs = checks.get('contrast') if isinstance(checks.get('contrast'), list) else []
+    for pair in pairs:
+        value = pair.get('min') if isinstance(pair, dict) else None
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            try:
+                finite = math.isfinite(float(value))
+            except OverflowError:
+                finite = False
+            if not finite:
+                raise PackageError('invalid_manifest: canonical-map.json: checks.contrast.min')
+
+
 def _colors(tokens: dict, canonical: dict) -> str:
     body = tokens.get('color') if isinstance(tokens.get('color'), dict) else {}
     themes = body.get('themes') if isinstance(body.get('themes'), list) else []
@@ -969,7 +1090,7 @@ def _colors(tokens: dict, canonical: dict) -> str:
         fg, bg = pair.get('fg'), pair.get('bg')
         if not isinstance(fg, str) or not isinstance(bg, str):
             continue
-        floor = float(pair['min']) if v3._is_number(pair.get('min')) and pair['min'] > 0 else (3.0 if pair.get('large') is True else 4.5)
+        floor = _contrast_floor(pair)
         for theme in columns:
             try:
                 ratio = v3.contrast_ratio(v3._resolve_color(by_name, theme_ids, fg, theme)[0],
@@ -1142,6 +1263,7 @@ def _overview(data: dict) -> str:
     system = system if isinstance(system, dict) else {}
     design = data.get('design_md') or ''
     cover = data.get('cover_svg')
+    cover = sanitize_svg(cover) if isinstance(cover, str) and cover else None  # the page checks again what it embeds
     texts = (_scan_svg(cover) or []) if cover else []
     tagline = texts[1] if len(texts) > 1 else _summary(data.get('readme') or '')
     facts = [('Status', system.get('status')), ('Version', system.get('version')), ('System id', system.get('id')),
@@ -1150,7 +1272,7 @@ def _overview(data: dict) -> str:
     body = '\n'.join(v3._section_lines(design, 'Overview')).strip()
     entries = [(f['path'], f['size']) for f in data.get('files') or []]
     return '\n'.join((
-        f'<figure aria-label="Cover">{cover}</figure>' if cover else '<p class="empty">No cover image</p>',
+        f'<figure aria-label="Cover">{isolate_svg_ids(cover)}</figure>' if cover else '<p class="empty">No cover image</p>',
         f'<p class="lead">{_esc(_line(index.get("title", "")))}'
         + (f' <span class="mut">{_esc(_line(tagline))}</span>' if tagline else '') + '</p>',
         f'<dl>{rows}</dl>' if rows else '',

@@ -21,7 +21,7 @@ UNCHECKED = ('live-render', 'browser-display', 'real-import')
 STATUSES = {'draft', 'pending', 'approved', 'deprecated', 'as-is', 'proposed'}
 PROFILES = ('full', 'minimal')
 EXCLUDED = {'.secret', 'node_modules', 'vendor', 'dist', 'build', 'generated', '.git', '__pycache__'}
-SENSITIVE = re.compile(r'(?i)(?:^\.env|^(?:auth|oauth_creds)\.json$|credentials|\.(?:pem|key|pfx|p12|crt|cer)$)')
+SENSITIVE = re.compile(r'(?i)(?:^\.env|^(?:auth|oauth_creds)\.json$|^id_(?:rsa|dsa|ecdsa|ed25519)|credentials|\.(?:pem|key|pfx|p12|crt|cer|ppk|kdbx)$)')
 
 NAME_RE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$')
 JS_IDENT = re.compile(r'^[A-Za-z_$][A-Za-z0-9_$]*$')
