@@ -1,42 +1,95 @@
-# Token contract: existing source, DTCG subset và legacy
+# Token contract: the canonical grammar and what is derived from it
 
-Hệ đã có CSS/TS/Figma source giữ authority đó. JSON export/delta không tự trở thành
-canonical. Hệ mới chọn JSON thì chỉ gọi **DTCG 2025.10 subset**, không chứng nhận toàn
-chuẩn (Community Group Report, không W3C Recommendation). Nguồn chính thức:
-https://www.designtokens.org/tr/2025.10/format/
+`tokens.json` is the single data source of a design-system package. Its shape is the Claude Design list grammar, pinned as `v:3` and read on 2026-10-22 (research preview, so it can change). Anything else a person needs, such as the `DESIGN.md` front matter or a DTCG file, is generated from it and never edited by hand. Why: ADR 0001. Folder rules: `system-contract.md`.
 
-Mỗi token có `$value`, `$type` trực tiếp hoặc kế thừa từ group. Metadata lý do dùng
-`$description`/`$extensions`. Group/token không trộn children vào token; tên path
-không có dấu chấm hoặc ngoặc alias. Subset nhận Unicode và khoảng trắng trong tên;
-cùng quy tắc áp lên mỗi đoạn alias. Ký tự điều khiển và ký hiệu cross-file `#`, `/`,
-`\`, `:` không được hỗ trợ trong tên hoặc alias; tên bắt đầu `$` dành cho metadata.
+## Canonical grammar (Claude Design v3, read 2026-10-22)
 
-| Type hỗ trợ | Value |
-| --- | --- |
-| color | `{colorSpace:"srgb",components:[r,g,b],alpha?}`; số hữu hạn 0–1 |
-| dimension | `{value:number,unit:"px"|"rem"}` |
-| duration | `{value:number,unit:"ms"|"s"}` |
-| fontFamily | chuỗi không rỗng hoặc mảng chuỗi không rỗng |
-| fontWeight | số 1–1000 hoặc tên weight chuẩn |
-| number | số JSON hữu hạn, không boolean |
+The file is one JSON object with these families:
 
-Alias `{path.to.token}` trong **cùng file, cùng type**; inherited type được resolve
-trước so. Cross-file/reference đặc biệt chưa hỗ trợ. Cycle/missing target/type mismatch
-báo `reference_cycle`, `missing_target`, `type_mismatch`; syntax alias ngoài subset
-báo `unsupported_reference`. CSS string thay object báo `invalid_value`; shadow,
-typography composite, gradient/easing chưa hỗ trợ báo `unsupported_type`.
-Shadow/easing giữ ở docs/code có trace, không đưa vào file token subset đã nhận hợp lệ.
+| Family | Shape |
+|---|---|
+| `color` | `themes`: list of `{id, name}`; `tokens`: one flat list of colour tokens |
+| `type` | `fonts`: list of font entries, each naming a `file` under `fonts/`; `families`: map of key to CSS font stack string; `groups`: list of `{name, family, styles[]}` |
+| `spacing` | `tokens`: list |
+| `radius` | `tokens`: list |
+| `shadow` and further families | optional, each `tokens`: list of the same token shape |
 
-Ví dụ token hợp lệ:
+- Every family except `type` is a list of tokens `{name, value, usage}`. A map in place of a list is not accepted.
+- `usage` is a non-empty string of at most 1 000 characters saying what the token is for. A text style should have one too (warning only).
+- A text style is `{name, family?, fontSize, fontWeight, lineHeight, ...}` inside a group; `family` on the style overrides the group's. Other optional fields (`letterSpacing`, `fontStyle`, `opticalSize`, `sample`, `usage`) are accepted and ignored by derived outputs.
+- Token names match `^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$`, and are unique across all families except `type`. Style names share one separate namespace. Theme ids and family keys follow the same name rule.
+- There is no `motion` family in v3. Motion stays in prose (`06-motion-spec.md` of the routing skill); a `motion` key is `unsupported_family`.
+- The platform limit for the file is 512 000 bytes.
+
+## Values and aliases
+
+- A colour `value` is either a string or a map `{<themeId>: <string>}`. A theme with no entry borrows the first theme's value. Every theme id used must be declared in `color.themes`.
+- Accepted colour strings: hex with 3, 4, 6 or 8 digits; `rgb()`, `rgba()`, `hsl()`, `hsla()`, `oklch()`, `oklab()`, `lab()`, `lch()` and `color()` with plain numbers; or an alias `"{name}"` that points at another colour token.
+- Refused colour syntax: `var()`, `url()`, `color-mix()` and colour names (`forbidden_color_syntax`).
+- Aliases are not resolved in the file. The target must exist (`missing_target`), the chain must not loop (`reference_cycle`) and may be at most 16 deep (`alias_too_deep`).
+- Contrast and hex conversion go through `parse_color`, which converts each function to sRGB and clamps colours that fall outside the gamut. `lab()`, `lch()` and `color()` are valid in the file; where a conversion is not available the derived output keeps the original string and warns.
+- `fontSize`, `radius` and `spacing` values are CSS lengths (`4px`, `0.5rem`, `50%`), `0`, or a bare number meaning pixels. `fontWeight` is a number, `normal`, `bold` or a range string such as `"300 800"`. `lineHeight` is a unitless number or a length.
+
+Example (three colour tokens, with an alias and an `oklch()` value):
+
 ```json
-{"gap":{"$type":"dimension","$value":{"value":4,"unit":"px"}},
- "space":{"$type":"dimension","$value":"{gap}"}}
+{
+  "color": {
+    "themes": [{"id": "light", "name": "Light"}],
+    "tokens": [
+      {"name": "bg", "value": "#ffffff", "usage": "page background"},
+      {"name": "text", "value": "{ink}", "usage": "body text"},
+      {"name": "ink", "value": "oklch(0 0 0)", "usage": "base ink"}
+    ]
+  }
+}
 ```
 
-`tokens.json` map chuỗi và `_why` cũ là legacy; chỉ `--legacy-tokens` xác nhận đọc
-map, không DTCG validate. Không sửa frozen example để ép schema mới.
+## Limits
 
-Verifier không tạo CSS và không chứng nhận alias/theme runtime. Parity phải có map
-JSON/source → CSS variable → component → route/render và evidence thay một token
-trên fixture; xuất CSS thủ công/dẫn xuất phải ghi chiều authority. Không claim sync
-chỉ vì file parse được. Khi validation fail không xuất/đưa lên token CSS từ input lỗi.
+| Limit | Value | Code when exceeded |
+|---|---|---|
+| themes | 8 | `limit_exceeded` |
+| colour tokens | 600 | `limit_exceeded` |
+| families | 12 | `limit_exceeded` |
+| type groups / text styles | 12 / 80 | `limit_exceeded` |
+| tokens per family other than colour | 60 | `limit_exceeded` |
+| alias chain | 16 | `alias_too_deep` |
+| font file | 1 000 000 bytes | `limit_exceeded` |
+
+## Derived outputs
+
+Both outputs are one-way. Editing them never changes `tokens.json`.
+
+- **`DESIGN.md` front matter.** Generated by `build-design-system.py --design-md` from the first theme. Mapping, key order and serialisation are in `design-md-spec.md`. In short: colours become hex (or `"{colors.<name>}"` for aliases), text styles become `typography` entries, `radius` becomes `rounded`, `spacing` stays `spacing`; `shadow`, other families, `type.fonts` and theme values after the first do not enter the front matter, so they are named in the `Elevation & Depth` section instead. The verifier regenerates the block and checks string equality (`design_md_stale`).
+- **DTCG.** `scripts/export-dtcg.py` derives a DTCG 2025.10 subset (Community Group Report, not a W3C Recommendation; https://www.designtokens.org/tr/2025.10/format/) and lists every token it had to skip, with the reason. Per-theme values after the first, `usage`, and colours outside sRGB survive only as converted values or not at all. The result is checked with `verify-design-system.py --dtcg <file>`. Subset: types `color` (sRGB components, alpha 0 to 1), `dimension` (`px` or `rem`), `duration` (`ms` or `s`), `fontFamily`, `fontWeight` (1 to 1000 or a standard name) and `number`; aliases `{path.to.token}` inside one file and one type. A CSS string where an object is expected is `invalid_value`; shadow, composite typography, gradients and easing are `unsupported_type`; an alias form outside the subset is `unsupported_reference`; a type clash is `type_mismatch`.
+
+The verifier does not write CSS and does not certify runtime themes. A claim that code and tokens are in sync needs a map from token to CSS variable to component to rendered route, and evidence from changing one token; parsing alone proves nothing. Never emit derived output from an input that failed validation.
+
+## Legacy maps
+
+- The earlier name-to-value map with a `_why` field per entry (Step 5 of the routing skill, frozen in `docs/example/`) is read only through `--legacy-tokens`. It is never labelled valid `v:3`, and the frozen example is not edited to fit a newer schema. The map stays readable until the owner decides otherwise.
+- `--tokens` now means this grammar. The earlier DTCG meaning moved to `--dtcg`.
+- A system that already owns CSS, TypeScript or Figma token sources keeps that authority. A JSON export or delta does not become canonical on its own; say which side wins and record it in `canonical-map.json` under `decisions`.
+
+## Error codes
+
+Each is printed as `<code>: <path>[: detail]` on stderr. These are the names tests and the generator use.
+
+| Code | When | Path and detail |
+|---|---|---|
+| `token_shape` | a family is not `{tokens: [...]}` (except `type`), a token is not an object, `name` or `value` is missing, a `type` part has the wrong shape | `tokens.json: <family>[<i>]` |
+| `token_name_invalid` | a name does not match the name rule (token, style, theme id, family key) | `tokens.json: <family>.<name>` |
+| `duplicate_name` | a name repeats across families, or a style name repeats | `tokens.json: <name>: <family A>, <family B>` |
+| `missing_usage` | `usage` is missing, empty or over 1 000 characters (a text style: warning only) | `tokens.json: <family>.<name>` |
+| `invalid_value` | a colour, length, weight or line height is malformed; a theme map uses an undeclared id | `tokens.json: <family>.<name>[@<theme>]` |
+| `forbidden_color_syntax` | `var()`, `url()`, `color-mix()` or a colour name | `tokens.json: color.<name>[@<theme>]` |
+| `missing_target` | an alias points at a name that does not exist | `tokens.json: color.<name> -> {x}` |
+| `reference_cycle` | an alias points at itself or loops | `tokens.json: color.<name>: a -> b -> a` |
+| `alias_too_deep` | an alias chain is longer than 16 | `tokens.json: color.<name>: <n>` |
+| `limit_exceeded` | a limit in the table above | `tokens.json: <limit>: <n> > <max>` |
+| `font_file_missing` | `type.fonts[].file` is not under `fonts/` | `fonts/<file>` |
+| `font_file_invalid` | the first 4 bytes are not `wOFF`, `wOF2`, `\0\1\0\0`, `true` or `OTTO` | `fonts/<file>` |
+| `unsupported_family` | a `motion` family; more than 12 families; a family name that is not an identifier | `tokens.json: <family>` |
+
+Codes for `DESIGN.md` (`design_md_missing`, `design_md_stale`, `design_md_section_missing`, `design_md_section_order`, `design_md_broken_ref`, `design_md_overview_incomplete`) are listed in `design-md-spec.md`, section "What the verifier checks". The build-time warning `WARN design_md_color_passthrough: <name>` is printed when a `lab()`, `lch()` or `color()` value is copied through unchanged. Format pin: `FORMAT_VERSION = 3`, `FORMAT_READ_ON = "2026-10-22"`; any other `--format-version` is an `input_error`.
