@@ -1337,6 +1337,35 @@ class BoundedInputTests(unittest.TestCase):
             errors, _ = self.fast(lambda: v3.verify_package(Path(directory)), 'package with many findings', 2.0)
         self.assertEqual(len([e for e in errors if e.startswith('unpinned_cdn')]), 9500)
 
+    def test_cdn_version_check_is_linear(self):
+        for host in ('cdnjs.cloudflare.com', 'code.jquery.com'):
+            url = f'https://{host}/' + '1' * 64000
+            self.assertTrue(self.fast(lambda: v3._unpinned(url), 'cdn digits'))
+            url = f'https://{host}/' + '1.' * 32000
+            self.assertFalse(self.fast(lambda: v3._unpinned(url), 'cdn dotted digits'))
+        page = '<!-- @dsCard height=300 -->\n<svg></svg>\nhttps://cdnjs.cloudflare.com/' + '1' * 200000
+        found = self.fast(lambda: v3.validate_preview(page, 'components/Cover/preview.html'), 'preview with long digit url')
+        self.assertEqual(len([e for e in found if e.startswith('unpinned_cdn')]), 1)
+
+    def test_cdn_version_vectors(self):
+        pinned = ['https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js', 'https://unpkg.com/react@18.3.1/umd/react.js',
+                  'https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js', 'https://code.jquery.com/jquery-3.7.1.min.js',
+                  'https://cdn.jsdelivr.net/npm/@scope/pkg@1.2.3-beta.1/x.js', 'https://cdnjs.cloudflare.com/ajax/libs/x/10.20.30+b.1/x.js']
+        loose = ['https://cdn.jsdelivr.net/npm/d3', 'https://cdn.jsdelivr.net/npm/d3@latest', 'https://cdn.jsdelivr.net/npm/@scope/pkg@1.2',
+                 'https://cdnjs.cloudflare.com/ajax/libs/d3/latest/d3.js', 'https://cdnjs.cloudflare.com/ajax/libs/d3/1.2/d3.js',
+                 'https://cdnjs.cloudflare.com/ajax/libs/d3/1.2.x/d3.js', 'https://code.jquery.com/jquery.min.js', 'https://cdn.tailwindcss.com']
+        for url in pinned:
+            self.assertFalse(v3._unpinned(url), url)
+        for url in loose:
+            self.assertTrue(v3._unpinned(url), url)
+
+    def test_readme_code_spans_dedupe_is_linear(self):
+        text = 'one paragraph of words\n' + ' '.join('`a%d`' % i for i in range(20000)) + ' `a1` `a1`'
+        errors, warnings = self.fast(lambda: v3.validate_readme(text, len(text), 'minimal', set()), 'code spans')
+        self.assertEqual(errors, [])
+        self.assertEqual(len(warnings), 20000)
+        self.assertEqual(warnings[:2], ['readme_unknown_token: README.md: a0', 'readme_unknown_token: README.md: a1'])
+
     def test_long_alias_chain_does_not_crash(self):
         count = 3000
         chain = [color(f'a{i}', '{a%d}' % (i + 1)) for i in range(count)] + [color(f'a{count}', '#000000')]

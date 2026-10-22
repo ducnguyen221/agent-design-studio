@@ -884,11 +884,15 @@ def validate_readme(text: str, size: int, profile: str, token_names: set[str], t
         for required in ('Content fundamentals', 'Visual foundations', 'Iconography'):
             if required.casefold() not in present:
                 errors.append(f'readme_missing_section: README.md: {required}')
-    seen: list[str] = []
+    seen: set[str] = set()
+    unknown: list[str] = []
     for span in re.findall(r'`([^`\n]+)`', _strip_fences(text)):
-        if re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]*', span) and re.search(r'[-_0-9]', span) and span not in token_names and span not in seen:
-            seen.append(span)
-    warnings.extend(f'readme_unknown_token: README.md: {_label(s)}' for s in seen)
+        if span in seen:
+            continue
+        seen.add(span)
+        if re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]*', span) and re.search(r'[-_0-9]', span) and span not in token_names:
+            unknown.append(span)
+    warnings.extend(f'readme_unknown_token: README.md: {_label(s)}' for s in unknown)
     return errors, warnings
 
 
@@ -897,6 +901,8 @@ def validate_readme(text: str, size: int, profile: str, token_names: set[str], t
 _MARKER = re.compile(r'^﻿?\s*<!--\s*@dsCard\b([^>]*?)-->')
 _URL = re.compile(r'https?://[^\s"\'<>`)]+', re.IGNORECASE)
 _EXACT_VERSION = r'\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.+-]+)?'
+# A dotted version anywhere in a path. Anchored at the start of a digit run so each start position costs one run, not a quadratic rescan.
+_SEMVER_IN_PATH = re.compile(r'(?<!\d)\d+\.\d+\.\d+')
 _PACKAGE_CDNS = {'cdn.jsdelivr.net', 'unpkg.com', 'esm.sh', 'cdn.skypack.dev'}
 _VERSIONED_CDNS = {'cdnjs.cloudflare.com', 'cdn.tailwindcss.com', 'code.jquery.com', 'ajax.googleapis.com',
                    'stackpath.bootstrapcdn.com', 'maxcdn.bootstrapcdn.com', 'cdn.datatables.net'}
@@ -930,7 +936,7 @@ def _unpinned(url: str) -> bool:
             return True
         return not re.fullmatch(_EXACT_VERSION, name.rsplit('@', 1)[1])
     if host in _VERSIONED_CDNS:
-        return not re.search(_EXACT_VERSION, parts.path)
+        return not _SEMVER_IN_PATH.search(parts.path)
     return False
 
 
