@@ -167,7 +167,8 @@ def verify_pack(root: Path) -> list[str]:
     required = ['SKILL.md', 'references/system-contract.md', 'references/source-code-audit.md',
                 'references/token-contract.md', 'references/design-md-spec.md', 'templates/DESIGN.md',
                 'templates/audit-report.md', 'templates/extend-proposal.md', 'templates/component-v3/README.md',
-                'templates/component-v3/preview.html', 'templates/brand-v3/design-system.json']
+                'templates/component-v3/preview.html', 'templates/brand-v3/design-system.json',
+                'templates/agent-adapters/AGENTS.md.tmpl', 'agents/openai.yaml']
     errors: list[str] = []
     targets: dict[str, Path] = {}
     for name in required:

@@ -1,0 +1,18 @@
+# Design system
+
+This project keeps its design system in `{package}/`. Read it before any UI work.
+
+Read order:
+1. `{package}/DESIGN.md` — entry file: overview, read order, owner, status, canonical sources.
+2. `{package}/tokens.json` — the only source of token values.
+3. `{package}/canonical-map.json` — which file or repo path owns each domain and component.
+4. `{package}/components/<Component>/README.md` — usage, states, accessibility.
+
+Rules:
+- Refer to tokens by name; never copy a token value into code or docs.
+- Do not hand-edit the DESIGN.md front matter or viewer.html; regenerate them after token changes:
+  `python scripts/build-design-system.py --package {package} --design-md --viewer`
+- Check before handing work back: `python scripts/verify-design-system.py --package {package}`
+  (both scripts ship with the agent-design-studio plugin).
+
+Preview offline: open `{package}/viewer.html` in a browser.

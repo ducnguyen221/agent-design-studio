@@ -3986,9 +3986,253 @@ class SizeCapAndContractDocTests(unittest.TestCase):
         self.assertGreaterEqual(checked, 2)
 
 
+ADAPTER_NAMES = ['AGENTS.md', 'CLAUDE.md', 'GEMINI.md']
+
+
+class AdapterTests(unittest.TestCase):
+    """TK11: AGENTS.md, CLAUDE.md and GEMINI.md are written next to the package from the skill's templates and never overwrite."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.build = importlib.import_module('design_system_build')
+        path = Path(__file__).with_name('build-design-system.py')
+        loader_spec = importlib.util.spec_from_file_location('design_system_builder_adapters', path)
+        cls.cli_module = importlib.util.module_from_spec(loader_spec)
+        loader_spec.loader.exec_module(cls.cli_module)
+
+    def run_cli(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = self.cli_module.main([str(a) for a in argv])
+        return code, out.getvalue(), err.getvalue()
+
+    @staticmethod
+    def project(directory, package='design-system'):
+        root = Path(directory) / 'project'
+        (root / package).mkdir(parents=True)
+        return root
+
+    @staticmethod
+    def digest(path):
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+    def test_adapters_written_three(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            self.assertEqual(self.build.write_adapters(root), (ADAPTER_NAMES, []))
+            self.assertEqual(sorted(p.name for p in root.iterdir() if p.is_file()), ADAPTER_NAMES)
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            code, out, err = self.run_cli('--package', root / 'design-system', '--adapters', root)
+            self.assertEqual((code, err), (0, ''), (out, err))
+            self.assertEqual(out.strip().splitlines()[-1], 'BUILT: design-md=skipped viewer=skipped adapters=3 written, 0 skipped')
+            self.assertEqual(sorted(p.name for p in root.iterdir() if p.is_file()), ADAPTER_NAMES)
+
+    def test_adapters_never_overwrite(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            (root / 'AGENTS.md').write_text('# Mine\n\nKeep this.\n', encoding='utf-8', newline='\n')
+            before = self.digest(root / 'AGENTS.md')
+            code, out, err = self.run_cli('--package', root / 'design-system', '--adapters', root)
+            self.assertEqual((code, err), (0, ''))
+            self.assertEqual(self.digest(root / 'AGENTS.md'), before)
+            self.assertIn('WARN adapter_exists: AGENTS.md', out)
+            lines = out.splitlines()
+            self.assertIn('--- proposed AGENTS.md ---', lines)
+            block = lines[lines.index('--- proposed AGENTS.md ---') + 1:lines.index('--- end ---')]
+            self.assertEqual('\n'.join(block) + '\n', self.build.adapter_text('AGENTS.md', 'design-system'))
+            self.assertEqual(lines[-1], 'BUILT: design-md=skipped viewer=skipped adapters=2 written, 1 skipped')
+            self.assertTrue((root / 'CLAUDE.md').is_file() and (root / 'GEMINI.md').is_file())
+            hashes = {name: self.digest(root / name) for name in ADAPTER_NAMES}
+            code, out, err = self.run_cli('--package', root / 'design-system', '--adapters', root)
+            self.assertEqual((code, err), (0, ''))
+            self.assertEqual(out.count('WARN adapter_exists:'), 3, out)
+            self.assertEqual(out.splitlines()[-1], 'BUILT: design-md=skipped viewer=skipped adapters=0 written, 3 skipped')
+            self.assertEqual({name: self.digest(root / name) for name in ADAPTER_NAMES}, hashes)
+
+    def test_adapters_never_overwrite_a_folder_or_a_link(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            (root / 'AGENTS.md').mkdir()
+            target = Path(directory) / 'elsewhere.md'
+            target.write_text('outside\n', encoding='utf-8', newline='\n')
+            try:
+                os.symlink(target, root / 'GEMINI.md')
+            except (OSError, NotImplementedError):
+                (root / 'GEMINI.md').mkdir()
+                target = None
+            self.assertEqual(self.build.write_adapters(root), (['CLAUDE.md'], ['AGENTS.md', 'GEMINI.md']))
+            if target is not None:
+                self.assertEqual(target.read_text(encoding='utf-8'), 'outside\n')
+
+    def test_a_file_created_between_the_check_and_the_write_is_kept(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            (root / 'GEMINI.md').write_text('mine\n', encoding='utf-8', newline='\n')
+            with patch.object(os.path, 'lexists', return_value=False):
+                self.assertEqual(self.build.write_adapters(root), (['AGENTS.md', 'CLAUDE.md'], ['GEMINI.md']))
+            self.assertEqual((root / 'GEMINI.md').read_text(encoding='utf-8'), 'mine\n')
+
+    def test_contract_describes_the_adapters_flag(self):
+        text = (ROOT / 'skills/design-system/references/system-contract.md').read_text(encoding='utf-8')
+        for words in ('--adapters <root>', '--- proposed <name> ---', 'adapters=<n> to write, <m> present',
+                      'input_error: package outside adapters root', 'input_error: adapters root not found'):
+            self.assertIn(words, text)
+
+    def test_adapters_point_to_design_md(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            self.build.write_adapters(root)
+            texts = {name: (root / name).read_bytes().decode('utf-8') for name in ADAPTER_NAMES}
+            self.assertIn('design-system/DESIGN.md', texts['AGENTS.md'])
+            self.assertIn('design-system/DESIGN.md', texts['GEMINI.md'])
+            self.assertEqual(texts['CLAUDE.md'], '@AGENTS.md\n')
+            self.assertIn('python scripts/build-design-system.py --package design-system --design-md --viewer', texts['AGENTS.md'])
+            self.assertIn('python scripts/verify-design-system.py --package design-system', texts['AGENTS.md'])
+            for name, text in texts.items():
+                self.assertNotIn('{package}', text, name)
+                self.assertNotIn('\r', text, name)
+                self.assertTrue(text.endswith('\n') and not text.endswith('\n\n'), name)
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory, 'web/ds')
+            code, out, err = self.run_cli('--package', root / 'web' / 'ds', '--adapters', root)
+            self.assertEqual((code, err), (0, ''), out)
+            self.assertIn('`web/ds/DESIGN.md`', (root / 'AGENTS.md').read_text(encoding='utf-8'))
+            self.assertIn('`web/ds/`', (root / 'GEMINI.md').read_text(encoding='utf-8'))
+
+    def test_adapters_line_cap_30(self):
+        folder = ROOT / 'skills/design-system/templates/agent-adapters'
+        for name in ADAPTER_NAMES:
+            text = (folder / f'{name}.tmpl').read_text(encoding='utf-8')
+            self.assertLessEqual(len(text.splitlines()), 30, name)
+            self.assertLessEqual(len(self.build.adapter_text(name, 'a/' * 40 + 'ds').splitlines()), 30, name)
+        self.assertEqual((folder / 'CLAUDE.md.tmpl').read_bytes(), b'@AGENTS.md\n')
+
+    def test_cli_adapters_check_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            before = sorted(p.name for p in root.iterdir())
+            code, out, err = self.run_cli('--package', root / 'design-system', '--adapters', root, '--check')
+            self.assertEqual((code, err), (0, ''), out)
+            self.assertEqual(sorted(p.name for p in root.iterdir()), before)
+            self.assertEqual(out.strip().splitlines()[-1], 'CHECKED: design-md=skipped viewer=skipped adapters=3 to write, 0 present')
+            self.assertEqual(self.build.write_adapters(root, check=True), (ADAPTER_NAMES, []))
+            self.assertEqual(sorted(p.name for p in root.iterdir()), before)
+            (root / 'GEMINI.md').write_text('mine\n', encoding='utf-8', newline='\n')
+            self.assertEqual(self.build.write_adapters(root, check=True), (['AGENTS.md', 'CLAUDE.md'], ['GEMINI.md']))
+            code, out, err = self.run_cli('--package', root / 'design-system', '--adapters', root, '--check')
+            self.assertEqual((code, err), (0, ''))
+            self.assertIn('WARN adapter_exists: GEMINI.md', out)
+            self.assertNotIn('--- proposed', out)
+            self.assertEqual(out.strip().splitlines()[-1], 'CHECKED: design-md=skipped viewer=skipped adapters=2 to write, 1 present')
+            self.assertEqual(sorted(p.name for p in root.iterdir()), sorted([*before, 'GEMINI.md']))
+
+    def test_adapters_package_outside_root_is_input_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            other = Path(directory) / 'other'
+            other.mkdir()
+            for package in (other, root, root.parent):
+                code, out, err = self.run_cli('--package', package, '--adapters', root)
+                self.assertEqual((code, out, err), (1, '', 'input_error: package outside adapters root\n'), package)
+            self.assertEqual(sorted(p.name for p in root.iterdir()), ['design-system'])
+        for bad in ('', '.', '..', '../x', '/abs', 'a/../b', 'a\\b', 'C:x', 'a\nb', 'a`b', 'a{b}', 'a//b'):
+            with self.subTest(package=bad), tempfile.TemporaryDirectory() as directory:
+                root = self.project(directory)
+                with self.assertRaises(ValueError) as caught:
+                    self.build.write_adapters(root, bad)
+                self.assertEqual(str(caught.exception), 'package outside adapters root')
+                self.assertEqual(sorted(p.name for p in root.iterdir()), ['design-system'])
+
+    def test_adapters_arguments_are_checked_before_anything_is_written(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            code, out, err = self.run_cli('--package', root / 'design-system', '--adapters', root / 'missing')
+            self.assertEqual((code, out), (1, ''))
+            self.assertRegex(err, r'^input_error: adapters root not found: .*missing\n$')
+            code, out, err = self.run_cli('--package', root / 'absent', '--adapters', root)
+            self.assertEqual((code, out), (1, ''))
+            self.assertRegex(err, r'^input_error: package not found: ')
+            code, out, err = self.run_cli('--package', root / 'design-system')
+            self.assertEqual((code, out, err), (1, '', 'input_error: choose --design-md/--viewer/--adapters\n'))
+            self.assertEqual(sorted(p.name for p in root.iterdir()), ['design-system'])
+            odd = root / 'odd`name'
+            odd.mkdir()
+            code, out, err = self.run_cli('--package', odd, '--adapters', root)
+            self.assertEqual((code, out, err), (1, '', 'input_error: package outside adapters root\n'))
+            self.assertEqual(sorted(p.name for p in root.iterdir()), ['design-system', 'odd`name'])
+
+    def test_adapters_follow_design_md_and_viewer(self):
+        with tempfile.TemporaryDirectory() as directory:
+            shutil.copytree(FIXTURE.parent.parent, Path(directory) / 'project')
+            root = Path(directory) / 'project'
+            package = root / 'design-system'
+            code, out, err = self.run_cli('--package', package, '--design-md', '--viewer', '--adapters', root)
+            self.assertEqual((code, err), (0, ''), out)
+            self.assertEqual(out.strip().splitlines()[-1], 'BUILT: design-md=unchanged viewer=unchanged adapters=3 written, 0 skipped')
+            self.assertEqual(v3.verify_package(package, 'full'), ([], []))  # the wrappers sit outside the package
+            code, out, err = self.run_cli('--package', package, '--design-md', '--viewer', '--adapters', root, '--check')
+            self.assertEqual((code, err), (0, ''), out)
+            self.assertEqual(out.strip().splitlines()[-1],
+                             'CHECKED: design-md=ok viewer=ok adapters=0 to write, 3 present')
+
+    def test_adapters_inside_the_package_are_refused_by_the_verifier(self):
+        with tempfile.TemporaryDirectory() as directory:
+            shutil.copytree(FIXTURE.parent, Path(directory) / 'design-system')
+            package = Path(directory) / 'design-system'
+            self.build.write_adapters(package)
+            errors, _ = v3.verify_package(package, 'full')
+            self.assertEqual([e for e in errors if e.startswith('refused_path')],
+                             ['refused_path: AGENTS.md', 'refused_path: CLAUDE.md', 'refused_path: GEMINI.md'])
+
+    def test_a_missing_template_is_an_input_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.project(directory)
+            with patch.object(self.build, 'ADAPTERS', Path(directory) / 'no-templates'):
+                code, out, err = self.run_cli('--package', root / 'design-system', '--adapters', root)
+            self.assertEqual((code, out), (1, ''))
+            self.assertRegex(err, r'^input_error: adapter template not found: AGENTS\.md\.tmpl\n$')
+            self.assertEqual(sorted(p.name for p in root.iterdir()), ['design-system'])
+
+    def test_no_wrapper_file_ships_inside_the_skill(self):
+        names = {path.name for path in (ROOT / 'skills/design-system').rglob('*') if path.is_file()}
+        self.assertFalse(names & set(ADAPTER_NAMES), names & set(ADAPTER_NAMES))
+        self.assertEqual({n for n in names if n.endswith('.tmpl')}, {f'{name}.tmpl' for name in ADAPTER_NAMES})
+
+    def test_pack_requires_adapter_templates(self):
+        self.assertEqual(verifier.verify_pack(ROOT), [])
+        yaml = (ROOT / 'skills/design-system/agents/openai.yaml').read_text(encoding='utf-8')
+        for line in ('  display_name: "Design System"',
+                     '  short_description: "Create, audit, document and extend a design system kept as files"',
+                     '''  default_prompt: "Use design-system to audit or extend this project's design system."''',
+                     '  allow_implicit_invocation: true'):
+            self.assertIn(line + '\n', yaml)
+        for name in ('templates/agent-adapters/AGENTS.md.tmpl', 'agents/openai.yaml'):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                shutil.copytree(ROOT / 'skills/design-system', root / 'skills/design-system', ignore=shutil.ignore_patterns('tests', '__pycache__'))
+                (root / 'skills/design-system' / name).unlink()
+                self.assertIn(f'missing_skill_file: {name}', verifier.verify_pack(root))
+        skill = (ROOT / 'skills/design-system/SKILL.md').read_text(encoding='utf-8')
+        self.assertIn('--adapters <root>', skill)
+        self.assertIn('build-design-system.py --package', skill)
+        self.assertIn('adapters: written', skill)
+        self.assertIn('templates/agent-adapters/AGENTS.md.tmpl', skill)
+        self.assertIn('agents/openai.yaml', skill)
+        body = skill.split('\n---\n', 1)[1].encode('utf-8')
+        self.assertLessEqual(len(body), 8000)
+
+    def test_adapter_text_is_linear_in_the_path(self):
+        start = time.perf_counter()
+        for _ in range(50):
+            self.build.adapter_text('AGENTS.md', 'a/' * 2000 + 'ds')
+        self.assertLess(time.perf_counter() - start, 1.0)
+
+
 PACK_FILES = ('references/system-contract.md', 'references/source-code-audit.md', 'references/token-contract.md',
               'references/design-md-spec.md', 'templates/DESIGN.md', 'templates/audit-report.md', 'templates/extend-proposal.md',
-              'templates/component-v3/README.md', 'templates/component-v3/preview.html', 'templates/brand-v3/design-system.json')
+              'templates/component-v3/README.md', 'templates/component-v3/preview.html', 'templates/brand-v3/design-system.json',
+              'templates/agent-adapters/AGENTS.md.tmpl', 'agents/openai.yaml')
 MODES = ('create', 'extract', 'audit', 'document', 'extend')
 
 
@@ -4116,9 +4360,10 @@ class PackAndTemplateTests(unittest.TestCase):
         line = next(item for item in self._section('Gotchas').splitlines() if 'logo' in item)
         self.assertRegex(line, r'\b(?:because|since)\b')
 
-    def test_skill_body_leaves_room_for_the_adapter_step(self):
+    def test_skill_body_keeps_a_margin_under_the_codex_limit(self):
+        """TK10 fix 1 cut the body to 7600 bytes so that the adapter step fits; the step is in, and 50 bytes stay free."""
         body = self._skill_text().split('\n---\n', 1)[1].encode('utf-8')
-        self.assertLessEqual(len(body), 7600)
+        self.assertLessEqual(len(body), 7950)
 
     def test_code_index_lists_design_md_limit_exceeded(self):
         contract = (ROOT / 'skills/design-system/references/system-contract.md').read_text(encoding='utf-8')

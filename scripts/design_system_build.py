@@ -1,7 +1,8 @@
-"""Generators for a design-system package: the DESIGN.md front matter and the offline viewer page. Adapters join in a later task.
+"""Generators for a design-system package: the DESIGN.md front matter, the offline viewer page and the agent wrapper files.
 
-Pure functions: no network, no writes. Files are read only by ``collect_package`` and ``inline_asset`` (every read goes through
-``safe_path`` first and is size-bounded) and, when a package has no DESIGN.md yet, by ``render_design_md`` (the body template).
+No network. Only ``write_adapters`` writes, and only new files, never over an existing one. Files are read only by
+``collect_package`` and ``inline_asset`` (every read goes through ``safe_path`` first and is size-bounded), by ``render_design_md``
+when a package has no DESIGN.md yet (the body template) and by ``adapter_text`` (the wrapper templates).
 Shape and escaping rules: skills/design-system/references/design-md-spec.md and system-contract.md.
 """
 from __future__ import annotations
@@ -10,6 +11,7 @@ import base64
 import html
 import json
 import math
+import os
 import re
 import sys
 from bisect import bisect_left
@@ -21,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import design_system_v3 as v3  # noqa: E402
 
 TEMPLATE = Path(__file__).resolve().parents[1] / 'skills' / 'design-system' / 'templates' / 'DESIGN.md'
+ADAPTERS = TEMPLATE.parent / 'agent-adapters'
 SPEC_LABEL = 'alpha'
 BOM = chr(0xFEFF)
 _BARE_KEY = re.compile(r'[A-Za-z_][A-Za-z0-9_-]*')
@@ -1410,3 +1413,50 @@ def render_viewer(data: dict) -> str:
         f'<header><h1>{_esc(title)}</h1><p class="mut">Static viewer generated from the package files. Not a Claude Design render.</p></header>',
         f'<nav aria-label="Screens">{nav}<label>Filter tokens <input id="q" type="search"></label><span id="qn" class="mut" role="status"></span></nav>',
         f'<main>\n{sections}\n</main>', f'<script>{_SCRIPT}</script>', '</body>', '</html>', ''))
+
+
+# --------------------------------------------------------------------------- agent adapters
+
+ADAPTER_NAMES = ('AGENTS.md', 'CLAUDE.md', 'GEMINI.md')
+# One folder name of the package path as it is written into an adapter: no control character, no backtick or brace (they would
+# end a code span or a placeholder), no character a Windows path refuses, not empty, not a dot segment.
+_ADAPTER_SEGMENT = re.compile(r'[^\x00-\x1f\x7f`{}\\:*?"<>|]+')
+
+
+def adapter_text(name: str, package_rel: str = 'design-system') -> str:
+    """Text of one wrapper file: its template with every ``{package}`` replaced by ``package_rel`` (POSIX, relative to the folder
+    the wrapper is written into). Raises ``FileNotFoundError`` (argument: the template name) when the template is missing and
+    ``ValueError`` when ``package_rel`` is not a plain relative path of at least one folder name."""
+    segments = package_rel.split('/')
+    if not package_rel or any(s in ('', '.', '..') or not _ADAPTER_SEGMENT.fullmatch(s) for s in segments):
+        raise ValueError('package outside adapters root')
+    try:
+        raw = (ADAPTERS / f'{name}.tmpl').read_bytes()
+    except OSError:
+        raise FileNotFoundError(f'{name}.tmpl') from None
+    return raw.decode('utf-8').replace('\r\n', '\n').replace('{package}', package_rel)
+
+
+def write_adapters(root: Path, package_rel: str = 'design-system', check: bool = False) -> tuple[list[str], list[str]]:
+    """Write AGENTS.md, CLAUDE.md and GEMINI.md into ``root`` (the folder that holds the package) and return (written, skipped).
+
+    A name that already exists in ``root`` (a file, a folder, a link) is skipped and never touched; files are created
+    exclusively and never through a link. With ``check`` nothing is written and the first list holds what would be. Every
+    template is read before the first write, so a missing template or a bad ``package_rel`` leaves ``root`` as it was."""
+    texts = {name: adapter_text(name, package_rel) for name in ADAPTER_NAMES}
+    written: list[str] = []
+    skipped: list[str] = []
+    for name in ADAPTER_NAMES:
+        target = Path(root) / name
+        if os.path.lexists(target):
+            skipped.append(name)
+            continue
+        if not check:
+            try:
+                with open(target, 'xb') as handle:
+                    handle.write(texts[name].encode('utf-8'))
+            except FileExistsError:  # created between the test and the open
+                skipped.append(name)
+                continue
+        written.append(name)
+    return written, skipped

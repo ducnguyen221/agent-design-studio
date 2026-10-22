@@ -186,7 +186,7 @@ Harness wrappers belong to the project that uses the package, not to the package
 - `CLAUDE.md`: the single line `@AGENTS.md`.
 - `GEMINI.md`: a short prose pointer.
 
-Each is at most 30 lines. `build-design-system.py --package <root>/design-system --adapters <root>` writes them from the `.tmpl` templates of this skill and never overwrites: an existing file prints `WARN adapter_exists: <name>` and a proposal block. The templates carry a `.tmpl` suffix so that a harness does not load them as rules while they sit inside the plugin.
+Each is at most 30 lines. `build-design-system.py --package <root>/design-system --adapters <root>` writes them from the `.tmpl` templates of this skill, filling `{package}` with the package path relative to `<root>`, and never overwrites: an existing name (file, folder or link) prints `WARN adapter_exists: <name>` and, for a file, a proposal block between `--- proposed <name> ---` and `--- end ---`. It runs after `--design-md` and `--viewer`, and its arguments are checked before anything is written. With `--check` it writes nothing and ends the line with `adapters=<n> to write, <m> present`. A package that is not inside `<root>`, or whose path holds a control character, backtick, brace or a character a Windows path refuses (backslash, colon, asterisk, question mark, quotation mark, angle bracket, bar), gives `input_error: package outside adapters root`; a missing folder gives `input_error: adapters root not found: <root>`. The templates carry a `.tmpl` suffix so that a harness does not load them as rules while they sit inside the plugin.
 
 ## Refused and generated paths
 

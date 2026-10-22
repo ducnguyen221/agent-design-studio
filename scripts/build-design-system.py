@@ -109,14 +109,30 @@ def _viewer(package: Path, check: bool) -> tuple[str, list[str]]:
     return 'written', warnings
 
 
+def _adapter_plan(package: Path, root: Path) -> tuple[str, tuple[list[str], list[str]]]:
+    """(package path relative to root in POSIX form, what ``--adapters`` would write and skip); raises Refused with the finished
+    error line. Nothing is written here, so a bad argument stops the run before any generated file is touched."""
+    if not root.is_dir():
+        raise Refused(f'input_error: adapters root not found: {v3._label(root)}')
+    try:
+        rel = package.resolve().relative_to(root.resolve()).as_posix()
+        return rel, build.write_adapters(root, rel, check=True)
+    except FileNotFoundError as exc:
+        raise Refused(f'input_error: adapter template not found: {exc.args[0]}') from None
+    except (ValueError, OSError):  # a package outside the root, or one whose path cannot go into a code span
+        raise Refused('input_error: package outside adapters root') from None
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--package', type=Path, help='design-system package folder (format v3)')
     parser.add_argument('--design-md', action='store_true', help='regenerate the DESIGN.md front matter from tokens.json')
     parser.add_argument('--viewer', action='store_true', help='regenerate viewer.html, the offline page, from the package files')
+    parser.add_argument('--adapters', type=Path, metavar='ROOT',
+                        help='write AGENTS.md, CLAUDE.md and GEMINI.md into ROOT, the folder that holds the package; never overwrites')
     parser.add_argument('--check', action='store_true', help='write nothing; exit 1 when a generated file is out of date')
     args = parser.parse_args(argv)
-    if not (args.design_md or args.viewer):
+    if not (args.design_md or args.viewer or args.adapters is not None):
         print('input_error: choose --design-md/--viewer/--adapters', file=sys.stderr)
         return 1
     if args.package is None:
@@ -126,15 +142,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f'input_error: package not found: {v3._label(args.package)}', file=sys.stderr)
         return 1
     try:
-        tokens, index = _inputs(args.package)
+        package_rel, plan = _adapter_plan(args.package, args.adapters) if args.adapters is not None else ('', ([], []))
         states = {'design-md': 'skipped', 'viewer': 'skipped'}
         warnings: list[str] = []
-        if args.design_md:
-            states['design-md'], found = _design_md(args.package, tokens, index, args.check)
-            warnings.extend(found)
-        if args.viewer:
-            states['viewer'], found = _viewer(args.package, args.check)
-            warnings.extend(found)
+        if args.design_md or args.viewer:
+            tokens, index = _inputs(args.package)
+            if args.design_md:
+                states['design-md'], found = _design_md(args.package, tokens, index, args.check)
+                warnings.extend(found)
+            if args.viewer:
+                states['viewer'], found = _viewer(args.package, args.check)
+                warnings.extend(found)
+        written, skipped = plan if args.check or args.adapters is None else build.write_adapters(args.adapters, package_rel)
     except Refused as exc:
         print(exc, file=sys.stderr)
         return 1
@@ -143,10 +162,17 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     for warning in warnings:
         print(warning)
+    for name in skipped:
+        print(f'WARN adapter_exists: {name}')
+        if not args.check:  # what the file would hold, for the owner to merge by hand
+            print(f'--- proposed {name} ---')
+            print(build.adapter_text(name, package_rel), end='')
+            print('--- end ---')
     if args.check:
-        print('CHECKED: ' + ' '.join(f'{name}={"skipped" if state == "skipped" else "ok"}' for name, state in states.items()))
+        line = 'CHECKED: ' + ' '.join(f'{name}={"skipped" if state == "skipped" else "ok"}' for name, state in states.items())
+        print(line + (f' adapters={len(written)} to write, {len(skipped)} present' if args.adapters is not None else ''))
     else:
-        print(f'BUILT: design-md={states["design-md"]} viewer={states["viewer"]} adapters=0 written, 0 skipped')
+        print(f'BUILT: design-md={states["design-md"]} viewer={states["viewer"]} adapters={len(written)} written, {len(skipped)} skipped')
     return 0
 
 

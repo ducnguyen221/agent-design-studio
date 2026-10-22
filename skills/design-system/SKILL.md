@@ -41,7 +41,7 @@ python <plugin>/scripts/build-design-system.py --package <dir> --design-md --vie
 python <plugin>/scripts/verify-design-system.py --package <dir>
 ```
 
-5. Report `adapters: not-requested` unless harness files were asked for.
+5. Only if the user asks for harness files, add `--adapters <root>` (the folder that holds `design-system/`) to the build line. It fills [AGENTS.md.tmpl](templates/agent-adapters/AGENTS.md.tmpl) and two siblings and never overwrites: an existing file prints a proposal and counts as skipped. Report `adapters: written`, `skipped` or `not-requested`.
 
 ## extract
 
@@ -61,7 +61,7 @@ Fill the seven parts of [extend-proposal.md](templates/extend-proposal.md). Reus
 
 ## Package format
 
-Contracts: [system-contract.md](references/system-contract.md) (tree, codes, caps), [token-contract.md](references/token-contract.md), [design-md-spec.md](references/design-md-spec.md) ([template](templates/DESIGN.md)), [source-code-audit.md](references/source-code-audit.md).
+Contracts: [system-contract.md](references/system-contract.md) (tree, codes, caps), [token-contract.md](references/token-contract.md), [design-md-spec.md](references/design-md-spec.md) ([template](templates/DESIGN.md)), [source-code-audit.md](references/source-code-audit.md). `agents/openai.yaml` is the Codex adapter.
 
 ## Boundaries
 
