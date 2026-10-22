@@ -1,114 +1,71 @@
----
-title: Design System audit and extraction report
-status: template
----
+<!-- Flexible template: drop a part that does not apply and say why in one line; keep the order of the six parts. -->
+# Design system audit report: [product name]
 
-# [Tên sản phẩm] — Design System [audit / extract] report
+> A report describes what was read, what it shows and what is still unknown. The `audit` mode is read-only. The `extract` mode writes an as-is proposal into the run folder. Neither mode updates a canonical file, marks anything `approved` or turns an inference into a brand decision.
 
-> Báo cáo này mô tả phạm vi đã kiểm, evidence và khoảng trống. `audit` là read-only. `extract` tạo proposal/as-is trong output directory của run. Không cập nhật canonical, đổi trạng thái approved hoặc biến inferred thành quyết định thương hiệu trong báo cáo này.
-
-## 1. Run và phạm vi
-
-| Trường bắt buộc | Giá trị |
+| Field | Value |
 |---|---|
-| Mode | `audit` / `extract` |
-| Run ID / ngày | `[id]` / `[YYYY-MM-DD]` |
-| Run output directory | `[đường dẫn cụ thể; artifacts của lượt này nằm tại đây]` |
-| Project root | `[đường dẫn repo đã được phép đọc]` |
-| Baseline | `[branch + commit SHA; dirty/clean]` |
-| Surface / sản phẩm | `[... ]` |
-| Phạm vi đường dẫn được đọc | `[thư mục/file allowlist]` |
-| Đường dẫn loại trừ | `[secret, env, credentials, generated/vendor/build, symlink ngoài phạm vi...]` |
-| Framework / entrypoint | `[chỉ ghi đã quan sát; nếu chưa xác định ghi unknown]` |
-| DS canonical hiện hữu | `[path/version/status; hoặc none found within scope]` |
-| Owner / reviewer | `[vai trò/người hoặc unknown; reviewer chưa làm ghi pending]` |
-| Output status | `proposal` / `audit-only` / `blocked` / `unverified` |
+| Mode | `audit` or `extract` |
+| Run id and date | `[id]`, `[YYYY-MM-DD]` |
+| Run folder | `[the folder this run writes to]` |
+| Baseline | `[branch and commit]`, `[clean or dirty]` |
+| Scope and allowlist | `[folders read]`; excluded: `[secrets, env files, generated, vendored, links]` |
+| Surface | `[web, mobile, email, ...]` |
+| Output folder | `[path, or not-written]` |
+| Owner and status | `[owner or unknown]`, `[draft, pending or as-is]` |
+| Canonical map | `[canonical-map.json path, or none found in scope]` |
 
-### Câu hỏi và điều kiện dừng
+## 1 Naming consistency
 
-- Câu hỏi owner còn mở: `[câu hỏi + người cần quyết + status pending]`.
-- Có thể tiếp tục phần chỉ đọc độc lập không? `[yes/no; lý do]`.
-- Điều gì bị chặn khi thiếu trả lời? `[... ]`.
+Names of tokens, components, props and files that follow different patterns for the same thing.
 
-## 2. Phương pháp và coverage
+| Group | Pattern A (`path:line`) | Pattern B (`path:line`) | Suggested single name |
+|---|---|---|---|
+| `[tokens, components, props]` | `[...]` | `[...]` | `[...]` |
 
-Chỉ liệt kê thao tác đã thực hiện. Không ghi “đã kiểm toàn bộ” nếu chưa xác định mẫu số.
+## 2 Token coverage and hardcoded values
 
-| Area | In-scope denominator | Examined numerator | Coverage | Method / locations | Limitations |
-|---|---:|---:|---:|---|---|
-| Token sources | `[N]` | `[n]` | `[n/N hoặc unknown]` | `[... ]` | `[... ]` |
-| Components / exports | `[N]` | `[n]` | `[... ]` | `[... ]` | `[... ]` |
-| Routes / screens | `[N]` | `[n]` | `[... ]` | `[... ]` | `[... ]` |
-| Stories / tests | `[N]` | `[n]` | `[... ]` | `[... ]` | `[... ]` |
-| Themes / assets | `[N]` | `[n]` | `[... ]` | `[... ]` | `[... ]` |
+| Measure | Count | Out of | Examples (`path:line`) |
+|---|---:|---:|---|
+| Values that use a token | `[n]` | `[N]` | `[...]` |
+| Hardcoded colours | `[n]` | `[N]` | `[...]` |
+| Hardcoded spacing, radius, type | `[n]` | `[N]` | `[...]` |
 
-Browser/render checks: `[not run / unverified / run]`; môi trường, route, viewport, theme và timestamp: `[... ]`. Không có browser thì claim runtime/computed giữ `unverified`.
+Each count names the denominator and what it covers. Runtime values not measured are `unverified`.
 
-## 3. Evidence inventory
+## 3 Component completeness
 
-Mỗi dòng là một claim nhỏ và có source trace. Dùng `observed`, `inferred`, `unknown`; ghi riêng `declared` (khai trong file) và `computed` (đo từ rendered runtime) khi nói về giá trị style.
-
-| ID | Claim / phát hiện | Class (`observed` / `inferred` / `unknown`) | Kind (`declared` / `computed` / `behavior` / `rights`) | Source (`path:line`, symbol, URL, Figma node) | Baseline / viewport | Confidence / limitation |
-|---|---|---|---|---|---|---|
-| `[E-01]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` |
-
-Comment, README, token name hoặc screenshot là evidence có giới hạn; chúng không tự chứng minh intent, quyền sử dụng, runtime behavior hay giá trị computed. Không chạy script/package của repo chỉ để suy phong cách.
-
-## 4. Canonical map và drift
-
-| Domain | Canonical source hiện hữu | Baseline/version | Claim được nguồn này chứng minh | Status/owner | Drift hoặc khoảng trống |
+| Component | Source (`path:line`) | Variants | States seen | Docs | Missing |
 |---|---|---|---|---|---|
-| Brand intent | `[path/URL hoặc unknown]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` |
-| Tokens | `[path/URL hoặc none]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` |
-| Components | `[path/URL hoặc none]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` |
-| Patterns/surfaces | `[path/URL hoặc none]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` |
-| Assets/fonts | `[path/URL hoặc none]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` |
+| `[name]` | `[...]` | `[...]` | `[default, hover, focus, disabled, ...]` | `[yes, no]` | `[...]` |
 
-| Drift ID | Nguồn A + evidence | Nguồn B + evidence | As-is / to-be distinction | Impact | Owner decision | Status |
-|---|---|---|---|---|---|---|
-| `[D-01]` | `[... ]` | `[... ]` | `[... ]` | `[... ]` | `[owner + pending/decision link]` | `[open/decided]` |
+A state nobody observed is `unknown`, not filled in from expectation.
 
-Code tại baseline mô tả as-is; guideline đã owner-approve mô tả to-be. Nếu khác nhau, ghi hai phía và để quyết định cho owner. Không tự tạo canonical token/component source thứ hai.
+## 4 Drift between system and code
 
-## 5. Token audit
-
-| Token / selector | Declared value + type | Source (`path:line`) | Consumers | Computed value / render evidence | Class/status |
+| Domain | System says (`path`) | Code says (`path:line`) | Impact | Proposal | Owner decision |
 |---|---|---|---|---|---|
-| `[... ]` | `[... ]` | `[... ]` | `[... ]` | `[unverified hoặc bằng chứng đo]` | `[observed/inferred/unknown]` |
+| `[brand, tokens, components]` | `[...]` | `[...]` | `[...]` | `[...]` | `[pending or recorded]` |
 
-Nếu kiểm theo DTCG subset: `$type` chỉ gồm `color`, `dimension`, `fontFamily`, `fontWeight`, `number`, `duration`; token cần `$value`; alias `{path.to.token}` phải trỏ token cùng file/cùng type. Báo target thiếu, type mismatch và alias cycle rõ ràng. Shadow/easing là composite chưa hỗ trợ trong subset: ghi ở doc/code với source trace, không ép thành DTCG token và không xuất CSS từ giá trị đoán.
+The code at the baseline is the present; owner-confirmed guidance is the target. Record both and let the owner choose.
 
-- Validator/schema/version đã dùng: `[...; nếu chưa chạy ghi not run]`.
-- Kết quả: `[pass/fail/unverified/not applicable]`.
-- Giới hạn: `[subset không chứng nhận tuân thủ toàn chuẩn DTCG]`.
+## 5 Verifier result
 
-## 6. Component, route và state inventory
+- Command: `[the command you ran, for example python scripts/verify-design-system.py --package <dir>]`
+- Result: `[paste the PASS line, or every error and warning line]`
+- Not checked by it: live render, browser display, real import.
 
-| ID | Component/surface | Implementation trace | Variants/states thấy được | Consumer route/story | Status | Missing evidence |
-|---|---|---|---|---|---|---|
-| `[... ]` | `[... ]` | `[path:line/symbol hoặc missing]` | `[... ]` | `[... ]` | `[observed/inferred/unknown]` | `[... ]` |
+## 6 Up to three priorities
 
-Các state runtime chưa quan sát được ghi `unknown`/`unverified`, không điền từ kỳ vọng. Shared component cần spec riêng; report này chỉ inventory và trỏ nguồn.
+1. `[the change with the most effect, and its evidence]`
+2. `[...]`
+3. `[...]`
 
-## 7. Quyền tài sản
+## Coverage, unknowns and next step
 
-| Asset/font/reference | Origin URL/path | Right to view | Right to reuse/distribute | Scope/conditions | Checked date / evidence | Status |
-|---|---|---|---|---|---|---|
-| `[... ]` | `[... ]` | `[yes/no/unknown]` | `[yes/no/unknown]` | `[... ]` | `[... ]` | `[... ]` |
-
-Quyền xem không suy ra quyền sao chép hoặc đưa vào package public. Không đóng gói asset khi trạng thái quyền là `unknown`.
-
-## 8. Kết luận và handoff
-
-- **Đã xác minh:** `[claim + evidence IDs]`.
-- **Suy luận cần xác nhận:** `[claim + cơ sở + owner]`.
-- **Chưa biết / chưa kiểm:** `[câu hỏi hoặc phép kiểm còn thiếu]`.
-- **Đề xuất delta:** `[file đích dự kiến trong run output; hoặc none]`.
-- **Canonical thay đổi:** `no` trong mode audit/extract.
-- **Owner decisions pending:** `[danh sách IDs; nếu không có ghi none]`.
-- **Reviewer record:** `[reviewer, ngày, kết luận, đường dẫn run artifact; nếu chưa review ghi pending]`.
-- **Điều kiện promotion:** `[owner approval + independent reviewer check + source/link consistency evidence]`.
-
-### Tóm tắt coverage
-
-`[n] / [N]` mục trong phạm vi đã khảo sát (`[percent hoặc not computed]`). Mẫu số là `[định nghĩa in-scope]`; loại trừ `[... ]`. Kết quả không đại diện cho phần ngoài phạm vi.
+- Coverage: `[n]` of `[N]` `[unit]` inside `[scope]`; excluded: `[...]`. This says nothing about what lies outside the scope.
+- Unknown or not checked: `[open questions and checks still needed]`
+- Owner decisions pending: `[list, or none]`
+- Reviewer record: `[name, date, verdict, or pending]`
+- Promotion needs: the owner's confirmation and a reviewer's check of diff, links and sources.
+- Next step: `[one action]`

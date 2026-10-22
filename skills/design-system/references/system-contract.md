@@ -114,7 +114,7 @@ Cover rule: line 1 is `<!-- @dsCard height=N -->` with N from 240 to 360 (outsid
 
 ### Viewer rules
 
-`viewer.html` is a static page the build writes; the verifier regenerates it and matches the bytes. These are the rules of the generator, so that a reader knows why the page looks as it does.
+`viewer.html` is a static page the build writes; the verifier regenerates it and matches the result, with CRLF and lone CR read as LF on both sides. These are the rules of the generator, so that a reader knows why the page looks as it does.
 
 - The cover SVG and any SVG asset pass an allow-list: drawing elements, text, gradients, clip and mask, simple filters. No `script`, `style`, `title`, `image`, `a`, `animate` or `foreignObject`, no comment or CDATA section, and `href` or `url()` may point only at an `#id` of the same file. Cover ids get the prefix `cover-` so that they cannot clash with ids of the page. An SVG that fails the list is shown by name only and the build prints `WARN viewer_asset_skipped: <path>`.
 - An image is embedded when it is at most 65 536 bytes, and all embedded images together stay under 250 000 characters of data URI. Anything beyond is listed by name with the same warning.
@@ -211,7 +211,7 @@ Every code the package verifier can print, with its level. `tokens.json` codes a
 
 | Code | Level | Path |
 |---|---|---|
-| `input_error` | error | the CLI argument at fault (no package path) |
+| `input_error` | error | the CLI argument at fault (no package path); a bare `input_error: <ExceptionName>` from the build is an unexpected failure inside a generator, so keep the package that reproduces it |
 | `refused_sensitive_path` | error | `<path>` |
 | `refused_path` | error | `<path>` |
 | `generated_file_present` | error | `<path>` |

@@ -138,8 +138,8 @@ selected source IDs, observed/inferred/unknown claims, rights status, and owner 
 to `design-system`. A reference shortlist or distill does not approve brand decisions.
 For the product-owned folder contract, see
 [system-contract.md](skills/design-system/references/system-contract.md); start at
-[design-index.md](skills/design-system/templates/design-index.md), then use the
-[component spec](skills/design-system/templates/component-spec.md) and
+[DESIGN.md](skills/design-system/templates/DESIGN.md), then use the
+[component README template](skills/design-system/templates/component-v3/README.md) and
 [audit report](skills/design-system/templates/audit-report.md) as needed.
 
 On whole-interface asks it usually triggers on its own:
@@ -194,8 +194,8 @@ skills/design-system/
 │   ├── source-code-audit.md    scoped source evidence and coverage
 │   └── token-contract.md       supported token subset and existing-source rules
 └── templates/
-    ├── design-index.md         system entrypoint, canonical map and ownership
-    ├── component-spec.md       reusable component contract
+    ├── DESIGN.md               system entrypoint, canonical map and ownership
+    ├── component-v3/           reusable component README and preview
     └── audit-report.md         run-scoped evidence, coverage and drift
 ```
 

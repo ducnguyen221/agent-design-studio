@@ -3468,6 +3468,97 @@ class SizeCapAndContractDocTests(unittest.TestCase):
         self.assertGreaterEqual(checked, 2)
 
 
+PACK_FILES = ('references/system-contract.md', 'references/source-code-audit.md', 'references/token-contract.md',
+              'references/design-md-spec.md', 'templates/DESIGN.md', 'templates/audit-report.md', 'templates/extend-proposal.md',
+              'templates/component-v3/README.md', 'templates/component-v3/preview.html', 'templates/brand-v3/design-system.json')
+MODES = ('create', 'extract', 'audit', 'document', 'extend')
+
+
+class PackAndTemplateTests(unittest.TestCase):
+    """TK10: the skill carries five modes, and its templates and size budget stay in shape."""
+
+    def _skill_copy(self, directory):
+        root = Path(directory)
+        shutil.copytree(ROOT / 'skills/design-system', root / 'skills/design-system',
+                        ignore=shutil.ignore_patterns('tests', '__pycache__'))
+        return root
+
+    def test_pack_requires_five_modes(self):
+        self.assertEqual(verifier.verify_pack(ROOT), [])
+
+    def test_pack_cli_without_flags_passes(self):
+        code, out, err = cli()
+        self.assertEqual((code, err), (0, ''), (out, err))
+        self.assertTrue(out.startswith('PASS: structural checks only;'), out)
+
+    def test_pack_reports_missing_document_route(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._skill_copy(directory)
+            (root / 'skills/design-system/SKILL.md').write_text(
+                ' '.join((*[m for m in MODES if m != 'document'], *PACK_FILES)), encoding='utf-8')
+            self.assertEqual(verifier.verify_pack(root), ['missing_skill_route: document'])
+
+    def test_pack_reports_each_missing_file(self):
+        for name in PACK_FILES:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                root = self._skill_copy(directory)
+                (root / 'skills/design-system' / name).unlink()
+                self.assertIn(f'missing_skill_file: {name}', verifier.verify_pack(root))
+
+    def test_pack_reports_each_missing_marker(self):
+        for marker in (*MODES, *PACK_FILES):
+            with self.subTest(marker=marker), tempfile.TemporaryDirectory() as directory:
+                root = self._skill_copy(directory)
+                skill = root / 'skills/design-system/SKILL.md'
+                skill.write_text(' '.join(m for m in (*MODES, *PACK_FILES) if m != marker), encoding='utf-8')
+                self.assertEqual(verifier.verify_pack(root), [f'missing_skill_route: {marker}'])
+
+    def test_skill_md_budget(self):
+        text = (ROOT / 'skills/design-system/SKILL.md').read_text(encoding='utf-8')
+        self.assertLessEqual(len(text.splitlines()), 200)
+        head = text.split('\n---\n', 1)[0].splitlines()
+        self.assertEqual([line.split(':', 1)[0] for line in head if not line.startswith(' ')], ['---', 'name', 'description'])
+        match = re.search(r'^description: "(.*)"$', text, re.MULTILINE)
+        self.assertIsNotNone(match)
+        description = match[1]
+        self.assertLessEqual(len(description), 1024)
+        phrase = 'fits the existing system'
+        self.assertLessEqual(description.index(phrase) + len(phrase), 520)
+        self.assertLess(description.index('Use when'), 500)
+        self.assertIn('adapters: written', text)
+        self.assertLessEqual(len(text.split('\n---\n', 1)[1].encode('utf-8')), 8000)  # Codex reads at most 8000 bytes of a skill body
+        self.assertNotRegex(text, r'\b(?:FR|TK|SC|CQ|RQ)\d')
+
+    def test_templates_have_no_dtcg_value_key(self):
+        for path in sorted((ROOT / 'skills/design-system/templates').rglob('*')):
+            if path.is_file() and path.suffix in {'.md', '.json', '.html', '.tmpl'}:
+                self.assertNotIn('$value', path.read_text(encoding='utf-8'), path.name)
+
+    def test_retired_templates_are_gone(self):
+        for name in ('component-spec.md', 'design-index.md'):
+            self.assertFalse((ROOT / 'skills/design-system/templates' / name).exists(), name)
+
+    def test_component_template_passes_in_a_full_package(self):
+        import design_system_build as build
+        with tempfile.TemporaryDirectory() as directory:
+            shutil.copytree(FIXTURE.parent.parent, Path(directory) / 'project')
+            root = Path(directory) / 'project' / 'design-system'
+            target = root / 'components/Sample'
+            target.mkdir()
+            for name in ('README.md', 'preview.html'):
+                shutil.copy(ROOT / 'skills/design-system/templates/component-v3' / name, target / name)
+            edit_json(root, 'canonical-map.json',
+                      lambda doc: doc['components'].update({'Sample': {'source': 'https://example.com/sample'}}), derived=False)
+            derive(root)
+            errors, warnings = v3.verify_package(root, 'full')
+            self.assertEqual(errors, [], errors)
+            readme = (target / 'README.md').read_text(encoding='utf-8')
+            self.assertEqual(build._summary(readme), readme.splitlines()[0])
+            self.assertFalse(readme.lstrip().startswith('#'))
+            self.assertTrue((target / 'preview.html').read_text(encoding='utf-8').startswith('<!-- @dsCard '))
+            self.assertLess((target / 'preview.html').stat().st_size, 2048)
+
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'skills/design-system/tests/fixture/design-system/design-system.json'
 TEMPLATE = ROOT / 'skills/design-system/templates/brand-v3/design-system.json'

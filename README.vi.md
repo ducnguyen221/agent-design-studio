@@ -137,8 +137,8 @@ và [template reference](skills/design-routing/templates/reference-design.md), r
 source ID, nhận định observed/inferred/unknown, trạng thái quyền và câu hỏi cho owner sang
 `design-system`. Shortlist hoặc bản distill không tự duyệt nhận diện thương hiệu. Xem
 [system contract](skills/design-system/references/system-contract.md) để biết cấu trúc hệ
-thống do sản phẩm sở hữu; bắt đầu với [design index](skills/design-system/templates/design-index.md),
-rồi dùng [component spec](skills/design-system/templates/component-spec.md) và
+thống do sản phẩm sở hữu; bắt đầu với [DESIGN.md](skills/design-system/templates/DESIGN.md),
+rồi dùng [mẫu README component](skills/design-system/templates/component-v3/README.md) và
 [audit report](skills/design-system/templates/audit-report.md) khi phù hợp.
 
 Với yêu cầu làm nguyên một giao diện, nó thường tự kích hoạt:
@@ -192,8 +192,8 @@ skills/design-system/
 │   ├── source-code-audit.md    bằng chứng và coverage khi đọc source
 │   └── token-contract.md       subset token hỗ trợ và luật giữ nguồn hiện hữu
 └── templates/
-    ├── design-index.md         điểm vào hệ thống, nguồn chuẩn và owner
-    ├── component-spec.md       hợp đồng component dùng lại
+    ├── DESIGN.md               điểm vào hệ thống, nguồn chuẩn và owner
+    ├── component-v3/           README và preview mẫu cho component
     └── audit-report.md         evidence, coverage và drift theo lượt chạy
 ```
 

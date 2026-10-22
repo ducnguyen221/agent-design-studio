@@ -165,8 +165,9 @@ def validate_manifest(document: object, root: Path) -> list[str]:
 
 def verify_pack(root: Path) -> list[str]:
     required = ['SKILL.md', 'references/system-contract.md', 'references/source-code-audit.md',
-                'references/token-contract.md', 'templates/design-index.md',
-                'templates/component-spec.md', 'templates/audit-report.md']
+                'references/token-contract.md', 'references/design-md-spec.md', 'templates/DESIGN.md',
+                'templates/audit-report.md', 'templates/extend-proposal.md', 'templates/component-v3/README.md',
+                'templates/component-v3/preview.html', 'templates/brand-v3/design-system.json']
     errors: list[str] = []
     targets: dict[str, Path] = {}
     for name in required:
@@ -183,8 +184,11 @@ def verify_pack(root: Path) -> list[str]:
             text = targets['SKILL.md'].read_text(encoding='utf-8')
         except (OSError, UnicodeError):
             return [*errors, 'cannot_read_skill: SKILL.md']
-        for marker in ('create', 'extract', 'audit', 'extend', *required[1:]):
-            if marker not in text:
+        modes = ('create', 'extract', 'audit', 'document', 'extend')
+        for marker in (*modes, *required[1:]):
+            # A mode counts as named only on its own: 'extend' inside 'extend-proposal.md' or 'document' inside 'documentation' does not.
+            found = re.search(rf'(?<![\w./-]){marker}(?![\w./-])', text) if marker in modes else marker in text
+            if not found:
                 errors.append(f'missing_skill_route: {marker}')
     return errors
 

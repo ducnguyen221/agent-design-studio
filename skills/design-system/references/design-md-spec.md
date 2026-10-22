@@ -38,6 +38,7 @@ Rules we add on top of the upstream shape:
 - `## Overview` must contain, as list items, a line starting with `- Read order:`, one starting with `- Owner:` and one starting with `- Status:`; `- Version:` and `- Canonical by domain:` are expected but not machine-checked.
 - The body names tokens (as `{colors.<key>}`, `{typography.<key>}`, `{rounded.<key>}`, `{spacing.<key>}` or in back-ticks) and never copies values. Value copying is not machine-checked.
 - `## Elevation & Depth` is where `shadow` tokens and other single-value families are named, because they have no front matter key.
+- Do not open the body with a `---` rule. A later `---` line would then be read as the end of a front matter block, and the text between would be replaced when the front matter is rebuilt.
 
 Starting point: `templates/DESIGN.md`.
 
@@ -120,7 +121,7 @@ Run by `verify-design-system.py` as part of `verify_package` (the `DESIGN.md` en
 | `design_md_broken_ref` | a `{colors.x}`, `{typography.x}`, `{rounded.x}` or `{spacing.x}` in the body (outside fenced code) names a key that is not in the front matter |
 | `design_md_overview_incomplete` | the Overview section lacks a `- Read order:`, `- Owner:` or `- Status:` line |
 
-`build-design-system.py --design-md --check` reports the same `design_md_stale` and exits 1 without writing; on a package without `DESIGN.md` it reports `design_md_missing: DESIGN.md`. `build-design-system.py --design-md` replaces only the front matter block and leaves the body untouched; on a file without a front matter block it prepends one.
+`build-design-system.py --design-md --check` reports the same `design_md_stale` and exits 1 without writing; on a package without `DESIGN.md` it reports `design_md_missing: DESIGN.md`. That check reads CRLF and lone CR as LF on both sides, so line endings alone never make `DESIGN.md` stale. `build-design-system.py --design-md` replaces only the front matter block and leaves the body untouched; on a file without a front matter block it prepends one.
 
 ## Not checked
 
