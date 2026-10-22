@@ -1,5 +1,6 @@
 """Original, anonymous contract fixtures; no external assets or runtime claims."""
 import importlib.util
+import hashlib
 import tempfile
 import unittest
 import json
@@ -1447,6 +1448,341 @@ class BoundedInputTests(unittest.TestCase):
             (errors, _warnings), reads = self.read_sizes(directory)
         self.assertTrue(all(0 < n <= 512001 for n in reads), sorted(set(reads)))
         self.assertEqual(errors, [])
+
+
+# ---------------------------------------------------------------------------
+# DESIGN.md generator and build CLI (SPR-32 TK6).
+# ---------------------------------------------------------------------------
+
+INDEX = {'v': 3, 'layout': 'files', 'title': 'Sample', 'namespace': 'Sample'}
+FULL_FRONT_MATTER = '''---
+version: alpha
+name: "Sample Studio"
+colors:
+  bg: "#ffffff"
+  text: "#111111"
+  accent: "#0057b8"
+  link: "{colors.accent}"
+typography:
+  body:
+    fontFamily: "Inter, sans-serif"
+    fontSize: "16px"
+    fontWeight: 400
+    lineHeight: 1.5
+rounded:
+  radius-sm: "2px"
+spacing:
+  space-1: "4px"
+---
+'''
+
+
+def two_themes(*tokens):
+    doc = tok(color=list(tokens))
+    doc['color']['themes'] = [{'id': 'light', 'name': 'Light'}, {'id': 'dark', 'name': 'Dark'}]
+    return doc
+
+
+def styled(*styles, families=None, group_family='sans'):
+    doc = tok()
+    doc['type'] = {'families': families or {'sans': 'Inter, sans-serif', 'mono': 'Menlo, monospace'},
+                   'groups': [{'name': 'G', 'family': group_family, 'styles': list(styles)}]}
+    return doc
+
+
+class DesignMdBuildTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.build = importlib.import_module('design_system_build')
+        path = Path(__file__).with_name('build-design-system.py')
+        loader_spec = importlib.util.spec_from_file_location('design_system_builder', path)
+        cls.cli_module = importlib.util.module_from_spec(loader_spec)
+        loader_spec.loader.exec_module(cls.cli_module)
+
+    def run_cli(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = self.cli_module.main(list(argv))
+        return code, out.getvalue(), err.getvalue()
+
+    def front(self, tokens, index=INDEX):
+        return self.build.render_front_matter(tokens, index)
+
+    def test_front_matter_first_theme_only(self):
+        tokens = two_themes(color('bg', {'light': '#ffffff', 'dark': '#000000'}), color('late', {'dark': '#123456'}),
+                            color('plain', '#ABC'))
+        text = self.front(tokens)
+        self.assertIn('  bg: "#ffffff"\n', text)
+        self.assertNotIn('#000000', text)
+        self.assertIn('  late: "#123456"\n', text)  # the first theme has no entry: the first theme that has one serves it
+        self.assertIn('  plain: "#aabbcc"\n', text)
+
+    def test_alias_becomes_ref(self):
+        tokens = tok(color=[color('bg', '#ffffff'), color('text', '{ink}'), color('ink', 'oklch(0 0 0)')])
+        self.assertEqual(self.front(tokens), '---\nversion: alpha\nname: "Sample"\ncolors:\n  bg: "#ffffff"\n'
+                                             '  text: "{colors.ink}"\n  ink: "#000000"\n---\n')
+
+    def test_oklch_to_hex(self):
+        self.assertEqual(self.build.to_hex('oklch(1 0 0)'), '#ffffff')
+        self.assertEqual(self.build.to_hex('oklch(0 0 0)'), '#000000')
+        self.assertIn('  ink: "#000000"\n', self.front(tok(color=[color('ink', 'oklch(0 0 0)')])))
+
+    def test_to_hex_vectors(self):
+        cases = {'#ABC': '#aabbcc', '#ABCD': '#aabbccdd', '#AABBCC': '#aabbcc', '#AABBCCDD': '#aabbccdd', ' #fff ': '#ffffff',
+                 'rgb(255 0 0)': '#ff0000', 'rgb(255, 0, 0)': '#ff0000', 'rgb(100% 0% 0%)': '#ff0000',
+                 'rgba(255 0 0 / 0.5)': '#ff000080', 'rgb(255 0 0 / 1)': '#ff0000', 'hsl(0 100% 50%)': '#ff0000',
+                 'oklab(1 0 0)': '#ffffff'}
+        for value, expected in cases.items():
+            self.assertEqual(self.build.to_hex(value), expected, value)
+        clamped = self.build.to_hex('oklch(0.7 0.4 30)')
+        self.assertRegex(clamped, r'^#[0-9a-f]{6}$')
+        for value in ('lab(50% 0 0)', 'lch(50% 0 0)', 'color(display-p3 1 0 0)', 'red', 'var(--x)', '', 12, None):
+            self.assertIsNone(self.build.to_hex(value), value)
+
+    def test_lab_passthrough_warns(self):
+        tokens = tok(color=[color('mid', 'lab(50% 0 0)'), color('ink', '#000000'), color('edge', 'color(display-p3 1 0 0)')])
+        self.assertIn('  mid: "lab(50% 0 0)"\n', self.front(tokens))
+        self.assertEqual(self.build.design_md_warnings(tokens), ['design_md_color_passthrough: mid', 'design_md_color_passthrough: edge'])
+        self.assertEqual(self.build.design_md_warnings(tok(color=[color('ink', 'oklch(0 0 0)'), color('a', '{ink}')])), [])
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('mid', 'lab(50% 0 0)')))
+            code, out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual((code, err), (0, ''))
+            self.assertIn('WARN design_md_color_passthrough: mid\n', out)
+            self.assertIn('  mid: "lab(50% 0 0)"\n', Path(directory, 'DESIGN.md').read_text(encoding='utf-8'))
+
+    def test_front_matter_key_order(self):
+        files = base_files()
+        text = self.build.render_front_matter(files['tokens.json'], files['design-system.json'])
+        self.assertEqual(text, FULL_FRONT_MATTER)
+        tops = [line.split(':')[0] for line in text.split('\n') if line and not line.startswith((' ', '-'))]
+        self.assertEqual(tops, ['version', 'name', 'colors', 'typography', 'rounded', 'spacing'])
+        # an empty family leaves no key at all
+        self.assertEqual(self.front(tok(color=[color('bg', '#fff')])), '---\nversion: alpha\nname: "Sample"\ncolors:\n  bg: "#ffffff"\n---\n')
+        self.assertEqual(self.front({}), '---\nversion: alpha\nname: "Sample"\n---\n')
+        self.assertEqual(self.front(tok(), {'title': 3}), '---\nversion: alpha\nname: ""\n---\n')
+
+    def test_typography_mapping(self):
+        tokens = styled(
+            {'name': 'a', 'fontSize': 16, 'fontWeight': 'bold', 'lineHeight': 1.5},
+            {'name': 'b', 'fontSize': '1rem', 'fontWeight': '300 800', 'lineHeight': '24px', 'family': 'mono'},
+            {'name': 'c', 'fontSize': '0.875rem', 'fontWeight': 'normal', 'lineHeight': '1.25'},
+            {'name': 'd', 'fontWeight': '700', 'lineHeight': 2.0, 'fontSize': 12.5},
+            {'name': 'e', 'family': 'missing'})
+        self.assertEqual(self.front(tokens), '''---
+version: alpha
+name: "Sample"
+typography:
+  a:
+    fontFamily: "Inter, sans-serif"
+    fontSize: "16px"
+    fontWeight: 700
+    lineHeight: 1.5
+  b:
+    fontFamily: "Menlo, monospace"
+    fontSize: "1rem"
+    fontWeight: "300 800"
+    lineHeight: "24px"
+  c:
+    fontFamily: "Inter, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: 1.25
+  d:
+    fontFamily: "Inter, sans-serif"
+    fontSize: "12.5px"
+    fontWeight: 700
+    lineHeight: 2
+  e: {}
+---
+''')
+
+    def test_font_stack_quotes_are_escaped(self):
+        tokens = styled({'name': 'a', 'fontSize': '16px'}, families={'sans': '"Inter", sans-serif'})
+        self.assertIn('    fontFamily: "\\"Inter\\", sans-serif"\n', self.front(tokens))
+
+    def test_rounded_and_spacing(self):
+        tokens = tok(radius=[color('r0', 0), color('r1', 4), color('r2', '0'), color('r3', '50%'), color('r4', '0.5rem'), color('r5', '6')],
+                     spacing=[color('s1', '4px'), color('s2', 8), color('s3', 1.5)])
+        text = self.front(tokens)
+        self.assertIn('rounded:\n  r0: "0"\n  r1: "4px"\n  r2: "0"\n  r3: "50%"\n  r4: "0.5rem"\n  r5: "6px"\n', text)
+        self.assertIn('spacing:\n  s1: "4px"\n  s2: "8px"\n  s3: "1.5px"\n', text)
+
+    def test_escaping_follows_the_spec(self):
+        title = 'a"b\\c\nd\te\rf\x08g\x0ch\x7fi\x85j k\x00lé'
+        text = self.front(tok(), {'title': title})
+        line = text.split('\n')[2]
+        self.assertEqual(line, 'name: "a\\"b\\\\c\\nd\\te\\u000df\\u0008g\\u000ch\\u007fi\\u0085j\\u2028k\\u0000lé"')
+        self.assertEqual(json.loads(line[len('name: '):]), title)
+        for ch in line:
+            self.assertFalse(ord(ch) < 0x20 or 0x7f <= ord(ch) <= 0x9f or ord(ch) in (0x2028, 0x2029), repr(ch))
+        everything = ''.join(chr(c) for c in list(range(0, 0x300)) + [0x2028, 0x2029, 0xfffe, 0xffff, 0xdc00, 0xd800, 0x1f600])
+        self.assertEqual(json.loads(self.build._quote(everything)), everything)
+
+    def test_keys_that_need_quotes(self):
+        names = ['plain', 'a-b', '_x', '1st', 'a.b', 'Yes', 'no', 'NULL', 'Off', 'n', 'Y', 'true', 'on', 'nope']
+        text = self.front(tok(color=[color(name, '#000000') for name in names]))
+        bare = [line.split(':')[0].strip() for line in text.split('\n')[4:-2]]
+        self.assertEqual(bare, ['plain', 'a-b', '_x', '"1st"', '"a.b"', '"Yes"', '"no"', '"NULL"', '"Off"', '"n"', '"Y"', '"true"', '"on"', 'nope'])
+
+    def test_split_front_matter(self):
+        split = self.build.split_front_matter
+        self.assertEqual(split('---\na: 1\n---\nbody'), ('---\na: 1\n---\n', 'body'))
+        self.assertEqual(split('no block\n'), ('', 'no block\n'))
+        self.assertEqual(split(''), ('', ''))
+        self.assertEqual(split('---\na: 1\n---'), ('---\na: 1\n---', ''))
+        self.assertEqual(split('---\r\na: 1\r\n---\r\nbody\r\n'), ('---\r\na: 1\r\n---\r\n', 'body\r\n'))
+        self.assertEqual(split('---\na: 1\nbody without close\n'), ('', '---\na: 1\nbody without close\n'))
+        self.assertEqual(split('---'), ('', '---'))
+        self.assertEqual(split('text\n---\na\n---\nbody'), ('', 'text\n---\na\n---\nbody'))
+        self.assertEqual(split('﻿---\na\n---\nbody'), ('﻿---\na\n---\n', 'body'))
+        self.assertEqual(split('---\n---\nbody'), ('---\n---\n', 'body'))
+
+    def test_split_front_matter_is_linear(self):
+        for text in ('---\n' + 'a\n' * 200000, '---\n' + ' ' * 400000, '\n' * 400000):
+            start = time.perf_counter()
+            self.build.split_front_matter(text)
+            self.assertLess(time.perf_counter() - start, 1.0)
+
+    def test_render_keeps_body_bytes(self):
+        tokens, index = base_files()['tokens.json'], base_files()['design-system.json']
+        head = self.build.render_front_matter(tokens, index)
+        body = '## Overview\r\n\ttabbed  \r\nCafé   text\x7f\n\n---\nnot a fence\n```\n---\n```\nno final newline'
+        for existing in ('---\nold: 1\n---\n' + body, '---\r\nold: 1\r\n---\r\n' + body, '﻿---\nold: 1\n---\n' + body, body):
+            result = self.build.render_design_md(existing, tokens, index)
+            self.assertEqual(result, head + body)
+            self.assertEqual(self.build.render_design_md(result, tokens, index), result)  # idempotent
+        self.assertEqual(self.build.render_design_md('---\nold: 1\n---\n', tokens, index), head)
+
+    def test_empty_existing_takes_the_template_body(self):
+        tokens, index = base_files()['tokens.json'], base_files()['design-system.json']
+        result = self.build.render_design_md('', tokens, index)
+        self.assertTrue(result.startswith(FULL_FRONT_MATTER + '## Overview\n'))
+        self.assertNotIn('do not edit', result)
+        self.assertNotIn('\r', result)
+        self.assertEqual(v3.validate_design_md_structure(result), [])
+        self.assertEqual(self.build.split_front_matter(result)[0], FULL_FRONT_MATTER)
+
+    def test_check_detects_stale(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            before = Path(directory, 'DESIGN.md').read_bytes()
+            code, out, err = self.run_cli('--package', directory, '--design-md', '--check')
+            self.assertEqual((code, out, err.strip()), (1, '', 'design_md_stale: DESIGN.md'))
+            self.assertEqual(Path(directory, 'DESIGN.md').read_bytes(), before)
+            Path(directory, 'DESIGN.md').unlink()
+            code, out, err = self.run_cli('--package', directory, '--design-md', '--check')
+            self.assertEqual((code, err.strip()), (1, 'design_md_missing: DESIGN.md'))
+            self.assertFalse(Path(directory, 'DESIGN.md').exists())
+
+    def test_build_twice_same_sha(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            path = Path(directory, 'DESIGN.md')
+            code, out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual((code, err), (0, ''))
+            self.assertEqual(out.strip(), 'BUILT: design-md=written viewer=skipped adapters=0 written, 0 skipped')
+            first = hashlib.sha256(path.read_bytes()).hexdigest()
+            self.assertTrue(path.read_text(encoding='utf-8').startswith(FULL_FRONT_MATTER + '\n## Overview\n'))
+            code, out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual((code, err), (0, ''))
+            self.assertEqual(out.strip(), 'BUILT: design-md=unchanged viewer=skipped adapters=0 written, 0 skipped')
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), first)
+            code, out, err = self.run_cli('--package', directory, '--design-md', '--check')
+            self.assertEqual((code, out.strip(), err), (0, 'CHECKED: design-md=ok viewer=skipped', ''))
+            errors, _warnings = v3.verify_package(Path(directory))
+            self.assertEqual(errors, [])
+
+    def test_build_after_token_edit_becomes_stale_then_fresh(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            self.assertEqual(self.run_cli('--package', directory, '--design-md')[0], 0)
+            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'][2].update(value='#0057b9'))
+            code, _out, err = self.run_cli('--package', directory, '--design-md', '--check')
+            self.assertEqual((code, err.strip()), (1, 'design_md_stale: DESIGN.md'))
+            self.assertEqual(self.run_cli('--package', directory, '--design-md')[1].strip(),
+                             'BUILT: design-md=written viewer=skipped adapters=0 written, 0 skipped')
+            self.assertIn('  accent: "#0057b9"\n', Path(directory, 'DESIGN.md').read_text(encoding='utf-8'))
+
+    def test_cli_requires_content_flag(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            for argv in (['--package', directory], ['--package', directory, '--check'], ['--package', str(Path(directory, 'absent'))], []):
+                code, out, err = self.run_cli(*argv)
+                self.assertEqual((code, out, err.strip()), (1, '', 'input_error: choose --design-md/--viewer/--adapters'), argv)
+
+    def test_cli_package_must_be_a_folder(self):
+        with tempfile.TemporaryDirectory() as directory:
+            code, out, err = self.run_cli('--package', str(Path(directory, 'absent')), '--design-md')
+            self.assertEqual((code, out), (1, ''))
+            self.assertTrue(err.startswith('input_error: package not found: '), err)
+            code, _out, err = self.run_cli('--design-md')
+            self.assertEqual((code, err.strip()), (1, 'input_error: --package is required'))
+
+    def test_cli_refuses_invalid_tokens_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            before = Path(directory, 'DESIGN.md').read_bytes()
+            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('bad', 'red')))
+            code, out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual((code, out), (1, ''))
+            self.assertIn('forbidden_color_syntax: tokens.json: color.bad', err)
+            self.assertEqual(Path(directory, 'DESIGN.md').read_bytes(), before)
+            make(directory, tokens__json=None)
+            Path(directory, 'tokens.json').unlink()
+            put(directory, 'design-system.json', '[')
+            code, _out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual(code, 1)
+            self.assertEqual(err.split('\n')[:2], ['missing_required_file: tokens.json', 'invalid_index_value: design-system.json: json'])
+            put(directory, 'tokens.json', '{"a":')
+            put(directory, 'design-system.json', {'v': 4})
+            code, _out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual(err.split('\n')[:2], ['token_shape: tokens.json: json', 'unsupported_format_version: design-system.json: v: 4'])
+
+    def test_cli_bounds_and_decodes_design_md(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, DESIGN__md='x' * 600000)
+            code, _out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual((code, err.strip()), (1, 'limit_exceeded: DESIGN.md: file size: 600000 > 512000'))
+            self.assertEqual(Path(directory, 'DESIGN.md').stat().st_size, 600000)
+            put(directory, 'DESIGN.md', b'\xff\xfe## Overview\n')
+            code, _out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual((code, err.strip()), (1, 'input_error: DESIGN.md: not valid UTF-8'))
+
+    def test_cli_never_opens_a_linked_or_sensitive_design_md(self):
+        real = v3.safe_path
+
+        def refuse_design_md(root, relative):
+            if relative == 'DESIGN.md':
+                raise ValueError('linked_path')
+            return real(root, relative)
+
+        with tempfile.TemporaryDirectory() as directory, patch.object(self.cli_module.v3, 'safe_path', refuse_design_md):
+            make(directory)
+            before = Path(directory, 'DESIGN.md').read_bytes()
+            code, out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual((code, out, err.strip()), (1, '', 'refused_sensitive_path: DESIGN.md'))
+            self.assertEqual(Path(directory, 'DESIGN.md').read_bytes(), before)
+
+    def test_cli_creates_design_md_from_the_template(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, DESIGN__md=None)
+            code, out, err = self.run_cli('--package', directory, '--design-md')
+            self.assertEqual((code, err), (0, ''))
+            self.assertIn('design-md=written', out)
+            text = Path(directory, 'DESIGN.md').read_text(encoding='utf-8')
+            self.assertTrue(text.startswith(FULL_FRONT_MATTER + '## Overview\n'))
+
+    def test_build_leaves_other_package_files_alone(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            names = sorted(str(p.relative_to(directory)) for p in Path(directory).rglob('*') if p.is_file())
+            before = {n: Path(directory, n).read_bytes() for n in names if n != 'DESIGN.md'}
+            self.assertEqual(self.run_cli('--package', directory, '--design-md')[0], 0)
+            after_names = sorted(str(p.relative_to(directory)) for p in Path(directory).rglob('*') if p.is_file())
+            self.assertEqual(after_names, names)
+            self.assertEqual({n: Path(directory, n).read_bytes() for n in names if n != 'DESIGN.md'}, before)
 
 
 ROOT = Path(__file__).resolve().parents[1]
