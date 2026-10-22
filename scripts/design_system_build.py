@@ -8,6 +8,7 @@ from __future__ import annotations
 import math
 import re
 import sys
+from decimal import Decimal
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -15,6 +16,7 @@ import design_system_v3 as v3  # noqa: E402
 
 TEMPLATE = Path(__file__).resolve().parents[1] / 'skills' / 'design-system' / 'templates' / 'DESIGN.md'
 SPEC_LABEL = 'alpha'
+BOM = chr(0xFEFF)
 _BARE_KEY = re.compile(r'[A-Za-z_][A-Za-z0-9_-]*')
 _YAML_WORDS = {'true', 'false', 'yes', 'no', 'on', 'off', 'y', 'n', 'null', '~'}
 _PLAIN_NUMBER = re.compile(r'[+-]?(?:\d+(?:\.\d*)?|\.\d+)')
@@ -58,7 +60,8 @@ def _number_text(value: object) -> str | None:
     if isinstance(value, int):
         return str(value)
     if isinstance(value, float) and math.isfinite(value):
-        return str(int(value)) if value == int(value) else repr(value)
+        # A decimal, never an exponent: a YAML 1.1 reader takes "1e-05" for a string.
+        return str(int(value)) if value == int(value) else format(Decimal(repr(value)), 'f')
     return None
 
 
@@ -269,4 +272,7 @@ def render_design_md(existing: str, tokens: dict, index: dict) -> str:
     if existing == '':
         _sample, body = split_front_matter(TEMPLATE.read_bytes().decode('utf-8').replace('\r\n', '\n'))
         return head + body
-    return head + split_front_matter(existing)[1]
+    front, body = split_front_matter(existing)
+    if not front and body.startswith(BOM):
+        body = body[1:]  # a BOM kept in front of no block would end up in the middle of the new file
+    return head + body

@@ -1784,6 +1784,57 @@ typography:
             self.assertEqual(after_names, names)
             self.assertEqual({n: Path(directory, n).read_bytes() for n in names if n != 'DESIGN.md'}, before)
 
+    # ---- TK6 fix 1 (review PS-1, NS-1, GC-1)
+
+    def test_bom_without_front_matter_leaves_no_bom_in_the_body(self):
+        existing = '\ufeff## Overview\n\n- Read order: README.md\n- Owner: A\n- Status: draft\n'
+        text = self.build.render_design_md(existing, tok(color=[color('bg', '#ffffff')]), INDEX)
+        self.assertNotIn('\ufeff', text)
+        front, body = self.build.split_front_matter(text)
+        self.assertTrue(body.startswith('## Overview\n'), body[:20])
+        self.assertEqual(self.build.render_design_md(text, tok(color=[color('bg', '#ffffff')]), INDEX), text)
+        # A BOM that sits in front of a front matter block is dropped with it; a BOM deeper in the body is not touched.
+        deeper = '---\nversion: alpha\n---\n## Overview\n\ufeffx\n'
+        self.assertIn('\ufeffx', self.build.render_design_md(deeper, tok(), INDEX))
+
+    def test_bom_without_front_matter_through_the_cli(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, DESIGN__md=b'\xef\xbb\xbf' + design_md().split('---\n', 2)[2].encode('utf-8'))
+            self.assertEqual(self.run_cli('--package', directory, '--design-md')[0], 0)
+            raw = Path(directory, 'DESIGN.md').read_bytes()
+            self.assertEqual(raw.count(b'\xef\xbb\xbf'), 0)
+            self.assertEqual(v3.validate_design_md_structure(raw.decode('utf-8')), [])
+            self.assertEqual(self.run_cli('--package', directory, '--design-md', '--check')[0], 0)
+
+    def test_output_larger_than_the_cap_is_refused_before_writing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, DESIGN__md='x' * v3.CAP_KEPT)
+            before = Path(directory, 'DESIGN.md').read_bytes()
+            for extra in ((), ('--check',)):
+                code, out, err = self.run_cli('--package', directory, '--design-md', *extra)
+                self.assertEqual((code, out), (1, ''), extra)
+                self.assertRegex(err.strip(), r'^limit_exceeded: DESIGN\.md: file size: \d+ > 512000$')
+                self.assertEqual(Path(directory, 'DESIGN.md').read_bytes(), before)
+            # One that fits after the head is added is written, and the next run leaves it alone.
+            put(directory, 'DESIGN.md', 'x' * 400000)
+            self.assertEqual(self.run_cli('--package', directory, '--design-md')[0], 0)
+            self.assertEqual(self.run_cli('--package', directory, '--design-md')[1].strip(),
+                             'BUILT: design-md=unchanged viewer=skipped adapters=0 written, 0 skipped')
+
+    def test_small_numbers_are_plain_decimals(self):
+        style = {'name': 'tiny', 'fontSize': 1e-07, 'fontWeight': 400, 'lineHeight': 1e-05, 'usage': 'u'}
+        doc = styled(style)
+        doc['radius'] = {'tokens': [{'name': 'r', 'value': 1e-07, 'usage': 'u'}, {'name': 'big', 'value': 2.5e-05, 'usage': 'u'}]}
+        text = self.front(doc)
+        self.assertNotRegex(text, r'\d[eE][+-]?\d')
+        self.assertIn('lineHeight: 0.00001\n', text)
+        self.assertIn('fontSize: "0.0000001px"\n', text)
+        self.assertIn('  r: "0.0000001px"\n', text)
+        self.assertIn('  big: "0.000025px"\n', text)
+        self.assertIn('lineHeight: 1.5\n', self.front(styled({'name': 'a', 'lineHeight': 1.5, 'usage': 'u'})))
+        self.assertIn('lineHeight: 2\n', self.front(styled({'name': 'a', 'lineHeight': 2.0, 'usage': 'u'})))
+        self.assertIn('lineHeight: 0.00001\n', self.front(styled({'name': 'a', 'lineHeight': '0.00001', 'usage': 'u'})))
+
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'skills/design-system/tests/fixture/design-system/design-system.json'

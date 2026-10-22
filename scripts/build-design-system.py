@@ -75,6 +75,9 @@ def _design_md(package: Path, tokens: dict, index: dict, check: bool) -> tuple[s
     warnings = [f'WARN {line}' for line in build.design_md_warnings(tokens)]
     if text == existing and raw is not None:
         return 'unchanged', warnings
+    size = len(text.encode('utf-8'))
+    if size > v3.CAP_KEPT:  # the file this run would leave behind must be one the next run accepts
+        raise Refused(f'limit_exceeded: DESIGN.md: file size: {size} > {v3.CAP_KEPT}')
     if check:
         raise Refused('design_md_missing: DESIGN.md' if raw is None else 'design_md_stale: DESIGN.md')
     v3.safe_path(package, 'DESIGN.md').write_bytes(text.encode('utf-8'))
