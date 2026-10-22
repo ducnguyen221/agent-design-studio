@@ -1,0 +1,29 @@
+name: verify skills
+
+# Runs the three verifiers and the generated-file checks. Stdlib only: the
+# only network use is checkout and setup-python.
+on:
+  push:
+    branches: [main, 'sprint/**']
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify motion pack
+        run: python scripts/verify-motion-pack.py
+      - name: Verify resource pack
+        run: python scripts/verify-resource-pack.py
+      - name: Design system self-test
+        run: python scripts/verify-design-system.py --self-test
+      - name: Verify design system skill
+        run: python scripts/verify-design-system.py
+      - name: Verify fixture package (full profile)
+        run: python scripts/verify-design-system.py --package skills/design-system/tests/fixture/design-system --profile full
+      - name: Check generated files (fixture and template)
+        run: python scripts/build-design-system.py --package skills/design-system/tests/fixture/design-system --design-md --viewer --check && python scripts/build-design-system.py --package skills/design-system/templates/brand-v3 --design-md --viewer --check
