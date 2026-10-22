@@ -6,6 +6,7 @@ import unittest
 import json
 import io
 import os
+import re
 import sys
 import time
 from contextlib import redirect_stderr, redirect_stdout
@@ -1834,6 +1835,729 @@ typography:
         self.assertIn('lineHeight: 1.5\n', self.front(styled({'name': 'a', 'lineHeight': 1.5, 'usage': 'u'})))
         self.assertIn('lineHeight: 2\n', self.front(styled({'name': 'a', 'lineHeight': 2.0, 'usage': 'u'})))
         self.assertIn('lineHeight: 0.00001\n', self.front(styled({'name': 'a', 'lineHeight': '0.00001', 'usage': 'u'})))
+
+
+# ---------------------------------------------------------------------------
+# viewer.html generator (SPR-32 TK7). Every package below is invented; hostile text is there on purpose.
+# ---------------------------------------------------------------------------
+
+PNG = b'\x89PNG\r\n\x1a\n'
+EIGHT = ['overview', 'colors', 'typography', 'spacing', 'components', 'assets', 'files', 'agents']
+CLEAN_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 10">'
+             '<defs><linearGradient id="g"><stop offset="0" stop-color="#fff"/></linearGradient><path id="a" d="M0 0h5v5z"/></defs>'
+             '<g style="fill:#fff;font-family:Inter"><use href="#a"/><rect width="4" height="4" fill="url(#g)"/>'
+             '<text x="1" y="2">Sample <tspan>Studio</tspan></text><text>Tagline here</text></g></svg>')
+COVER = '<!-- @dsCard height=300 -->\n' + CLEAN_SVG + '\n'
+
+
+class ViewerBuildTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.build = importlib.import_module('design_system_build')
+        path = Path(__file__).with_name('build-design-system.py')
+        loader_spec = importlib.util.spec_from_file_location('design_system_builder_viewer', path)
+        cls.cli_module = importlib.util.module_from_spec(loader_spec)
+        loader_spec.loader.exec_module(cls.cli_module)
+
+    def run_cli(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = self.cli_module.main(list(argv))
+        return code, out.getvalue(), err.getvalue()
+
+    def page(self, directory):
+        data = self.build.collect_package(Path(directory))
+        return self.build.render_viewer(data), data
+
+    def sections(self, text):
+        return re.findall(r'<section id="([a-z]+)"', text)
+
+    # ---- structure
+
+    def test_viewer_sections_eight(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            text, _data = self.page(directory)
+        self.assertEqual(self.sections(text), EIGHT)
+        self.assertEqual(re.findall(r'<nav[^>]*>(.*?)</nav>', text, re.S)[0].count('href="#'), 8)
+        for name in EIGHT:
+            self.assertIn(f'<a href="#{name}">', text)
+        self.assertEqual(len(re.findall(r'<h1[ >]', text)), 1)
+        self.assertTrue(text.startswith('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">'))
+        self.assertIn('<meta name="viewport" content="width=device-width, initial-scale=1">', text)
+        self.assertIn('<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; '
+                      'style-src \'unsafe-inline\'; script-src \'unsafe-inline\'">', text)
+
+    def test_viewer_title_static_label(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            text, _data = self.page(directory)
+            self.assertIn('<title>Sample Studio — static viewer — not a Claude Design render</title>', text)
+            self.assertIn('<h1>Sample Studio</h1>', text)
+            edit_json(directory, 'design-system.json', lambda d: d.update(title='<b>"Q" & co</b>\n\tx'))
+            text, _data = self.page(directory)
+        self.assertIn('<title>&lt;b&gt;&quot;Q&quot; &amp; co&lt;/b&gt; x — static viewer', text)
+        self.assertEqual(len(re.findall(r'<title>', text)), 1)
+        self.assertNotIn('<b>', text)
+
+    def test_viewer_token_coverage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+
+            def grow(doc):
+                doc['color']['tokens'].append(color('extra', '#123456'))
+                doc['spacing']['tokens'].append({'name': 'space-2', 'value': '8px', 'usage': 'gap'})
+                doc['shadow'] = {'tokens': [{'name': 'lift', 'value': '0 1px 2px #00000040', 'usage': 'card'},
+                                            {'name': 'float', 'value': '0 8px 16px #00000040', 'usage': 'menu'}]}
+                doc['type']['groups'][0]['styles'].append({'name': 'caption', 'fontSize': '12px', 'usage': 'small'})
+
+            edit_json(directory, 'tokens.json', grow)
+            text, data = self.page(directory)
+        expected = 4 + 1 + 1 + 1 + 1 + 2 + 1 + 1  # colours, spacing, radius, styles, then the additions
+        self.assertEqual(text.count('data-token='), expected)
+        self.assertEqual(self.build.count_tokens(data['tokens']), expected)
+        for name in ('bg', 'text', 'accent', 'link', 'extra', 'space-1', 'space-2', 'radius-sm', 'lift', 'float', 'body', 'caption'):
+            self.assertEqual(text.count(f'data-token="{name}"'), 1, name)
+
+    def test_viewer_component_and_asset_coverage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'components/Button/README.md', '# Button\n\nA plain action control. It has two states.\n\n- primary\n- quiet\n')
+            put(directory, 'components/Button/preview.html', '<!-- @dsCard height=120 group="Actions" -->\n<p>x</p>\n')
+            put(directory, 'components/Card/preview.html', '<!-- @dsCard page group="Templates" -->\n<p>x</p>\n')
+            put(directory, 'components/lib/x.js', 'x')
+            put(directory, 'assets/Logos/README.md', 'a.png, b.svg, c.zip, sub/d.png\n')
+            put(directory, 'assets/Logos/a.png', PNG + bytes(100))
+            put(directory, 'assets/Logos/b.svg', CLEAN_SVG)
+            put(directory, 'assets/Logos/c.zip', b'PK\x03\x04')
+            put(directory, 'assets/Logos/sub/d.png', PNG)
+            put(directory, 'assets/Loose.png', PNG)
+            text, data = self.page(directory)
+        self.assertEqual(text.count('data-component='), 2)
+        self.assertEqual([c['name'] for c in data['components']], ['Button', 'Card'])
+        self.assertEqual(text.count('data-asset='), 5)
+        self.assertEqual([a['path'] for a in data['assets']],
+                         ['assets/Logos/a.png', 'assets/Logos/b.svg', 'assets/Logos/c.zip', 'assets/Logos/sub/d.png', 'assets/Loose.png'])
+        button = data['components'][0]
+        self.assertEqual((button['group'], button['summary'], button['rel']), ('Actions', 'A plain action control.', 'components/Button/preview.html'))
+        self.assertEqual(button['marker'], '@dsCard height=120 group="Actions"')
+        self.assertIn('<li>primary</li>', button['readme_html'])
+        self.assertEqual(data['components'][1]['group'], 'Templates')
+        self.assertIn('<a href="components/Button/preview.html">', text)
+        self.assertNotIn('<iframe', text)
+        self.assertNotIn('<img alt="assets/Logos/c.zip"', text)
+        self.assertEqual(text.count('<img '), 4)  # a.png, b.svg, sub/d.png and the ungrouped Loose.png
+        self.assertIn('listed, not embedded', text)
+        self.assertEqual(data['warnings'], [])
+
+    def test_viewer_no_components_message(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            text, _data = self.page(directory)
+        self.assertIn('No components', text)
+        self.assertNotIn('data-component=', text)
+        self.assertIn('No assets', text)
+
+    def test_viewer_excludes_self_from_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'viewer.html', '<p>old</p>')
+            put(directory, 'sub/viewer.html', 'kept')
+            put(directory, '.hidden', 'x')
+            put(directory, 'notes/.dot', 'x')
+            put(directory, '.env', 'SECRET_VALUE=1')
+            put(directory, 'credentials.json', 'SECRET_VALUE')
+            text, data = self.page(directory)
+        paths = [f['path'] for f in data['files']]
+        self.assertEqual(paths, sorted(paths))
+        self.assertNotIn('viewer.html', paths)
+        self.assertIn('sub/viewer.html', paths)
+        self.assertNotIn('.hidden', ' '.join(paths))
+        self.assertNotIn('.env', ' '.join(paths))
+        self.assertNotIn('credentials', ' '.join(paths))
+        self.assertNotIn('SECRET_VALUE', text)
+        self.assertIn('<code>tokens.json</code> <span class="mut">', text)
+        self.assertEqual(dict((f['path'], f['size']) for f in data['files'])['README.md'], len(base_files()['README.md'].encode()))
+
+    def test_viewer_script_under_4kb(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'components/Evil/README.md', '<script>alert(1)</script>\n')
+            text, _data = self.page(directory)
+        self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', text)
+        scripts = re.findall(r'<script\b[^>]*>(.*?)</script>', text, re.S)
+        self.assertEqual(len(scripts), 1)
+        self.assertLessEqual(len(scripts[0].encode('utf-8')), 4096)
+        self.assertNotRegex(text, r'<script\b[^>]*\bsrc\b')
+        for word in ('innerHTML', 'outerHTML', 'eval(', 'fetch', 'XMLHttpRequest', 'new Function', 'WebSocket', 'serviceWorker',
+                     'import(', 'document.write'):
+            self.assertNotIn(word, text, word)
+        self.assertNotRegex(text, r'\son[a-z]+\s*=')
+
+    def test_viewer_no_external_ref(self):
+        with tempfile.TemporaryDirectory() as directory:
+            hostile = ('See [site](https://evil.example/a) and https://cdn.example/x.js or //cdn.example/y.\n\n'
+                       '[proto](//evil.example) [abs](/etc/passwd) [up](../x) [js](javascript:alert(1)) ![pic](http://evil.example/i.png)\n')
+            make(directory, components__Cover__preview__html=COVER,
+                 DESIGN__md=design_md(overview=OVERVIEW + '\n' + hostile))
+            put(directory, 'components/Doc/README.md', hostile)
+            put(directory, 'assets/G/README.md', 'a.svg\n\n' + hostile)
+            put(directory, 'assets/G/a.svg', CLEAN_SVG)
+            text, _data = self.page(directory)
+        stripped = re.sub(r'xmlns(?::[A-Za-z]+)?="[^"]*"', '', text)
+        self.assertEqual(re.findall(r'https?://|//cdn', stripped), [])
+        for value in re.findall(r'(?:src|href)="([^"]*)"', stripped):
+            self.assertFalse(value.startswith(('http', '//', '/')), value)
+        self.assertNotIn('url(http', text)
+        self.assertIn('site', text)  # the label survives, the link does not
+        self.assertNotIn('evil.example/a"', text)
+        self.assertNotIn('javascript:', text.replace('href="#', ''))
+
+    def test_viewer_idempotent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, components__Cover__preview__html=COVER)
+            put(directory, 'components/Button/README.md', 'A control.\n')
+            put(directory, 'assets/G/README.md', 'a.png')
+            put(directory, 'assets/G/a.png', PNG + bytes(50))
+            self.assertEqual(self.run_cli('--package', directory, '--design-md', '--viewer')[0], 0)
+            first = [hashlib.sha256(Path(directory, n).read_bytes()).hexdigest() for n in ('DESIGN.md', 'viewer.html')]
+            code, out, err = self.run_cli('--package', directory, '--design-md', '--viewer')
+            second = [hashlib.sha256(Path(directory, n).read_bytes()).hexdigest() for n in ('DESIGN.md', 'viewer.html')]
+            self.assertEqual((code, err), (0, ''))
+            self.assertEqual(out.strip(), 'BUILT: design-md=unchanged viewer=unchanged adapters=0 written, 0 skipped')
+            self.assertEqual(first, second)
+            # The order the operating system lists a folder in must not matter.
+            real = v3._walk
+
+            def backwards(root):
+                entries, files, dirs, links = real(root)
+                return entries[::-1], dict(reversed(list(files.items()))), dirs, links
+
+            with patch.object(v3, '_walk', backwards):
+                text = self.build.render_viewer(self.build.collect_package(Path(directory)))
+            self.assertEqual(text.encode('utf-8'), Path(directory, 'viewer.html').read_bytes())
+
+    def test_viewer_check_detects_stale(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            code, _out, err = self.run_cli('--package', directory, '--viewer', '--check')
+            self.assertEqual((code, err.strip()), (1, 'viewer_missing: viewer.html'))
+            self.assertFalse(Path(directory, 'viewer.html').exists())
+            self.assertEqual(self.run_cli('--package', directory, '--viewer')[0], 0)
+            code, out, err = self.run_cli('--package', directory, '--viewer', '--check')
+            self.assertEqual((code, out.strip(), err), (0, 'CHECKED: design-md=skipped viewer=ok', ''))
+            path = Path(directory, 'viewer.html')
+            raw = bytearray(path.read_bytes())
+            raw[len(raw) // 2] ^= 0x01
+            path.write_bytes(bytes(raw))
+            before = path.read_bytes()
+            code, _out, err = self.run_cli('--package', directory, '--viewer', '--check')
+            self.assertEqual((code, err.strip()), (1, 'viewer_stale: viewer.html'))
+            self.assertEqual(path.read_bytes(), before)
+            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'][2].update(value='#0057b9'))
+            self.assertEqual(self.run_cli('--package', directory, '--viewer')[1].strip(),
+                             'BUILT: design-md=skipped viewer=written adapters=0 written, 0 skipped')
+            code, out, _err = self.run_cli('--package', directory, '--design-md', '--viewer', '--check')
+            self.assertEqual((code, out.strip()), (1, ''))  # DESIGN.md was not regenerated: stale before the viewer is looked at
+
+    def test_cli_viewer_output_lines(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            code, out, err = self.run_cli('--package', directory, '--viewer')
+            self.assertEqual((code, err), (0, ''))
+            self.assertEqual(out.strip(), 'BUILT: design-md=skipped viewer=written adapters=0 written, 0 skipped')
+            code, out, err = self.run_cli('--package', directory, '--design-md', '--viewer')
+            # The page lists DESIGN.md with its size, and the front matter just made it longer: both files are written.
+            self.assertEqual(out.strip(), 'BUILT: design-md=written viewer=written adapters=0 written, 0 skipped')
+            code, out, err = self.run_cli('--package', directory, '--design-md', '--viewer')
+            self.assertEqual(out.strip(), 'BUILT: design-md=unchanged viewer=unchanged adapters=0 written, 0 skipped')
+            code, out, err = self.run_cli('--package', directory, '--design-md', '--viewer', '--check')
+            self.assertEqual((code, out.strip(), err), (0, 'CHECKED: design-md=ok viewer=ok', ''))
+            Path(directory, 'viewer.html').unlink()
+            self.assertEqual(self.run_cli('--package', directory, '--design-md', '--viewer')[1].strip(),
+                             'BUILT: design-md=unchanged viewer=written adapters=0 written, 0 skipped')
+
+    def test_cli_viewer_refuses_bad_input_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('bad', 'red')))
+            code, out, err = self.run_cli('--package', directory, '--viewer')
+            self.assertEqual((code, out), (1, ''))
+            self.assertIn('forbidden_color_syntax: tokens.json: color.bad', err)
+            self.assertFalse(Path(directory, 'viewer.html').exists())
+        real = v3.safe_path
+
+        def refuse(root, relative):
+            if relative == 'viewer.html':
+                raise ValueError('linked_path')
+            return real(root, relative)
+
+        with tempfile.TemporaryDirectory() as directory, patch.object(self.cli_module.v3, 'safe_path', refuse):
+            make(directory)
+            code, out, err = self.run_cli('--package', directory, '--viewer')
+            self.assertEqual((code, out, err.strip()), (1, '', 'refused_sensitive_path: viewer.html'))
+
+    def test_cli_viewer_size_limits(self):
+        words = ('lorem ipsum dolor sit amet ' * 2400)[:63900] + '\n'
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            for n in range(5):
+                put(directory, f'components/C{n}/README.md', words)
+            code, out, err = self.run_cli('--package', directory, '--viewer')
+            size = Path(directory, 'viewer.html').stat().st_size
+            self.assertEqual((code, err), (0, ''))
+            self.assertTrue(300000 < size <= 512000, size)
+            self.assertIn(f'WARN viewer_large: viewer.html: {size} > 300000\n', out)
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            for n in range(9):
+                put(directory, f'components/C{n}/README.md', words)
+            code, out, err = self.run_cli('--package', directory, '--viewer')
+            self.assertEqual((code, out), (1, ''))
+            self.assertRegex(err.strip(), r'^viewer_too_large: viewer\.html: \d+ > 512000$')
+            self.assertFalse(Path(directory, 'viewer.html').exists())
+            self.assertEqual(self.run_cli('--package', directory, '--viewer', '--check')[0], 1)
+
+    # ---- sensitive files and bounded reads
+
+    def test_collect_package_skips_sensitive(self):
+        seen = []
+        real_open = Path.open
+
+        def spy_open(self, *args, **kwargs):
+            seen.append(self.name)
+            return real_open(self, *args, **kwargs)
+
+        def forbidden(self, *args, **kwargs):
+            raise AssertionError(f'unbounded read of {self.name}')
+
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, '.env', 'SECRET_VALUE=1')
+            put(directory, 'credentials.json', 'SECRET_VALUE')
+            put(directory, 'assets/G/README.md', 'secret.pem, auth.json, x.png')
+            put(directory, 'assets/G/secret.pem', 'SECRET_VALUE')
+            put(directory, 'assets/G/auth.json', 'SECRET_VALUE')
+            put(directory, 'assets/G/credentials.png', PNG)
+            put(directory, 'assets/G/x.png', PNG)
+            put(directory, 'components/.env/README.md', 'SECRET_VALUE')
+            put(directory, 'components/dist/README.md', 'SECRET_VALUE')
+            with patch.object(Path, 'open', spy_open), patch.object(Path, 'read_text', forbidden), patch.object(Path, 'read_bytes', forbidden):
+                text, data = self.page(directory)
+            self.assertEqual(self.build.inline_asset(Path(directory, 'assets/G/credentials.png')), None)
+            self.assertEqual(self.build.inline_asset(Path(directory, '.env')), None)
+        for name in seen:
+            self.assertIsNone(v3.SENSITIVE.search(name), name)
+        self.assertNotIn('SECRET_VALUE', text)
+        self.assertEqual([a['path'] for a in data['assets']], ['assets/G/x.png'])
+        self.assertEqual(data['components'], [])
+        listed = ' '.join(f['path'] for f in data['files'])
+        for word in ('.env', 'credentials', 'secret.pem', 'auth.json', 'dist'):
+            self.assertNotIn(word, listed)
+
+    def test_collect_package_goes_through_safe_path(self):
+        calls = []
+        real = v3.safe_path
+
+        def spy(root, relative):
+            calls.append(relative)
+            return real(root, relative)
+
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'assets/G/README.md', 'x.png')
+            put(directory, 'assets/G/x.png', PNG)
+            with patch.object(v3, 'safe_path', spy):
+                self.page(directory)
+        for needed in ('design-system.json', 'tokens.json', 'canonical-map.json', 'DESIGN.md', 'README.md', 'assets/G/x.png',
+                       'assets/G/README.md', 'components/Cover/preview.html'):
+            self.assertIn(needed, calls)
+
+    def test_collect_package_reads_are_bounded(self):
+        sizes = []
+        real_open = io.open
+
+        class Spy:
+            def __init__(self, handle):
+                self.handle = handle
+
+            def __enter__(self):
+                self.handle.__enter__()
+                return self
+
+            def __exit__(self, *exc):
+                return self.handle.__exit__(*exc)
+
+            def read(self, size=-1):
+                sizes.append(size)
+                return self.handle.read(size)
+
+            def __getattr__(self, name):
+                return getattr(self.handle, name)
+
+        def spy_open(file, mode='r', *args, **kwargs):
+            handle = real_open(file, mode, *args, **kwargs)
+            return Spy(handle) if 'b' in mode else handle
+
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, README__md='## Content fundamentals\n' + 'x' * 600000, DESIGN__md='y' * 700000)
+            put(directory, 'components/Big/README.md', 'z' * 300000)
+            put(directory, 'components/Big/preview.html', '<!-- @dsCard -->\n' + 'p' * 600000)
+            put(directory, 'assets/G/README.md', 'w' * 300000)
+            put(directory, 'assets/G/huge.png', PNG + bytes(300000))
+            with patch('io.open', spy_open):
+                _text, data = self.page(directory)
+        self.assertTrue(sizes and all(0 < n <= 512001 for n in sizes), sorted(set(sizes)))
+        self.assertTrue(len(data['readme']) <= 200000 and len(data['design_md']) <= 512000)
+        self.assertIn('README cut at 64000 bytes', data['components'][0]['readme_html'])
+        self.assertIn('viewer_asset_skipped: assets/G/huge.png', data['warnings'])
+
+    def test_large_asset_skipped(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'assets/G/README.md', 'big.png small.png')
+            put(directory, 'assets/G/big.png', PNG + bytes(70000 - 8))
+            put(directory, 'assets/G/small.png', PNG + bytes(2000 - 8))
+            self.assertIsNone(self.build.inline_asset(Path(directory, 'assets/G/big.png')))
+            self.assertIsNone(self.build.inline_asset(Path(directory, 'assets/G/small.png'), cap=1000))
+            small = self.build.inline_asset(Path(directory, 'assets/G/small.png'))
+            self.assertTrue(small.startswith('data:image/png;base64,'))
+            text, data = self.page(directory)
+            code, out, _err = self.run_cli('--package', directory, '--viewer')
+        self.assertEqual(text.count('data:image/png;base64,'), 1)
+        self.assertEqual(data['warnings'], ['viewer_asset_skipped: assets/G/big.png'])
+        self.assertIn('70000 bytes', text)
+        self.assertIn('listed, not embedded', text)
+        self.assertEqual((code, out.splitlines()[0]), (0, 'WARN viewer_asset_skipped: assets/G/big.png'))
+
+    def test_total_embedded_images_are_bounded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'assets/G/README.md', 'img')
+            for n in range(10):
+                put(directory, f'assets/G/i{n}.png', PNG + bytes(60000))
+            opened = []
+            real = self.build.inline_asset
+
+            def counting(path, *args, **kwargs):
+                opened.append(Path(path).name)
+                return real(path, *args, **kwargs)
+
+            with patch.object(self.build, 'inline_asset', counting):
+                text, data = self.page(directory)
+        embedded = text.count('data:image/png;base64,')
+        self.assertTrue(1 <= embedded <= 4, embedded)
+        self.assertLessEqual(len(opened), embedded + 1)  # once the budget is spent, no further image is even read
+        self.assertEqual(len(data['warnings']), 10 - embedded)
+        self.assertEqual(text.count('data-asset='), 10)
+
+    def test_viewer_svg_with_script_skipped(self):
+        evil = ['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+                '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><rect/></svg>',
+                '<svg xmlns="http://www.w3.org/2000/svg"><rect onclick="x()" width="1" height="1"/></svg>']
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + evil[0] + '\n')
+            put(directory, 'assets/G/README.md', 'bad0.svg bad1.svg bad2.svg good.svg')
+            for n, svg in enumerate(evil):
+                put(directory, f'assets/G/bad{n}.svg', svg)
+            put(directory, 'assets/G/good.svg', CLEAN_SVG)
+            text, data = self.page(directory)
+        self.assertNotIn('alert(1)', text)
+        self.assertNotRegex(text, r'<script>alert')
+        self.assertEqual(text.count('data:image/svg+xml;base64,'), 1)
+        self.assertEqual(data['warnings'], ['viewer_asset_skipped: components/Cover/preview.html']
+                         + [f'viewer_asset_skipped: assets/G/bad{n}.svg' for n in range(3)])
+        self.assertIsNone(data['cover_svg'])
+        self.assertIn('No cover image', text)
+
+    def test_sanitize_svg_refuses_active_content(self):
+        head = '<svg xmlns="http://www.w3.org/2000/svg">'
+        bad = {
+            'script': head + '<script>alert(1)</script></svg>',
+            'script upper': head + '<SCRIPT>alert(1)</SCRIPT></svg>',
+            'script spaced': head + '<script >alert(1)</script ></svg>',
+            'onload': '<svg onload="alert(1)"><rect/></svg>',
+            'onload upper': '<svg ONLOAD="alert(1)"><rect/></svg>',
+            'onload spaced': '<svg onload = "alert(1)"><rect/></svg>',
+            'onload slash': '<svg/onload=alert(1)></svg>',
+            'onclick child': head + '<rect onclick="x()"/></svg>',
+            'onmouseover single': head + "<rect onmouseover='x()'/></svg>",
+            'foreignObject': head + '<foreignObject><div>x</div></foreignObject></svg>',
+            'iframe': head + '<iframe src="x"></iframe></svg>',
+            'anchor js': head + '<a href="javascript:alert(1)"><rect/></a></svg>',
+            'use external': head + '<use href="http://x.example/a.svg#b"/></svg>',
+            'use data': head + '<use xlink:href="data:image/svg+xml,x"/></svg>',
+            'use relative': head + '<use href="other.svg#b"/></svg>',
+            'image': head + '<image href="x.png"/></svg>',
+            'style element': head + '<style>@import url(http://x.example/a.css);</style></svg>',
+            'fill url ext': head + '<rect fill="url(http://x.example/a)"/></svg>',
+            'style url proto': head + '<rect style="background:url(//x.example/a)"/></svg>',
+            'style expression': head + '<rect style="width:expression(alert(1))"/></svg>',
+            'entity js': head + '<a href="&#106;avascript:alert(1)"/></svg>',
+            'entity in value': head + '<rect fill="&#117;rl(x)"/></svg>',
+            'backslash css': head + '<rect style="fill:\\75 rl(x)"/></svg>',
+            'comment': head + '<!-- x --></svg>',
+            'cdata': head + '<![CDATA[x]]></svg>',
+            'doctype': '<!DOCTYPE svg><svg></svg>',
+            'pi': head + '<?xml-stylesheet href="x"?></svg>',
+            'breakout p': head + '<p>x</p></svg>',
+            'breakout math': head + '<math><mi>x</mi></math></svg>',
+            'nested svg': head + '<svg><rect/></svg></svg>',
+            'two roots': head + '</svg><svg></svg>',
+            'unclosed': head + '<g>',
+            'mismatch': head + '<g></rect></svg>',
+            'set': head + '<set attributeName="href" to="javascript:alert(1)"/></svg>',
+            'animate': head + '<animate attributeName="href" values="javascript:alert(1)"/></svg>',
+            'data attr': head + '<rect data-token="x"/></svg>',
+            'text on=': head + '<text> onerror=alert(1) </text></svg>',
+            'text url': head + '<text>see https://x.example</text></svg>',
+            'bare attribute': head + '<rect hidden/></svg>',
+            'unquoted': head + '<rect width=4/></svg>',
+            'lt in value': head + '<rect title="a<b"/></svg>',
+            'nul': head + '<rect/>\x00</svg>',
+            'svg title': head + '<title>x</title></svg>',
+            'not svg': '<div></div>',
+            'empty': '',
+            'self closing root': '<svg/>',
+            'closing with attr': head + '<g></g x="1"></svg>',
+        }
+        for label, text in bad.items():
+            self.assertIsNone(self.build.sanitize_svg(text), label)
+        self.assertIsNone(self.build.sanitize_svg(None))
+        self.assertEqual(self.build.sanitize_svg(CLEAN_SVG), CLEAN_SVG)
+        self.assertEqual(self.build.sanitize_svg('\n  ' + CLEAN_SVG + '\n'), CLEAN_SVG)
+        self.assertEqual(self.build.extract_cover_svg('<!-- @dsCard -->\n<div>' + CLEAN_SVG + '</div>'), CLEAN_SVG)
+        self.assertEqual(self.build.extract_cover_svg('<SVG a="1"><g/></SVG>'), '<SVG a="1"><g/></SVG>')
+        self.assertIsNone(self.build.extract_cover_svg('<p>none</p>'))
+        self.assertIsNone(self.build.extract_cover_svg('<svg>never closed'))
+        self.assertIsNone(self.build.extract_cover_svg(None))
+
+    # ---- Markdown
+
+    def test_markdown_escapes_html(self):
+        out = self.build.render_markdown('<script>x</script>')
+        self.assertIn('&lt;script&gt;x&lt;/script&gt;', out)
+        self.assertNotIn('<script', out)
+        out = self.build.render_markdown('<img src=x onerror=alert(1)>')
+        self.assertNotIn('<img', out)
+        self.assertNotRegex(out, r'(?i)\son[a-z]+\s*=')
+        self.assertIn('&lt;img', out)
+        everything = self.build.render_markdown('# <b>t</b>\n\n- <i>x</i>\n\n```\n<script>y</script>\n```\n\n| <u>h</u> |\n|---|\n| <s>c</s> |\n\n> <em>q</em>\n\n**<a>**\n\n`<code>`')
+        for tag in ('<b>', '<i>', '<script>', '<u>', '<s>', '<em>', '<a>', '<img'):
+            self.assertNotIn(tag, everything, tag)
+
+    def test_markdown_blocks_and_links(self):
+        out = self.build.render_markdown('# Title\n\n## Sub\n\nText with **bold** and `code` and [b](components/Button/README.md).\n\n'
+                                         '- one\n- two\n  more\n\n1. first\n2. second\n\n```\nraw <x> & y\n```\n\n> quoted\n\n---\n\n'
+                                         '| a | b |\n| --- | --- |\n| 1 | 2 |\n')
+        self.assertIn('<h3>Title</h3>', out)
+        self.assertIn('<h4>Sub</h4>', out)
+        self.assertNotIn('<h1', out)
+        self.assertNotIn('<h2', out)
+        self.assertIn('<strong>bold</strong>', out)
+        self.assertIn('<code>code</code>', out)
+        self.assertIn('<a href="components/Button/README.md">b</a>', out)
+        self.assertIn('<ul><li>one</li><li>two more</li></ul>', out)
+        self.assertIn('<ol><li>first</li><li>second</li></ol>', out)
+        self.assertIn('<pre><code>raw &lt;x&gt; &amp; y</code></pre>', out)
+        self.assertIn('<blockquote><p>quoted</p></blockquote>', out)
+        self.assertIn('<hr>', out)
+        self.assertIn('<th scope="col">a</th>', out)
+        self.assertIn('<td>2</td>', out)
+        self.assertEqual(self.build.render_markdown('# T', 5), '<h5>T</h5>')
+        self.assertEqual(self.build.render_markdown('###### T', 5), '<h6>T</h6>')
+        self.assertEqual(self.build.render_markdown(''), '')
+
+    def test_markdown_links_keep_only_relative_files(self):
+        render = self.build.render_markdown
+        self.assertEqual(render('[a](http://x.example)'), '<p>a</p>')
+        self.assertEqual(render('[a](https://x.example/p)'), '<p>a</p>')
+        self.assertEqual(render('[a](//x.example)'), '<p>a</p>')
+        self.assertEqual(render('[a](/abs/path)'), '<p>a</p>')
+        self.assertEqual(render('[a](../up/file.md)'), '<p>a</p>')
+        self.assertEqual(render('[a](x/../y.md)'), '<p>a</p>')
+        self.assertEqual(render('[a](javascript:alert(1))'), '<p>a</p>')
+        self.assertEqual(render('[a](JaVaScRiPt:alert(1))'), '<p>a</p>')
+        self.assertEqual(render('[a](data:text/html,x)'), '<p>a</p>')
+        self.assertEqual(render('[a](file:' + '//' + '/etc/passwd)'), '<p>a</p>')
+        self.assertEqual(render('[a](a b.md)'), '<p>a</p>')
+        self.assertEqual(render('[a](x"onmouseover="y)'), '<p>a</p>')
+        self.assertEqual(render('[a](x?q=1)'), '<p>a</p>')
+        self.assertEqual(render('![pic](img.png)'), '<p>pic</p>')
+        self.assertEqual(render('[a](notes/x.md#part)'), '<p><a href="notes/x.md#part">a</a></p>')
+        self.assertEqual(render('[a](x.md) [b](y.md)'), '<p><a href="x.md">a</a> <a href="y.md">b</a></p>')
+        self.assertEqual(render('[a'), '<p>[a</p>')
+        self.assertEqual(render('a](b)'), '<p>a](b)</p>')
+
+    def test_markdown_inputs_run_in_linear_time(self):
+        n = 100000
+        m = n // 4  # per-line constructs: the cost is per line, so fewer lines than characters
+        cases = {
+            'backticks': '`' * n, 'backtick pairs': '`a' * n, 'stars': '*' * n, 'bold open': '**a' * (n // 2), 'bold odd': '*a' * n,
+            'open brackets': '[' * n, 'bracket then close': '[' * n + ']', 'link heads': '[a](' * (n // 4),
+            'link no close': '[a](' + 'x' * n, 'close brackets': ']' * n, 'bang': '![' * n, 'bang links': '![a](b' * (n // 6),
+            'many lines': 'word\n' * m, 'list': '- item\n' * m, 'ordered': '1. item\n' * m, 'quote': '> q\n' * m,
+            'table': '| a | b |\n|---|---|\n' + '| 1 | 2 |\n' * m, 'table heads': '| a |\n' * m, 'fences': '```\n' * m,
+            'hashes': '#' * n, 'headings': '# h\n' * m, 'rules': '---\n' * m, 'spaces': ' ' * n + 'x', 'long line': 'word ' * n,
+            'nested links': '[[[[a]](b)](c)](d)' * (n // 20), 'digits': '1' * n + '.',
+        }
+        for label, text in cases.items():
+            start = time.perf_counter()
+            self.build.render_markdown(text)
+            elapsed = time.perf_counter() - start
+            self.assertLess(elapsed, 2.0, f'{label}: {elapsed:.2f} s')
+
+    def test_sanitize_svg_runs_in_linear_time(self):
+        head = '<svg xmlns="http://www.w3.org/2000/svg">'
+        cases = {
+            'unclosed tags': head + '<a ' * 50000 + '</svg>', 'attribute flood': head + '<g ' + 'a="1" ' * 100000 + '/></svg>',
+            'comment flood': head + '<!--' * 50000 + '</svg>', 'deep': head + '<g>' * 100000 + '</svg>',
+            'many tags': head + '<g/>' * 100000 + '</svg>', 'spaces': head + ' ' * 200000 + '</svg>',
+            'long value': head + '<g a="' + 'x' * 200000 + '"/></svg>', 'unterminated value': head + '<g a="' + 'x' * 200000 + '/></svg>',
+            'lt flood': head + '<' * 100000 + '</svg>', 'on run': head + '<text>' + ' on' * 60000 + '</text></svg>',
+            'letters': head + '<text>' + ' on' + 'a' * 200000 + '</text></svg>', 'big clean': head + '<g>' * 1000 + '</g>' * 1000 + '</svg>',
+        }
+        for label, text in cases.items():
+            start = time.perf_counter()
+            self.build.sanitize_svg(text)
+            elapsed = time.perf_counter() - start
+            self.assertLess(elapsed, 2.0, f'{label}: {elapsed:.2f} s')
+        start = time.perf_counter()
+        self.build.extract_cover_svg('<svg ' * 200000)
+        self.assertLess(time.perf_counter() - start, 2.0)
+
+    def test_viewer_runs_in_linear_time_on_hostile_package(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, README__md='[' * 150000, DESIGN__md='---\nversion: alpha\n---\n## Overview\n' + '- Read order: ' + ',' * 100000 + '\n')
+            put(directory, 'components/C/README.md', '`' * 60000)
+            put(directory, 'assets/G/README.md', '*' * 60000)
+            start = time.perf_counter()
+            text, _data = self.page(directory)
+            self.assertLess(time.perf_counter() - start, 3.0)
+        self.assertEqual(self.sections(text), EIGHT)
+
+    # ---- render_viewer on hostile data (no validation in front of it)
+
+    def test_render_viewer_escapes_names_and_gates_css(self):
+        hostile = '"><script>alert(1)</script><img src=x onerror=alert(1)>'
+        data = {'index': {'title': hostile},
+                'tokens': {'color': {'themes': [{'id': hostile}], 'tokens': [{'name': hostile, 'value': {hostile: 'red; background:url(//x)'}, 'usage': hostile}]},
+                           'spacing': {'tokens': [{'name': 'a', 'value': '4px;background:url(//x.example/y)', 'usage': 'u'},
+                                                  {'name': 'b', 'value': 'calc(1px + 2px)', 'usage': 'u'}]},
+                           'radius': {'tokens': [{'name': 'c', 'value': '1px" onmouseover="x', 'usage': 'u'}]},
+                           'shadow': {'tokens': [{'name': 'd', 'value': '0 0 1px url(//x.example)', 'usage': 'u'},
+                                                 {'name': 'e', 'value': '0 0 1px red;}body{display:none', 'usage': 'u'},
+                                                 {'name': 'f', 'value': '0 1px 2px #00000040', 'usage': 'u'}]},
+                           'type': {'families': {'sans': 'Inter;}body{display:none', 'ok': '"Helvetica Neue", Arial'},
+                                    'groups': [{'name': hostile, 'family': 'sans', 'styles': [
+                                        {'name': hostile + '1', 'fontSize': '16px;color:red', 'fontWeight': '400;x', 'lineHeight': '1;y', 'usage': hostile},
+                                        {'name': 'good', 'family': 'ok', 'fontSize': '16px', 'fontWeight': 700, 'lineHeight': 1.5, 'usage': 'u'}]}]}},
+                'canonical': {'system': {'status': hostile, 'version': hostile}, 'checks': {'contrast': [{'fg': hostile, 'bg': hostile}, 'junk', {}]}},
+                'design_md': '## Overview\n- Owner: ' + hostile + '\n- Read order: ' + hostile + '\n',
+                'components': [{'name': hostile, 'group': hostile, 'summary': hostile, 'readme_html': '', 'marker': hostile, 'rel': hostile + '/preview.html'}],
+                'assets': [{'group': hostile, 'path': 'assets/' + hostile, 'size': 1, 'inline': None}],
+                'files': [{'path': 'a/' + hostile, 'size': 1}], 'cover_svg': None, 'asset_readmes': {}}
+        text = self.build.render_viewer(data)
+        self.assertEqual(len(re.findall(r'<script\b', text)), 1)
+        self.assertNotIn('<img src=x', text)
+        self.assertNotRegex(text, r'\son[a-z]+\s*=')
+        self.assertNotIn('onmouseover', text.replace('onmouseover&#61;', ''))
+        styles = re.findall(r'style="([^"]*)"', text)
+        for value in styles:
+            self.assertNotRegex(value, r'url|;\}|display:none|background:url|onmouseover|color:red')
+        joined = ' '.join(styles)
+        self.assertIn('box-shadow:0 1px 2px #00000040', joined)
+        self.assertIn('font-family:&quot;Helvetica Neue&quot;, Arial', text)
+        self.assertIn('font-size:min(16px,72px)', joined)
+        self.assertIn('font-weight:700', joined)
+        self.assertIn('line-height:1.5', joined)
+        self.assertEqual(self.sections(text), EIGHT)
+        self.assertEqual(self.build.render_viewer({}).count('<section '), 8)
+        self.assertEqual(self.build.render_viewer({'tokens': [], 'index': [], 'canonical': 3}).count('<section '), 8)
+
+    def test_render_viewer_swatches_and_contrast(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].extend(
+                [color('ink', 'oklch(0 0 0)'), color('mid', 'lab(50% 0 0)'), color('pale', '#777777')]))
+            edit_json(directory, 'canonical-map.json', lambda d: d['checks']['contrast'].extend(
+                [{'fg': 'pale', 'bg': 'bg', 'min': 4.5}, {'fg': 'mid', 'bg': 'bg'}, {'fg': 'ink', 'bg': 'bg', 'large': True}, {'fg': 'nope', 'bg': 'bg'}]))
+            text, _data = self.page(directory)
+        self.assertIn('background:#000000', text)  # oklch(0 0 0)
+        self.assertIn('background:#0057b8', text)
+        self.assertEqual(text.count('background:#0057b8'), 4)  # accent and link, two themes each
+        self.assertIn('<code>lab(50% 0 0)</code>', text)
+        self.assertEqual(len(re.findall(r'class="sw"', text)), 12)  # four base colours, ink and pale in two themes; lab(): none
+        self.assertIn(f'<td>{v3.contrast_ratio("#111111", "#ffffff"):.2f}</td><td>4.5</td><td>Pass</td>', text)
+        self.assertIn('<td>4.48</td><td>4.5</td><td>Fail</td>', text)  # #777777 on white, light theme
+        self.assertIn('Not measured', text)
+        self.assertIn('<th scope="row">text on bg</th><td>dark</td>', text)
+
+    def test_overview_and_agents_come_from_the_package(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, components__Cover__preview__html=COVER,
+                 DESIGN__md=design_md(overview='- Read order: README.md, tokens.json, `components/`\n- Owner: Sample Studio team\n'
+                                               '- Status: draft\n\nThe overview paragraph is here.\n'))
+            edit_json(directory, 'canonical-map.json', lambda d: d['system'].update(version='0.3.1', status='approved', id='sample-ds'))
+            text, data = self.page(directory)
+        overview = text.split('<section id="overview"')[1].split('</section>')[0]
+        self.assertIn('<svg xmlns=', overview)
+        self.assertIn('Tagline here', overview)
+        self.assertIn('<dt>Status</dt><dd>approved</dd>', overview)
+        self.assertIn('<dt>Version</dt><dd>0.3.1</dd>', overview)
+        self.assertIn('<dt>Owner</dt><dd>Sample Studio team</dd>', overview)
+        self.assertIn('The overview paragraph is here.', overview)
+        self.assertIn('<details open><summary>components/', overview)
+        self.assertIn('(1 file)', overview)
+        agents = text.split('<section id="agents"')[1].split('</section>')[0]
+        self.assertIn('<ol><li><code>README.md</code></li><li><code>tokens.json</code></li><li><code>components/</code></li></ol>', agents)
+        for harness in ('Claude Design', 'Claude Code', 'Codex', 'Gemini CLI'):
+            self.assertIn(harness, agents)
+        self.assertEqual(data['design_md'].split('\n', 1)[0], '')  # body after the front matter
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, DESIGN__md=None, components__Cover__preview__html='<!-- @dsCard height=300 -->\n<svg><text>Only one</text></svg>\n')
+            text, _data = self.page(directory)
+        self.assertIn('<p class="lead">Sample Studio <span class="mut">Plain words.</span></p>', text)  # README's first sentence
+        self.assertIn('DESIGN.md has no Overview section', text)
+        self.assertIn('DESIGN.md has no Read order line', text)
+
+    def test_typography_and_spacing_screens(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            text, _data = self.page(directory)
+        typography = text.split('<section id="typography"')[1].split('</section>')[0]
+        self.assertIn('<code>Inter, sans-serif</code>', typography)
+        self.assertIn('style="font-family:Inter, sans-serif;font-size:min(16px,72px);font-weight:400;line-height:1.5"', typography)
+        self.assertIn('The quick brown fox', typography)
+        spacing = text.split('<section id="spacing"')[1].split('</section>')[0]
+        self.assertIn('style="width:min(4px,100%)"', spacing)
+        self.assertIn('style="border-radius:2px"', spacing)
+        self.assertEqual(spacing.count('data-token='), 2)
+
+    def test_component_summary_is_plain_text(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            put(directory, 'components/A/README.md', '# A\n\nA **bold** and `code` and [link](x.md) summary. Next sentence.\n')
+            put(directory, 'components/B/README.md', '```\ncode first\n```\n\n<b>Tag</b> text without a full stop\n')
+            put(directory, 'components/C/README.md', '# only a heading\n')
+            _text, data = self.page(directory)
+        self.assertEqual([c['summary'] for c in data['components']], ['A bold and code and link summary.', '<b>Tag</b> text without a full stop', ''])
+
+    def test_files_screen_shows_tree_with_sizes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            text, data = self.page(directory)
+        files = text.split('<section id="files"')[1].split('</section>')[0]
+        size = dict((f['path'], f['size']) for f in data['files'])['components/Cover/preview.html']
+        self.assertIn('<summary>components/</summary>', files)
+        self.assertIn(f'<code>preview.html</code> <span class="mut">{size} bytes</span>', files)
+        self.assertIn('<details open>', files)
+
+    def test_count_tokens(self):
+        self.assertEqual(self.build.count_tokens({}), 0)
+        self.assertEqual(self.build.count_tokens(None), 0)
+        self.assertEqual(self.build.count_tokens({'color': {'tokens': [{'name': 'a'}, {'x': 1}, 3]}, 'type': {'groups': [{'styles': [{'name': 's'}, {}]}, 5]},
+                                                  'spacing': {'tokens': 'no'}, 'other': 4}), 2)
 
 
 ROOT = Path(__file__).resolve().parents[1]

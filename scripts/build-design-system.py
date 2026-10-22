@@ -84,13 +84,35 @@ def _design_md(package: Path, tokens: dict, index: dict, check: bool) -> tuple[s
     return 'written', warnings
 
 
+def _viewer(package: Path, check: bool) -> tuple[str, list[str]]:
+    """Write (or, with check, only diff) viewer.html; return (state, warnings). Raises Refused on a missing, stale or oversized page."""
+    try:
+        data = build.collect_package(package)
+    except build.PackageError as exc:
+        raise Refused(str(exc)) from None
+    text = build.render_viewer(data).encode('utf-8')
+    warnings = [f'WARN {line}' for line in data['warnings']]
+    if len(text) > build.VIEWER_MAX:
+        raise Refused(f'viewer_too_large: viewer.html: {len(text)} > {build.VIEWER_MAX}')
+    if len(text) > build.VIEWER_WARN:
+        warnings.append(f'WARN viewer_large: viewer.html: {len(text)} > {build.VIEWER_WARN}')
+    raw = _read(package, 'viewer.html', build.VIEWER_MAX)
+    if raw == text:
+        return 'unchanged', warnings
+    if check:
+        raise Refused('viewer_missing: viewer.html' if raw is None else 'viewer_stale: viewer.html')
+    v3.safe_path(package, 'viewer.html').write_bytes(text)
+    return 'written', warnings
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--package', type=Path, help='design-system package folder (format v3)')
     parser.add_argument('--design-md', action='store_true', help='regenerate the DESIGN.md front matter from tokens.json')
+    parser.add_argument('--viewer', action='store_true', help='regenerate viewer.html, the offline page, from the package files')
     parser.add_argument('--check', action='store_true', help='write nothing; exit 1 when a generated file is out of date')
     args = parser.parse_args(argv)
-    if not args.design_md:
+    if not (args.design_md or args.viewer):
         print('input_error: choose --design-md/--viewer/--adapters', file=sys.stderr)
         return 1
     if args.package is None:
@@ -101,7 +123,14 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     try:
         tokens, index = _inputs(args.package)
-        state, warnings = _design_md(args.package, tokens, index, args.check)
+        states = {'design-md': 'skipped', 'viewer': 'skipped'}
+        warnings: list[str] = []
+        if args.design_md:
+            states['design-md'], found = _design_md(args.package, tokens, index, args.check)
+            warnings.extend(found)
+        if args.viewer:
+            states['viewer'], found = _viewer(args.package, args.check)
+            warnings.extend(found)
     except Refused as exc:
         print(exc, file=sys.stderr)
         return 1
@@ -111,9 +140,9 @@ def main(argv: list[str] | None = None) -> int:
     for warning in warnings:
         print(warning)
     if args.check:
-        print('CHECKED: design-md=ok viewer=skipped')
+        print('CHECKED: ' + ' '.join(f'{name}={"skipped" if state == "skipped" else "ok"}' for name, state in states.items()))
     else:
-        print(f'BUILT: design-md={state} viewer=skipped adapters=0 written, 0 skipped')
+        print(f'BUILT: design-md={states["design-md"]} viewer={states["viewer"]} adapters=0 written, 0 skipped')
     return 0
 
 
