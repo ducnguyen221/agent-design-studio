@@ -4614,6 +4614,359 @@ class PackAndTemplateTests(unittest.TestCase):
             self.assertLess((target / 'preview.html').stat().st_size, 2048)
 
 
+class DtcgExportTests(unittest.TestCase):
+    """TK12: tokens.json (v3 list grammar) -> a DTCG 2025.10 subset, with every skipped token named and its reason."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tokens = json.loads((FIXTURE.parent / 'tokens.json').read_text(encoding='utf-8'))
+
+    @property
+    def cli_module(self):
+        path = Path(__file__).with_name('export-dtcg.py')
+        loader_spec = importlib.util.spec_from_file_location('design_system_dtcg_cli', path)
+        module = importlib.util.module_from_spec(loader_spec)
+        loader_spec.loader.exec_module(module)
+        return module
+
+    def run_cli(self, *argv, module=None):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = (module or self.cli_module).main([str(a) for a in argv])
+        return code, out.getvalue(), err.getvalue()
+
+    @staticmethod
+    def doc(colors=None, themes=('light',), **families):
+        body = {'color': {'themes': [{'id': i, 'name': i.title()} for i in themes],
+                          'tokens': [{'name': n, 'value': v, 'usage': 'test'} for n, v in (colors or {'bg': '#ffffff'}).items()]}}
+        body.update(families)
+        return body
+
+    @staticmethod
+    def family(name, *pairs):
+        return {'tokens': [{'name': n, 'value': v, 'usage': 'test'} for n, v in pairs]}
+
+    def test_export_dtcg_roundtrip(self):
+        for tokens in (self.tokens, json.loads((TEMPLATE.parent / 'tokens.json').read_text(encoding='utf-8'))):
+            dtcg, skipped = v3.to_dtcg(tokens)
+            self.assertEqual(verifier.validate_tokens(dtcg), [])
+            self.assertEqual(verifier.validate_tokens(json.loads(json.dumps(dtcg))), [])
+            self.assertIsInstance(skipped, list)
+            self.assertTrue(all(isinstance(line, str) for line in skipped))
+        dtcg, _ = v3.to_dtcg(self.tokens)
+        self.assertEqual(sorted(dtcg), ['color', 'radius', 'spacing', 'type'])
+        self.assertEqual(len([k for k in dtcg['color'] if not k.startswith('$')]), 10)
+        self.assertEqual(dtcg['color']['$type'], 'color')
+        self.assertEqual(dtcg['color']['bg']['$value'], {'colorSpace': 'srgb', 'components': [1.0, 1.0, 1.0]})
+        self.assertEqual(dtcg['color']['focus']['$value'], '{color.accent}')
+        self.assertEqual(dtcg['spacing']['space-1']['$value'], {'value': 4, 'unit': 'px'})
+        self.assertEqual(dtcg['radius']['radius-full']['$value'], {'value': 9999, 'unit': 'px'})
+        self.assertEqual(dtcg['type']['family']['$type'], 'fontFamily')
+        self.assertEqual(dtcg['type']['family']['sans']['$value'], ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'])
+        self.assertEqual(dtcg['type']['weight']['display'], {'$value': 700})
+        self.assertEqual(dtcg['type']['size']['body']['$value'], {'value': 16, 'unit': 'px'})
+        self.assertEqual(dtcg['type']['lineHeight']['body']['$value'], {'value': 24, 'unit': 'px'})
+
+    def test_export_is_deterministic_and_leaves_the_input_alone(self):
+        before = json.dumps(self.tokens, sort_keys=True)
+        first = v3.to_dtcg(self.tokens)
+        second = v3.to_dtcg(json.loads(before))
+        self.assertEqual(json.dumps(first), json.dumps(second))
+        self.assertEqual(json.dumps(self.tokens, sort_keys=True), before)
+
+    def test_export_skips_shadow_with_reason(self):
+        tokens = self.doc(shadow=self.family('shadow', ('card', '0 1px 2px rgba(0,0,0,.2)'), ('pop', '0 4px 8px #0003')),
+                          elevation=self.family('elevation', ('one', '1px')))
+        dtcg, skipped = v3.to_dtcg(tokens)
+        self.assertIn('shadow/card: unsupported_type', skipped)
+        self.assertIn('shadow/pop: unsupported_type', skipped)
+        self.assertIn('elevation/one: unsupported_type', skipped)
+        self.assertNotIn('shadow', dtcg)
+        self.assertNotIn('elevation', dtcg)
+        self.assertEqual(verifier.validate_tokens(dtcg), [])
+
+    def test_export_oklch_to_srgb(self):
+        tokens = self.doc({'white': 'oklch(1 0 0)', 'black': 'oklch(0 0 0)', 'red': '#ff0000', 'short': '#f00', 'half': 'rgba(0, 0, 0, 0.5)',
+                           'hex8': '#00000080', 'grey': 'hsl(0 0% 50%)', 'oklab-white': 'oklab(100% 0 0)', 'pct': 'rgb(100% 0% 0%)'})
+        dtcg, skipped = v3.to_dtcg(tokens)
+        color = dtcg['color']
+        self.assertEqual(color['white']['$value'], {'colorSpace': 'srgb', 'components': [1.0, 1.0, 1.0]})
+        self.assertEqual(color['black']['$value'], {'colorSpace': 'srgb', 'components': [0.0, 0.0, 0.0]})
+        self.assertEqual(color['red']['$value']['components'], [1.0, 0.0, 0.0])
+        self.assertEqual(color['short']['$value']['components'], [1.0, 0.0, 0.0])
+        self.assertEqual(color['pct']['$value']['components'], [1.0, 0.0, 0.0])
+        self.assertEqual(color['oklab-white']['$value']['components'], [1.0, 1.0, 1.0])
+        self.assertEqual(color['half']['$value']['alpha'], 0.5)
+        self.assertEqual(color['hex8']['$value']['alpha'], round(128 / 255, 6))
+        self.assertNotIn('alpha', color['red']['$value'])
+        self.assertAlmostEqual(color['grey']['$value']['components'][0], 0.5, places=3)
+        self.assertEqual(skipped, [])
+        for entry in color.values():
+            if isinstance(entry, dict):
+                self.assertTrue(all(isinstance(c, float) and 0.0 <= c <= 1.0 for c in entry['$value']['components']))
+        self.assertEqual(verifier.validate_tokens(dtcg), [])
+
+    def test_export_colours_it_cannot_convert_are_skipped_with_a_reason(self):
+        tokens = self.doc({'ok': '#112233', 'lab': 'lab(50 20 20)', 'lch': 'lch(50 20 20)', 'wide': 'color(display-p3 1 0 0)',
+                           'alias-to-lab': '{lab}', 'alias-ok': '{ok}', 'dotted.name': '#000000', 'alias-dotted': '{dotted.name}'})
+        dtcg, skipped = v3.to_dtcg(tokens)
+        self.assertEqual(sorted(k for k in dtcg['color'] if not k.startswith('$')), ['alias-ok', 'ok'])
+        self.assertEqual(dtcg['color']['alias-ok']['$value'], '{color.ok}')
+        for line in ('color/lab: unsupported_color_space', 'color/lch: unsupported_color_space', 'color/wide: unsupported_color_space',
+                     'color/alias-to-lab: alias_target_skipped: {lab}', 'color/dotted.name: name_not_exportable',
+                     'color/alias-dotted: alias_target_skipped: {dotted.name}'):
+            self.assertIn(line, skipped)
+        self.assertEqual(verifier.validate_tokens(dtcg), [])
+
+    def test_export_alias_chain_and_theme_borrowing(self):
+        tokens = self.doc({'a': '#010203', 'b': '{a}', 'c': '{b}'}, themes=('light', 'dark'))
+        tokens['color']['tokens'].append({'name': 'late', 'value': {'dark': '#ffffff'}, 'usage': 'only dark'})
+        tokens['color']['tokens'].append({'name': 'mixed', 'value': {'light': '{a}', 'dark': '#000000'}, 'usage': 'x'})
+        dtcg, skipped = v3.to_dtcg(tokens)
+        self.assertEqual(dtcg['color']['c']['$value'], '{color.b}')
+        self.assertEqual(dtcg['color']['late']['$value']['components'], [1.0, 1.0, 1.0])  # the first theme borrows the first value there is
+        self.assertEqual(dtcg['color']['mixed']['$value'], '{color.a}')
+        self.assertIn('color/mixed: theme_not_exported: dark', skipped)
+        self.assertEqual(verifier.validate_tokens(dtcg), [])
+
+    def test_export_second_theme_skipped(self):
+        dtcg, skipped = v3.to_dtcg(self.tokens)
+        names = [t['name'] for t in self.tokens['color']['tokens']]
+        self.assertEqual([line for line in skipped if 'theme_not_exported' in line],
+                         [f'color/{name}: theme_not_exported: dark' for name in names])
+        self.assertEqual(dtcg['color']['text']['$value']['components'][0], round(0x1c / 255, 6))  # the light value, not the dark one
+        three = json.loads(json.dumps(self.tokens))
+        three['color']['themes'].append({'id': 'sepia', 'name': 'Sepia'})
+        _, skipped = v3.to_dtcg(three)
+        self.assertIn('color/bg: theme_not_exported: dark', skipped)
+        self.assertIn('color/bg: theme_not_exported: sepia', skipped)
+        _, skipped = v3.to_dtcg(self.doc({'bg': '#ffffff'}))
+        self.assertEqual(skipped, [])
+
+    def test_export_dimensions(self):
+        tokens = self.doc(spacing=self.family('spacing', ('a', '4px'), ('b', '0.5rem'), ('c', '0'), ('d', 8), ('e', '12.5px'), ('f', '50%'),
+                                              ('g', '2em'), ('h', '1vw'), ('i', '10pt'), ('j', '-2px'), ('k', '.25rem')),
+                          radius=self.family('radius', ('sm', '4px'), ('pill', '9999px'), ('round', '50%')))
+        dtcg, skipped = v3.to_dtcg(tokens)
+        values = {k: v['$value'] for k, v in dtcg['spacing'].items() if not k.startswith('$')}
+        self.assertEqual(values, {'a': {'value': 4, 'unit': 'px'}, 'b': {'value': 0.5, 'unit': 'rem'}, 'c': {'value': 0, 'unit': 'px'},
+                                  'd': {'value': 8, 'unit': 'px'}, 'e': {'value': 12.5, 'unit': 'px'}, 'j': {'value': -2, 'unit': 'px'},
+                                  'k': {'value': 0.25, 'unit': 'rem'}})
+        for name in ('f', 'g', 'h', 'i'):
+            self.assertIn(f'spacing/{name}: unsupported_unit', skipped)
+        self.assertIn('radius/round: unsupported_unit', skipped)
+        self.assertEqual(sorted(k for k in dtcg['radius'] if not k.startswith('$')), ['pill', 'sm'])
+        self.assertEqual(verifier.validate_tokens(dtcg), [])
+
+    def test_export_type_families_weights_sizes(self):
+        tokens = self.doc()
+        tokens['type'] = {'fonts': [], 'families': {'serif': "Georgia, 'Times New Roman', \"Noto Serif\", serif", 'mono': 'ui-monospace',
+                                                    'odd.key': 'Arial', 'blank': ' , '},
+                          'groups': [{'name': 'G', 'family': 'serif', 'styles': [
+                              {'name': 'a', 'fontSize': '16px', 'fontWeight': 'bold', 'lineHeight': 1.5},
+                              {'name': 'b', 'fontSize': '1.25rem', 'fontWeight': '300 800', 'lineHeight': '2rem'},
+                              {'name': 'c', 'fontSize': '120%', 'fontWeight': '500', 'lineHeight': '20pt'},
+                              {'name': 'd', 'fontSize': 14, 'fontWeight': 400.5},
+                              {'name': 'e.x', 'fontSize': '10px', 'fontWeight': 700, 'lineHeight': '12px'}]}]}
+        dtcg, skipped = v3.to_dtcg(tokens)
+        family = dtcg['type']['family']
+        self.assertEqual(family['serif']['$value'], ['Georgia', 'Times New Roman', 'Noto Serif', 'serif'])
+        self.assertEqual(family['mono']['$value'], ['ui-monospace'])
+        self.assertNotIn('odd.key', family)
+        self.assertNotIn('blank', family)
+        self.assertIn('type/family.odd.key: name_not_exportable', skipped)
+        self.assertIn('type/family.blank: invalid_value', skipped)
+        weight = {k: v['$value'] for k, v in dtcg['type']['weight'].items() if not k.startswith('$')}
+        self.assertEqual(weight, {'a': 'bold', 'c': 500, 'd': 400.5})
+        self.assertIn('type/weight.b: unsupported_weight_range', skipped)
+        size = {k: v['$value'] for k, v in dtcg['type']['size'].items() if not k.startswith('$')}
+        self.assertEqual(size, {'a': {'value': 16, 'unit': 'px'}, 'b': {'value': 1.25, 'unit': 'rem'}, 'd': {'value': 14, 'unit': 'px'}})
+        self.assertIn('type/size.c: unsupported_unit', skipped)
+        line = {k: v for k, v in dtcg['type']['lineHeight'].items() if not k.startswith('$')}
+        self.assertEqual(line['a'], {'$type': 'number', '$value': 1.5})
+        self.assertEqual(line['b'], {'$type': 'dimension', '$value': {'value': 2, 'unit': 'rem'}})
+        self.assertIn('type/lineHeight.c: unsupported_unit', skipped)
+        self.assertFalse([k for k in dtcg['type']['weight'] if k.startswith('e')])
+        self.assertIn('type/weight.e.x: name_not_exportable', skipped)
+        self.assertEqual(verifier.validate_tokens(dtcg), [])
+
+    def test_export_with_nothing_to_export_is_an_empty_document_the_validator_refuses(self):
+        dtcg, skipped = v3.to_dtcg({'color': {'themes': [{'id': 'light', 'name': 'Light'}], 'tokens': [
+            {'name': 'x', 'value': 'lab(1 2 3)', 'usage': 'u'}]}})
+        self.assertEqual(dtcg, {})
+        self.assertEqual(skipped, ['color/x: unsupported_color_space'])
+        self.assertTrue(verifier.validate_tokens(dtcg))
+
+    def test_export_tolerates_a_malformed_document(self):
+        for bad in (None, [], 'x', 1, {}, {'color': None}, {'color': {'tokens': 5}}, {'color': {'tokens': [None, 3, {'name': 7}]}},
+                    {'color': {'tokens': [{'name': 'a', 'value': '{b}'}, {'name': 'b', 'value': '{a}'}, {'name': 'c', 'value': '{c}'}]}},
+                    {'spacing': {'tokens': [{'name': 'a', 'value': {}}]}}, {'type': {'families': 4, 'groups': 'x'}}, {'shadow': 3}):
+            with self.subTest(bad=bad):
+                dtcg, skipped = v3.to_dtcg(bad)
+                self.assertIsInstance(dtcg, dict)
+                self.assertIsInstance(skipped, list)
+
+    def test_export_large_input_is_linear(self):
+        tokens = self.doc({f'c{i}': f'#{i % 4096:03x}' for i in range(600)}, themes=tuple(f't{i}' for i in range(8)),
+                          spacing=self.family('spacing', *[(f's{i}', f'{i}px') for i in range(60)]))
+        start = time.perf_counter()
+        for _ in range(20):
+            dtcg, skipped = v3.to_dtcg(tokens)
+        self.assertLess(time.perf_counter() - start, 2.0)
+        self.assertEqual(len(skipped), 600 * 7)
+        chain = self.doc({'c0': '#000000', **{f'c{i}': f'{{c{i - 1}}}' for i in range(1, 400)}})
+        start = time.perf_counter()
+        dtcg, _ = v3.to_dtcg(chain)
+        self.assertLess(time.perf_counter() - start, 1.0)
+        self.assertEqual(len([k for k in dtcg['color'] if not k.startswith('$')]), 400)
+
+    # ---- the command line
+
+    def copy_package(self, directory):
+        shutil.copytree(FIXTURE.parent.parent, Path(directory) / 'project')
+        return Path(directory) / 'project' / 'design-system'
+
+    def test_cli_exports_the_fixture_and_lists_skips(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            out = Path(directory) / 'out' / 'fixture.dtcg.json'
+            out.parent.mkdir()
+            code, stdout, stderr = self.run_cli('--package', package, '--out', out)
+            self.assertEqual((code, stderr), (0, ''), stdout)
+            lines = stdout.splitlines()
+            self.assertIn('SKIP color/bg: theme_not_exported: dark', lines)
+            skips = [line for line in lines if line.startswith('SKIP ')]
+            self.assertEqual(len(skips), 10)
+            self.assertRegex(lines[-1], r'^EXPORTED: \d+ tokens, 10 skipped -> ')
+            written = out.read_bytes()
+            self.assertTrue(written.endswith(b'}\n') and b'\r' not in written)
+            self.assertEqual(verifier.validate_tokens(json.loads(written.decode('utf-8'))), [])
+            self.assertEqual(json.loads(written.decode('utf-8')), v3.to_dtcg(self.tokens)[0])
+            before = out.read_bytes()
+            self.assertEqual(self.run_cli('--package', package, '--out', out)[0], 0)  # an existing export is replaced
+            self.assertEqual(out.read_bytes(), before)
+            self.assertEqual(v3.verify_package(package, 'full'), ([], []))  # the package is untouched
+
+    def test_export_out_inside_package_is_input_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            before = sorted(str(p.relative_to(package)) for p in package.rglob('*'))
+            for out in (package / 'tokens.dtcg.json', package / 'components' / 'x.json', package / 'new' / 'x.json', package / '..' / 'design-system' / 'a.json'):
+                code, stdout, stderr = self.run_cli('--package', package, '--out', out)
+                self.assertEqual((code, stdout, stderr), (1, '', 'input_error: --out inside package\n'), out)
+            self.assertEqual(sorted(str(p.relative_to(package)) for p in package.rglob('*')), before)
+
+    def test_export_out_through_a_link_into_the_package_is_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            link = Path(directory) / 'alias'
+            made = 'symlink'
+            try:
+                os.symlink(package, link, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                made = 'junction' if os.name == 'nt' and subprocess.run(
+                    ['cmd', '/c', 'mklink', '/J', str(link), str(package)], capture_output=True).returncode == 0 else None
+            if made is None:
+                self.skipTest('this machine cannot make a symlink or a junction')
+            try:
+                code, stdout, stderr = self.run_cli('--package', package, '--out', link / 'x.dtcg.json')
+                self.assertEqual((code, stdout, stderr), (1, '', 'input_error: --out inside package\n'))
+                self.assertFalse((package / 'x.dtcg.json').exists())
+            finally:
+                if made == 'junction':
+                    subprocess.run(['cmd', '/c', 'rmdir', str(link)], capture_output=True)
+                else:
+                    os.unlink(link)
+
+    def test_cli_argument_errors_are_one_line_and_write_nothing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            out = Path(directory) / 'x.json'
+            cases = [(('--out', out), 'input_error: --package is required\n'),
+                     (('--package', package), 'input_error: --out is required\n'),
+                     (('--package', Path(directory) / 'missing', '--out', out), 'input_error: package not found: '),
+                     (('--package', package, '--out', Path(directory) / 'nowhere' / 'x.json'), 'input_error: --out folder not found: '),
+                     (('--package', package, '--out', Path(directory)), 'input_error: --out is not a file: ')]
+            for argv, start in cases:
+                with self.subTest(argv=argv):
+                    code, stdout, stderr = self.run_cli(*argv)
+                    self.assertEqual((code, stdout), (1, ''))
+                    self.assertTrue(stderr.startswith(start), stderr)
+                    self.assertEqual(len(stderr.splitlines()), 1, stderr)
+            self.assertFalse(out.exists())
+
+    def test_cli_never_writes_through_a_link(self):
+        """A link as --out is refused (no symlink privilege is needed here: the link test is stood in for)."""
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            target = Path(directory) / 'real.json'
+            target.write_text('keep\n', encoding='utf-8', newline='\n')
+            with patch.object(os.path, 'islink', lambda path: Path(path) == target):
+                code, stdout, stderr = self.run_cli('--package', package, '--out', target)
+            self.assertEqual((code, stdout), (1, ''))
+            self.assertTrue(stderr.startswith('input_error: --out is not a file: '), stderr)
+            self.assertEqual(target.read_text(encoding='utf-8'), 'keep\n')
+
+    def test_cli_refuses_a_package_whose_tokens_fail_validation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            doc = json.loads((package / 'tokens.json').read_text(encoding='utf-8'))
+            doc['color']['tokens'][0]['value'] = 'var(--x)'
+            (package / 'tokens.json').write_text(json.dumps(doc), encoding='utf-8')
+            out = Path(directory) / 'x.json'
+            code, stdout, stderr = self.run_cli('--package', package, '--out', out)
+            self.assertEqual((code, stdout), (1, ''))
+            self.assertIn('forbidden_color_syntax: tokens.json: color.bg', stderr)
+            self.assertFalse(out.exists())
+            (package / 'tokens.json').write_text('{not json', encoding='utf-8')
+            code, stdout, stderr = self.run_cli('--package', package, '--out', out)
+            self.assertEqual((code, stdout, stderr), (1, '', 'token_shape: tokens.json: json\n'))
+            (package / 'tokens.json').write_text(' ' * 600_000, encoding='utf-8')
+            code, stdout, stderr = self.run_cli('--package', package, '--out', out)
+            self.assertEqual((code, stdout), (1, ''))
+            self.assertTrue(stderr.startswith('limit_exceeded: tokens.json: file size: '), stderr)
+            (package / 'tokens.json').unlink()
+            code, stdout, stderr = self.run_cli('--package', package, '--out', out)
+            self.assertEqual((code, stdout, stderr), (1, '', 'missing_required_file: tokens.json\n'))
+            self.assertFalse(out.exists())
+
+    def test_cli_exits_1_when_the_export_does_not_pass_the_validator(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            out = Path(directory) / 'x.json'
+            module = self.cli_module
+            with patch.object(module.verifier, 'validate_tokens', return_value=['invalid_value: color.bg']):
+                code, stdout, stderr = self.run_cli('--package', package, '--out', out, module=module)
+            self.assertEqual(code, 1)
+            self.assertIn('invalid_value: color.bg', stderr)
+            self.assertFalse(out.exists())
+            doc = json.loads((package / 'tokens.json').read_text(encoding='utf-8'))
+            doc['color']['tokens'] = [{'name': 'x', 'value': 'lab(1 2 3)', 'usage': 'u'}]
+            for family in ('spacing', 'radius'):
+                doc.pop(family)
+            doc.pop('type')
+            (package / 'tokens.json').write_text(json.dumps(doc), encoding='utf-8')
+            code, stdout, stderr = self.run_cli('--package', package, '--out', out)
+            self.assertEqual(code, 1)
+            self.assertIn('SKIP color/x: unsupported_color_space', stdout)
+            self.assertIn('invalid_structure', stderr)
+            self.assertFalse(out.exists())
+
+    def test_cli_names_are_escaped_in_skip_lines(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            doc = json.loads((package / 'tokens.json').read_text(encoding='utf-8'))
+            doc['shadow'] = {'tokens': [{'name': 'ok', 'value': '1px', 'usage': 'u'}]}
+            (package / 'tokens.json').write_text(json.dumps(doc), encoding='utf-8')
+            out = Path(directory) / 'x.json'
+            code, stdout, stderr = self.run_cli('--package', package, '--out', out)
+            self.assertEqual((code, stderr), (0, ''))
+            self.assertIn('SKIP shadow/ok: unsupported_type', stdout)
+        _, skipped = v3.to_dtcg({'color': {'themes': [{'id': 'a', 'name': 'x'}, {'id': 'z\x1b[31m\n', 'name': 'y'}],
+                                           'tokens': [{'name': 'n', 'value': '#000', 'usage': 'u'}]}})
+        self.assertTrue(all(line.isprintable() for line in skipped), skipped)
+
+
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'skills/design-system/tests/fixture/design-system/design-system.json'
 TEMPLATE = ROOT / 'skills/design-system/templates/brand-v3/design-system.json'

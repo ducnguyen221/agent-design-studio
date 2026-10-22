@@ -695,6 +695,243 @@ def _unsupported_owners(by_name: dict, theme_ids: list, pair: dict, theme: objec
 
 # --------------------------------------------------------------------------- index and canonical map
 
+# --------------------------------------------------------------------------- DTCG export (derived, lossy, one way)
+
+_DTCG_LENGTH = re.compile(r'([+-]?(?:\d+(?:\.\d*)?|\.\d+))(px|rem)?')
+_DTCG_WEIGHT = re.compile(r'(\d{1,4})(?:\s+(\d{1,4}))?')
+_DTCG_FAMILIES = ('color', 'spacing', 'radius', 'type')
+
+
+def _plain_number(value: float) -> int | float:
+    """The JSON number of a measured value: ``4`` rather than ``4.0``."""
+    if isinstance(value, int) or not float(value).is_integer() or abs(value) >= 1e15:
+        return value
+    return int(value)
+
+
+def _dtcg_name(name: object) -> bool:
+    """A name the DTCG subset accepts as a key: no dot (it separates path parts), brace, hash, slash, backslash, colon, ``$`` start or control character."""
+    return (isinstance(name, str) and bool(name) and not name.startswith('$')
+            and not any(c in '.{}#/\\:' or ord(c) < 32 or ord(c) == 127 for c in name))
+
+
+def _dtcg_dimension(value: object) -> dict | None:
+    """``{value, unit}`` for ``0``, a bare number (pixels) or a px / rem length; None for any other unit or for no length at all."""
+    if _is_number(value):
+        number, unit = value, 'px'
+    elif isinstance(value, str):
+        match = _DTCG_LENGTH.fullmatch(value.strip())
+        if not match:
+            return None
+        number, unit = float(match[1]), match[2] or 'px'
+        if not math.isfinite(number):
+            return None
+    else:
+        return None
+    return {'value': _plain_number(number), 'unit': unit}
+
+
+def _dtcg_weight(value: object) -> tuple[object, str]:
+    """(DTCG weight, '') or (None, reason): a number 1 to 1000, ``normal``, ``bold`` or digits; a range is not a DTCG weight."""
+    if _is_number(value):
+        return (_plain_number(value), '') if 1 <= value <= 1000 else (None, 'invalid_value')
+    if isinstance(value, str):
+        text = value.strip()
+        if text in ('normal', 'bold'):
+            return text, ''
+        match = _DTCG_WEIGHT.fullmatch(text)
+        if match and all(1 <= int(g) <= 1000 for g in match.groups() if g):
+            return (None, 'unsupported_weight_range') if match[2] else (int(match[1]), '')
+    return None, 'invalid_value'
+
+
+def _font_stack(text: object) -> list[str]:
+    """The family names of a CSS font stack, quotes removed; one pass, empty when the text is not a usable stack."""
+    if not isinstance(text, str):
+        return []
+    items: list[str] = []
+    current: list[str] = []
+    quote = ''
+    for char in text:
+        if quote:
+            if char == quote:
+                quote = ''
+            else:
+                current.append(char)
+        elif char in '"\'':
+            quote = char
+        elif char == ',':
+            items.append(''.join(current).strip())
+            current = []
+        else:
+            current.append(char)
+    items.append(''.join(current).strip())
+    items = [item for item in items if item]
+    return items if all(item.isprintable() for item in items) else []
+
+
+def _token_rows(body: object) -> list[tuple[str, dict]]:
+    """(name, token) of every well-formed token in a ``{tokens: [...]}`` family body; the first of a repeated name only."""
+    rows: list[tuple[str, dict]] = []
+    seen: set[str] = set()
+    for token in body.get('tokens', []) if isinstance(body, dict) and isinstance(body.get('tokens'), list) else []:
+        if isinstance(token, dict) and isinstance(token.get('name'), str) and token['name'] not in seen:
+            seen.add(token['name'])
+            rows.append((token['name'], token))
+    return rows
+
+
+def _dtcg_colors(body: object, skipped: list[str]) -> dict:
+    themes = [t['id'] for t in body.get('themes', []) if isinstance(t, dict) and isinstance(t.get('id'), str)] \
+        if isinstance(body, dict) and isinstance(body.get('themes'), list) else []
+    records: dict[str, tuple[str, object]] = {}
+    rows = _token_rows(body)
+    for name, token in rows:
+        value = _theme_value(token, themes, themes[0] if themes else None)
+        if not _dtcg_name(name):
+            records[name] = ('skip', 'name_not_exportable')
+        elif value is None:
+            records[name] = ('skip', 'invalid_value')
+        elif _ALIAS.match(value.strip()):
+            records[name] = ('alias', value.strip()[1:-1])
+        else:
+            try:
+                red, green, blue, alpha = _parse_color_alpha(value)
+            except (ValueError, ArithmeticError, IndexError) as exc:
+                records[name] = ('skip', 'unsupported_color_space' if exc.args[:1] == ('unsupported_space',) else 'invalid_value')
+                continue
+            channels = [round(min(1.0, max(0.0, c)), 6) for c in (red, green, blue)]
+            colour: dict = {'colorSpace': 'srgb', 'components': channels}
+            if alpha < 1:
+                colour['alpha'] = round(min(1.0, max(0.0, alpha)), 6)
+            records[name] = ('color', colour)
+    memo: dict[str, bool] = {}
+
+    def exported(name: str) -> bool:
+        chain: list[str] = []
+        current = name
+        while True:
+            if current in memo:
+                result = memo[current]
+                break
+            record = records.get(current)
+            if record is None or record[0] == 'skip' or current in chain:
+                result = False
+                break
+            if record[0] == 'color':
+                result = True
+                break
+            chain.append(current)
+            current = record[1]
+        memo.update((link, result) for link in chain)
+        return result
+
+    group: dict = {'$type': 'color'}
+    for name, _token in rows:
+        kind, payload = records[name]
+        if kind == 'skip':
+            skipped.append(f'color/{_label(name)}: {payload}')
+        elif kind == 'alias' and not exported(name):
+            skipped.append(f'color/{_label(name)}: alias_target_skipped: {{{_label(payload)}}}')
+        else:
+            group[name] = {'$value': payload if kind == 'color' else '{color.' + payload + '}'}
+            skipped.extend(f'color/{_label(name)}: theme_not_exported: {_label(theme)}' for theme in themes[1:])
+    return group
+
+
+def _dtcg_lengths(family: str, body: object, skipped: list[str]) -> dict:
+    group: dict = {'$type': 'dimension'}
+    for name, token in _token_rows(body):
+        dimension = _dtcg_dimension(token.get('value'))
+        if not _dtcg_name(name):
+            skipped.append(f'{family}/{_label(name)}: name_not_exportable')
+        elif dimension is None:
+            skipped.append(f'{family}/{_label(name)}: ' + ('unsupported_unit' if _valid_length(token.get('value')) else 'invalid_value'))
+        else:
+            group[name] = {'$value': dimension}
+    return group
+
+
+def _dtcg_type(body: object, skipped: list[str]) -> dict:
+    out: dict[str, dict] = {'family': {'$type': 'fontFamily'}, 'weight': {'$type': 'fontWeight'}, 'size': {'$type': 'dimension'}, 'lineHeight': {}}
+    if not isinstance(body, dict):
+        return {}
+    families = body.get('families')
+    for key, stack in families.items() if isinstance(families, dict) else []:
+        names = _font_stack(stack)
+        if not _dtcg_name(key):
+            skipped.append(f'type/family.{_label(key)}: name_not_exportable')
+        elif not names:
+            skipped.append(f'type/family.{_label(key)}: invalid_value')
+        else:
+            out['family'][key] = {'$value': names}
+    seen: set[str] = set()
+    for group in body.get('groups', []) if isinstance(body.get('groups'), list) else []:
+        for style in group.get('styles', []) if isinstance(group, dict) and isinstance(group.get('styles'), list) else []:
+            if not isinstance(style, dict) or not isinstance(style.get('name'), str) or style['name'] in seen:
+                continue
+            name = style['name']
+            seen.add(name)
+            usable = _dtcg_name(name)
+            for prop, part in (('fontWeight', 'weight'), ('fontSize', 'size'), ('lineHeight', 'lineHeight')):
+                if prop not in style:
+                    continue
+                value = style[prop]
+                where = f'type/{part}.{_label(name)}'
+                if part == 'weight':
+                    result, reason = _dtcg_weight(value)
+                    token = {'$value': result}
+                elif part == 'lineHeight' and _is_number(value):
+                    result, reason = value, '' if 0 <= value < 10 else 'invalid_value'
+                    token = {'$type': 'number', '$value': _plain_number(value)}
+                else:
+                    result = _dtcg_dimension(value)
+                    reason = '' if result is not None else 'unsupported_unit' if _valid_length(value) else 'invalid_value'
+                    token = {'$type': 'dimension', '$value': result} if part == 'lineHeight' else {'$value': result}
+                if not usable:
+                    skipped.append(f'{where}: name_not_exportable')
+                elif reason:
+                    skipped.append(f'{where}: {reason}')
+                else:
+                    out[part][name] = token
+    return {part: group for part, group in out.items() if any(not key.startswith('$') for key in group)}
+
+
+def to_dtcg(tokens: dict) -> tuple[dict, list[str]]:
+    """Derive a DTCG 2025.10 subset document from a ``tokens.json`` document: (document, skipped).
+
+    Exported: colours (sRGB components, alpha only below 1, same-file aliases ``{color.name}``) of the FIRST theme, ``spacing`` and
+    ``radius`` as ``dimension`` (px, rem), font stacks as ``fontFamily`` and the weight, size and line height of each text style.
+    Every token left out is one line ``<family>/<name>: <reason>`` in ``skipped``: ``unsupported_type`` (a family without a DTCG
+    type, such as ``shadow``), ``theme_not_exported: <id>`` (each theme after the first, for every exported colour),
+    ``unsupported_color_space`` (``lab()``, ``lch()``, ``color()``), ``unsupported_unit``, ``unsupported_weight_range``,
+    ``alias_target_skipped``, ``name_not_exportable`` (a dot in a name), ``invalid_value``. ``usage`` is not exported.
+    Pure and linear; a document that is not valid ``tokens.json`` gives a partial result, so validate it first."""
+    if not isinstance(tokens, dict):
+        return {}, []
+    skipped: list[str] = []
+    out: dict = {}
+    parts = (('color', lambda body: _dtcg_colors(body, skipped)), ('spacing', lambda body: _dtcg_lengths('spacing', body, skipped)),
+             ('radius', lambda body: _dtcg_lengths('radius', body, skipped)), ('type', lambda body: _dtcg_type(body, skipped)))
+    for family, build in parts:
+        if family in tokens:
+            group = build(tokens[family])
+            if family == 'type':
+                if group:
+                    out[family] = group
+            elif any(not key.startswith('$') for key in group):
+                out[family] = group
+    for family, body in tokens.items():
+        if family in _DTCG_FAMILIES:
+            continue
+        rows = _token_rows(body)
+        if rows:
+            skipped.extend(f'{_label(family)}/{_label(name)}: unsupported_type' for name, _token in rows)
+        else:
+            skipped.append(f'{_label(family)}: unsupported_type')
+    return out, skipped
+
+
 def validate_index(doc: object) -> list[str]:
     """Check design-system.json; a format version other than 3 stops all further checks."""
     name = 'design-system.json'
