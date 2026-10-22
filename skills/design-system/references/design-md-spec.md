@@ -121,7 +121,7 @@ Run by `verify-design-system.py` as part of `verify_package` (the `DESIGN.md` en
 | `design_md_broken_ref` | a `{colors.x}`, `{typography.x}`, `{rounded.x}` or `{spacing.x}` in the body (outside fenced code) names a key that is not in the front matter |
 | `design_md_overview_incomplete` | the Overview section lacks a `- Read order:`, `- Owner:` or `- Status:` line |
 
-`build-design-system.py --design-md --check` reports the same `design_md_stale` and exits 1 without writing; on a package without `DESIGN.md` it reports `design_md_missing: DESIGN.md`. That check reads CRLF and lone CR as LF on both sides, so line endings alone never make `DESIGN.md` stale. `build-design-system.py --design-md` replaces only the front matter block and leaves the body untouched; on a file without a front matter block it prepends one.
+`build-design-system.py --design-md --check` reports the same `design_md_stale` and exits 1 without writing; on a package without `DESIGN.md` it reports `design_md_missing: DESIGN.md`. That check reads CRLF and lone CR as LF on both sides, so line endings alone never make `DESIGN.md` stale. The verifier reads the whole file that way before it looks at sections and references, so the build and the verifier give a file with lone CR the same verdict. `build-design-system.py --design-md` replaces only the front matter block and leaves the body untouched; on a file without a front matter block it prepends one.
 
 ## Not checked
 

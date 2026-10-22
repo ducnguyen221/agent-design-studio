@@ -291,7 +291,14 @@ VIEWER_WARN = 300_000
 INLINE_CAP = 65_536       # one embedded image
 INLINE_TOTAL = 250_000    # all embedded images together, counted as data-URI characters
 MAX_LISTED = 20_000       # files the page will list
-VIEWER_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
+# The content-security policy of the page; ``{script}`` is replaced by the hash of the one script (``viewer_csp``). The fixed
+# directives are the list ``VIEWER_CSP_FIXED`` of the verifier, which checks them; a test keeps both in step.
+VIEWER_CSP = ("default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src {script}; script-src-attr 'none'; "
+              "base-uri 'none'; form-action 'none'")
+READ_PIECE = 65_536          # the most one read call asks for when a whole file has to be looked at
+EOL_READ_MAX = 12_000_000     # a text file is sized with LF line ends when it is at most this long ...
+EOL_READ_TOTAL = 64_000_000   # ... while all such files read so far stay under this total ...
+EOL_READ_FILES = 2_000        # ... and there are at most this many of them (any other file is shown with its stored size)
 TITLE_SUFFIX = ' — static viewer — not a Claude Design render'
 SCREENS = (('overview', 'Overview'), ('colors', 'Colors'), ('typography', 'Typography'), ('spacing', 'Spacing'),
            ('components', 'Components'), ('assets', 'Assets'), ('files', 'Files'), ('agents', 'Agents'))
@@ -789,9 +796,15 @@ def sanitize_svg(text: str) -> str | None:
     return text.strip() if _scan_svg(text) is not None else None
 
 
+def viewer_csp(script: str) -> str:
+    """The content-security policy for a page whose one script is ``script``."""
+    return VIEWER_CSP.replace('{script}', v3.csp_script_hash(script))
+
+
 def inline_asset(path: Path, cap: int = INLINE_CAP) -> str | None:
     """A ``data:`` URI for an image of at most ``cap`` bytes, or None (not an image type, too large, unreadable, unsafe SVG).
 
+    An SVG is text: it is embedded, and measured against ``cap``, with LF line ends, so that a copy saved with CRLF gives the same page.
     The caller passes a path that already went through ``safe_path``; a sensitive name or a link is refused again here.
     """
     path = Path(path)
@@ -802,9 +815,11 @@ def inline_asset(path: Path, cap: int = INLINE_CAP) -> str | None:
         if path.is_symlink():
             return None
         with path.open('rb') as handle:
-            raw = handle.read(cap + 1)
+            raw = handle.read(2 * cap + 1 if kind == 'image/svg+xml' else cap + 1)  # CRLF doubles a text at most
     except OSError:
         return None
+    if kind == 'image/svg+xml':
+        raw = v3.eol_lf(raw)
     if len(raw) > cap:
         return None
     if kind == 'image/svg+xml':
@@ -828,8 +843,51 @@ def _capped(root: Path, rel: str, cap: int) -> bytes | None:
 
 
 def _text_of(root: Path, rel: str, cap: int) -> str:
-    raw = _capped(root, rel, cap)
-    return '' if raw is None else raw[:cap].decode('utf-8', errors='replace')
+    """At most ``cap`` bytes of a text file, line ends as LF (the cut falls at the same place in a copy saved with CRLF).
+
+    Up to ``2 * cap`` stored bytes are read, in pieces of ``READ_PIECE``: CRLF doubles a text at most."""
+    try:
+        with v3.safe_path(root, rel).open('rb') as handle:
+            parts: list[bytes] = []
+            total = 0
+            while total <= 2 * cap:
+                piece = handle.read(min(READ_PIECE, 2 * cap + 1 - total))
+                if not piece:
+                    break
+                parts.append(piece)
+                total += len(piece)
+    except (ValueError, RuntimeError, OSError):
+        return ''
+    return v3.eol_lf(b''.join(parts))[:cap].decode('utf-8', errors='replace')
+
+
+def _lf_size(root: Path, rel: str, size: int, spent: list[int]) -> int:
+    """The size a text file has with LF line ends; ``size`` for any other file, one that is too large, or one that cannot be read.
+
+    The file is read in pieces of ``READ_PIECE`` and counted as it goes; ``spent`` holds the bytes and the files read so far, and
+    both stay under their limits."""
+    if (Path(rel).suffix.casefold() not in v3.TEXT_SUFFIXES or size > EOL_READ_MAX or spent[0] + size > EOL_READ_TOTAL
+            or spent[1] >= EOL_READ_FILES):
+        return size
+    spent[1] += 1
+    counted = stored = 0
+    carry = b''  # a CR at the end of a piece waits for the first byte of the next one
+    try:
+        with v3.safe_path(root, rel).open('rb') as handle:
+            while True:
+                piece = handle.read(READ_PIECE)
+                if not piece:
+                    break
+                stored += len(piece)
+                if stored > EOL_READ_MAX:
+                    return size
+                piece = carry + piece
+                carry = piece[-1:] if piece.endswith(b'\r') else b''
+                counted += len(v3.eol_lf(piece[:len(piece) - len(carry)]))
+    except (ValueError, RuntimeError, OSError):
+        return size
+    spent[0] += stored
+    return counted + len(carry)
 
 
 def _json_of(root: Path, rel: str, cap: int, required: bool) -> object:
@@ -895,6 +953,14 @@ def collect_package(root: Path) -> dict:
     names = sorted(rel for rel in sizes if _listed(rel) and rel != 'viewer.html')
     if len(names) > MAX_LISTED:
         raise PackageError(f'limit_exceeded: package: files: {len(names)} > {MAX_LISTED}')
+    eol_spent = [0, 0]  # bytes and files read to size text files
+    measured: dict[str, int] = {}
+
+    def lf(rel: str) -> int:
+        """The page shows a text file with the size it has with LF line ends. Read once, and only when the page needs the size."""
+        if rel not in measured:
+            measured[rel] = _lf_size(root, rel, sizes[rel], eol_spent)
+        return measured[rel]
     warnings: list[str] = []
 
     design = split_front_matter(_text_of(root, 'DESIGN.md', v3.CAP_KEPT))[1].lstrip(BOM)
@@ -913,7 +979,7 @@ def collect_package(root: Path) -> dict:
             raise PackageError(f'viewer_too_large: viewer.html: {spent} > {VIEWER_MAX}')
         base = f'components/{name}'
         body = _text_of(root, f'{base}/README.md', v3.CAP_COMPONENT_README) if f'{base}/README.md' in sizes else ''
-        if sizes.get(f'{base}/README.md', 0) > v3.CAP_COMPONENT_README:
+        if sizes.get(f'{base}/README.md', 0) > v3.CAP_COMPONENT_README and lf(f'{base}/README.md') > v3.CAP_COMPONENT_README:
             body += f'\n\n(README cut at {v3.CAP_COMPONENT_README} bytes)'
         head = _text_of(root, f'{base}/preview.html', 4096) if f'{base}/preview.html' in sizes else ''
         match = v3._marker(head) if head else None
@@ -936,8 +1002,9 @@ def collect_package(root: Path) -> dict:
             spent += len(asset_readmes[group])
             continue
         inline = None
+        size = lf(rel)
         if Path(rel).suffix.casefold() in IMAGE_TYPES:
-            if sizes[rel] <= INLINE_CAP and 4 * math.ceil(sizes[rel] / 3) + 26 <= budget:  # base64 plus the longest ``data:`` prefix
+            if size <= INLINE_CAP and 4 * math.ceil(size / 3) + 26 <= budget:  # base64 plus the longest ``data:`` prefix
                 try:
                     inline = inline_asset(v3.safe_path(root, rel))
                 except (ValueError, RuntimeError, OSError):
@@ -947,10 +1014,10 @@ def collect_package(root: Path) -> dict:
                 warnings.append(f'viewer_asset_skipped: {rel}')
             else:
                 budget -= len(inline)
-        assets.append({'group': group, 'path': rel, 'size': sizes[rel], 'inline': inline})
+        assets.append({'group': group, 'path': rel, 'size': size, 'inline': inline})
 
     return {'index': index, 'design_md': design, 'readme': readme, 'tokens': tokens, 'canonical': canonical, 'cover_svg': cover,
-            'components': components, 'assets': assets, 'files': [{'path': rel, 'size': sizes[rel]} for rel in names],
+            'components': components, 'assets': assets, 'files': [{'path': rel, 'size': lf(rel)} for rel in names],
             'asset_readmes': asset_readmes, 'warnings': warnings}
 
 
@@ -1330,14 +1397,15 @@ def render_viewer(data: dict) -> str:
     title = _line(index.get('title') or 'Design system', 160)
     bodies = {'overview': _overview(data), 'colors': _colors(tokens, canonical), 'typography': _typography(tokens),
               'spacing': _spacing(tokens), 'components': _components(data), 'assets': _assets(data),
-              'files': _tree([(f['path'], f['size']) for f in data.get('files') or []], True), 'agents': _agents(data)}
+              'files': '<p class="mut">Sizes of text files are measured with LF line endings.</p>\n'
+                       + _tree([(f['path'], f['size']) for f in data.get('files') or []], True), 'agents': _agents(data)}
     nav = ''.join(f'<a href="#{key}">{label}</a>' for key, label in SCREENS)
     sections = '\n'.join(f'<section id="{key}" aria-labelledby="h-{key}"><h2 id="h-{key}">{label}</h2>\n{bodies[key]}\n</section>'
                          for key, label in SCREENS)
     return '\n'.join((
         '<!doctype html>', '<html lang="en">', '<head>', '<meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
-        f'<meta http-equiv="Content-Security-Policy" content="{VIEWER_CSP}">',
+        f'<meta http-equiv="Content-Security-Policy" content="{viewer_csp(_SCRIPT)}">',
         f'<title>{_esc(title + TITLE_SUFFIX)}</title>', f'<style>{_STYLE}</style>', '</head>', '<body>',
         f'<header><h1>{_esc(title)}</h1><p class="mut">Static viewer generated from the package files. Not a Claude Design render.</p></header>',
         f'<nav aria-label="Screens">{nav}<label>Filter tokens <input id="q" type="search"></label><span id="qn" class="mut" role="status"></span></nav>',

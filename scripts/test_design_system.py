@@ -1,4 +1,5 @@
 """Original, anonymous contract fixtures; no external assets or runtime claims."""
+import base64
 import importlib.util
 import hashlib
 import tempfile
@@ -1986,8 +1987,8 @@ class ViewerBuildTests(unittest.TestCase):
         self.assertEqual(len(re.findall(r'<h1[ >]', text)), 1)
         self.assertTrue(text.startswith('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">'))
         self.assertIn('<meta name="viewport" content="width=device-width, initial-scale=1">', text)
-        self.assertIn('<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; '
-                      'style-src \'unsafe-inline\'; script-src \'unsafe-inline\'">', text)
+        self.assertIn('<meta http-equiv="Content-Security-Policy" content="' + self.build.viewer_csp(self.build._SCRIPT) + '">', text)
+        self.assertNotIn("script-src 'unsafe-inline'", text)
 
     def test_viewer_title_static_label(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -2884,7 +2885,8 @@ class ViewerVerifyTests(unittest.TestCase):
     def injected(self, snippet):
         """The fixture page with ``snippet`` added at the end of <main>; returns the errors of ``validate_viewer``."""
         self.assertEqual(self.page.count('</main>'), 1)
-        return self.checked(self.page.replace('</main>', snippet + '</main>'))[0]
+        errors = self.checked(self.page.replace('</main>', snippet + '</main>'))[0]
+        return [e for e in errors if not re.fullmatch(r'viewer_csp_weak: viewer\.html: script count \d+', e)]  # a script of the snippet: see ViewerHardeningTests
 
     def run_builder(self, *argv):
         out, err = io.StringIO(), io.StringIO()
@@ -3166,7 +3168,8 @@ class ViewerVerifyTests(unittest.TestCase):
             self.assertEqual(self.injected(inert), [], inert)
         self.assertEqual(self.injected('<!--x--><iframe>'), ['viewer_forbidden_tag: viewer.html: iframe'])
         self.assertEqual(self.injected('<!-->--><iframe>'), ['viewer_forbidden_tag: viewer.html: iframe'])
-        reordered = '<meta content="default-src \'none\'; img-src data:" HTTP-EQUIV=\'content-security-policy\'>'
+        policy = re.search(r'content="([^"]*)"', meta)[1]
+        reordered = '<meta content="' + '; '.join(reversed(policy.split('; '))) + '" HTTP-EQUIV=\'content-security-policy\'>'
         self.assertEqual(self.checked(self.page.replace(meta, reordered))[0], [])
         with tempfile.TemporaryDirectory() as directory:
             package = self.copy_of(directory)
@@ -3405,6 +3408,445 @@ class ViewerGuardTests(unittest.TestCase):
             self.assertEqual(self.build.render_markdown(f'[up]({target})'), '<p>up</p>', target)
         for target in ('a/.x/b.md', 'a/x./b.md', 'a/..x/b.md', 'a/x.y.z/b.md', 'a/%20x/b.md'):
             self.assertEqual(safe(target), target, target)
+
+
+class ViewerHardeningTests(unittest.TestCase):
+    """TK19: the page policy pins its one script by hash, the page and its checks do not depend on line ends, and the guards that the
+    TK9 review found without a test that fails when they are removed (NS-3, NS-4)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.build = importlib.import_module('design_system_build')
+        path = Path(__file__).with_name('build-design-system.py')
+        loader_spec = importlib.util.spec_from_file_location('design_system_builder_hardening', path)
+        cls.cli_module = importlib.util.module_from_spec(loader_spec)
+        loader_spec.loader.exec_module(cls.cli_module)
+        cls.fixture_dir = FIXTURE.parent
+        cls.template_dir = TEMPLATE.parent
+        cls.page = (cls.fixture_dir / 'viewer.html').read_text(encoding='utf-8')
+        cls.data = cls.build.collect_package(cls.fixture_dir)
+        cls.meta = re.search(r'<meta http-equiv="Content-Security-Policy"[^>]*>', cls.page)[0]
+        cls.policy_text = re.search(r'content="([^"]*)"', cls.meta)[1]
+
+    def run_builder(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = self.cli_module.main(list(argv))
+        return code, out.getvalue(), err.getvalue()
+
+    def copy_of(self, directory, source=None):
+        source = Path(source or self.fixture_dir)
+        shutil.copytree(source.parent, Path(directory) / 'copy', ignore=shutil.ignore_patterns('__pycache__'))
+        return Path(directory) / 'copy' / source.name
+
+    def checked(self, text):
+        return v3.validate_viewer(text, len(text.encode('utf-8')), self.data)[0]
+
+    def injected(self, snippet):
+        return self.checked(self.page.replace('</main>', snippet + '</main>'))
+
+    @staticmethod
+    def digest(script):
+        return base64.b64encode(hashlib.sha256(script.encode('utf-8')).digest()).decode('ascii')
+
+    @staticmethod
+    def policy_of(page):
+        content = re.search(r'<meta http-equiv="Content-Security-Policy" content="([^"]*)"', page)[1]
+        return {part.split()[0]: part.split()[1:] for part in content.split('; ')}
+
+    def with_policy(self, policy):
+        return self.page.replace(self.policy_text, policy)
+
+    def with_script(self, body, hashed=None):
+        """The fixture page with another script body and a policy that holds the hash of ``hashed`` (default: the body, line ends as LF)."""
+        script = re.search(r'<script>(.*?)</script>', self.page, re.S)[1]
+        page = self.page.replace(f'<script>{script}</script>', f'<script>{body}</script>')
+        old = re.search(r"script-src '(sha256-[^']*)'", page)[1]
+        return page.replace(old, 'sha256-' + self.digest(v3.eol_lf(body) if hashed is None else hashed))
+
+    # ---- (1) the policy: one source of truth, one script pinned by its hash
+
+    def test_policy_pins_the_one_script_by_hash(self):
+        for source in (self.fixture_dir, self.template_dir):
+            page = (source / 'viewer.html').read_text(encoding='utf-8')
+            scripts = re.findall(r'<script>(.*?)</script>', page, re.S)
+            self.assertEqual(len(scripts), 1, source)
+            self.assertEqual(self.policy_of(page), {
+                'default-src': ["'none'"], 'img-src': ['data:'], 'style-src': ["'unsafe-inline'"],
+                'script-src': ["'sha256-" + self.digest(scripts[0]) + "'"], 'script-src-attr': ["'none'"],
+                'base-uri': ["'none'"], 'form-action': ["'none'"]}, source)
+            self.assertNotIn("script-src 'unsafe-inline'", page)
+            self.assertEqual(v3.verify_package(source), ([], []), source)
+
+    def test_generator_and_verifier_share_the_policy(self):
+        text = self.build.viewer_csp(self.build._SCRIPT)
+        self.assertEqual(text, self.policy_text)
+        self.assertEqual(self.build.viewer_csp('x'), self.build.viewer_csp('x'))
+        self.assertNotEqual(self.build.viewer_csp('x'), self.build.viewer_csp('y'))
+        parts = self.build.VIEWER_CSP.split('; ')
+        fixed = [f'{name} {value}' for name, value in v3.VIEWER_CSP_FIXED]
+        self.assertEqual([p for p in parts if not p.startswith('script-src ')], fixed)  # the same directives, the same values
+        self.assertEqual([p for p in parts if p.startswith('script-src ')], ['script-src {script}'])
+        self.assertEqual(len(parts), len(fixed) + 1)
+
+    def test_the_hash_is_computed_from_the_script_text(self):
+        self.assertEqual(re.search(r"'sha256-([^']*)'", self.policy_text)[1], self.digest(self.build._SCRIPT))
+        self.assertEqual(self.build.viewer_csp('a'), self.build.VIEWER_CSP.replace('{script}', "'sha256-" + self.digest('a') + "'"))
+        self.assertEqual(self.build.viewer_csp('é'), self.build.VIEWER_CSP.replace('{script}', "'sha256-" + self.digest('é') + "'"))  # UTF-8 bytes
+
+    def test_two_builds_give_the_same_page_and_policy(self):
+        first = self.build.render_viewer(self.data)
+        second = self.build.render_viewer(self.build.collect_package(self.fixture_dir))
+        self.assertEqual(hashlib.sha256(first.encode()).hexdigest(), hashlib.sha256(second.encode()).hexdigest())
+        self.assertEqual(first, self.page)
+
+    def test_a_directive_missing_or_loosened_is_named(self):
+        parts = self.policy_text.split('; ')
+        self.assertEqual(self.checked(self.page), [])
+        for part in parts:
+            name = part.split()[0]
+            rest = '; '.join(p for p in parts if p != part)
+            errors = self.checked(self.with_policy(rest))
+            if name == 'default-src':
+                self.assertEqual(errors, ['viewer_missing_csp: viewer.html'], name)  # no policy that closes everything by default
+            elif name == 'script-src':
+                self.assertEqual(errors, ['viewer_csp_weak: viewer.html: script-src hash missing'], name)
+            else:
+                self.assertEqual(errors, [f'viewer_csp_weak: viewer.html: {name}'], name)
+            if name != 'default-src':
+                loose = '; '.join(f'{name} *' if p == part else p for p in parts)
+                self.assertEqual(len(self.checked(self.with_policy(loose))), 1, name)
+        self.assertEqual(self.checked(self.with_policy(self.policy_text + "; connect-src *")), ['viewer_csp_weak: viewer.html: connect-src'])
+        self.assertEqual(self.checked(self.with_policy(self.policy_text + "; img-src *")), [])  # the first of a repeated directive counts
+        self.assertEqual(self.checked(self.with_policy(self.policy_text.replace("base-uri 'none'", "base-uri 'none' 'self'"))),
+                         ['viewer_csp_weak: viewer.html: base-uri'])
+
+    def test_script_src_must_not_allow_inline_code(self):
+        hashed = re.search(r"script-src '[^']*'", self.policy_text)[0]
+        self.assertEqual(self.checked(self.with_policy(self.policy_text.replace(hashed, "script-src 'unsafe-inline'"))),
+                         ['viewer_csp_weak: viewer.html: script-src unsafe-inline'])
+        self.assertEqual(self.checked(self.with_policy(self.policy_text.replace(hashed, hashed + " 'UNSAFE-INLINE'"))),
+                         ['viewer_csp_weak: viewer.html: script-src unsafe-inline'])
+        for extra in ("'unsafe-eval'", '*', 'https:', "'strict-dynamic'", "'self'"):
+            self.assertEqual(self.checked(self.with_policy(self.policy_text.replace(hashed, hashed + ' ' + extra))),
+                             ['viewer_csp_weak: viewer.html: script-src'], extra)
+        self.assertEqual(self.checked(self.with_policy(self.policy_text.replace(hashed, "script-src 'none'"))),
+                         ['viewer_csp_weak: viewer.html: script-src hash missing'])
+
+    def test_the_hash_must_match_the_script_byte_for_byte(self):
+        page = self.page.replace('var q=document', 'var Q=document', 1)  # the script changes, the policy does not
+        self.assertEqual(self.checked(page), ['viewer_csp_weak: viewer.html: script-src hash mismatch'])
+        old = re.search(r"'sha256-([^']*)'", self.policy_text)[1]
+        flipped = old[:5] + (old[5].swapcase() if old[5].isalpha() else 'A') + old[6:]
+        self.assertNotEqual(old, flipped)
+        self.assertEqual(self.checked(self.page.replace(old, flipped)), ['viewer_csp_weak: viewer.html: script-src hash mismatch'])
+        self.assertEqual(self.checked(self.page.replace(old, old.rstrip('='))), ['viewer_csp_weak: viewer.html: script-src hash mismatch'])
+        self.assertEqual(self.checked(self.page.replace("'sha256-", "'SHA256-")), [])  # the algorithm name has no case, the digest has
+        self.assertEqual(self.checked(self.page.replace('script-src ', 'SCRIPT-SRC ').replace('base-uri', 'Base-URI')), [])
+        shouted = self.policy_text.replace("'none'", "'NONE'").replace('data:', 'DATA:').replace("'unsafe-inline'", "'Unsafe-Inline'")
+        self.assertEqual(self.checked(self.page.replace(self.policy_text, shouted)), [])  # keywords have no case
+
+    def test_the_first_policy_that_closes_everything_is_the_one_judged(self):
+        loose = self.meta.replace(self.policy_text, "default-src 'none'; img-src *")
+        other = self.meta.replace(self.policy_text, "default-src *; img-src *")
+        self.assertEqual(self.checked(self.page.replace(self.meta, self.meta + loose)), [])  # a second policy only narrows what a browser allows
+        self.assertEqual(self.checked(self.page.replace(self.meta, loose + self.meta)), ['viewer_csp_weak: viewer.html: img-src',
+                                                                                          'viewer_csp_weak: viewer.html: style-src',
+                                                                                          'viewer_csp_weak: viewer.html: script-src-attr',
+                                                                                          'viewer_csp_weak: viewer.html: base-uri',
+                                                                                          'viewer_csp_weak: viewer.html: form-action',
+                                                                                          'viewer_csp_weak: viewer.html: script-src hash missing'])
+        self.assertEqual(self.checked(self.page.replace(self.meta, other + self.meta)), [])  # a policy without default-src 'none' is skipped
+
+    def test_the_policy_is_read_as_a_browser_reads_it(self):
+        self.assertEqual(self.checked(self.page.replace(self.policy_text, self.policy_text.replace("'", '&#39;'))), [])
+        self.assertEqual(self.checked(self.page.replace(self.policy_text, self.policy_text.replace('; ', ' ;\n ;'))), [])
+
+    def test_script_count_must_be_one(self):
+        self.assertEqual(self.injected('<script>var a=1;</script>'), ['viewer_csp_weak: viewer.html: script count 2'])
+        self.assertEqual(self.injected('<!-- <script>var a=1;</script> -->'), [])  # inert
+        script = re.search(r'<script>.*?</script>', self.page, re.S)[0]
+        self.assertEqual(self.checked(self.page.replace(script, '')), ['viewer_csp_weak: viewer.html: script count 0'])
+
+    def test_a_missing_meta_is_missing_csp_only(self):
+        self.assertEqual(self.checked(self.page.replace(self.meta, '')), ['viewer_missing_csp: viewer.html'])
+        self.assertEqual(self.checked(self.page.replace(self.meta, self.meta.replace('http-equiv', 'name'))), ['viewer_missing_csp: viewer.html'])
+
+    def test_script_line_ends_are_read_as_a_browser_reads_them(self):
+        body = 'var a = 1;\r\nvar b = "é";\rvar c = 3;\n'
+        page = self.with_script(body)
+        self.assertEqual(self.checked(page), [])
+        self.assertEqual(self.checked(v3.eol_lf(page).replace('\n', '\r\n')), [])
+        self.assertEqual(self.checked(self.with_script(body, hashed=body)), ['viewer_csp_weak: viewer.html: script-src hash mismatch'])
+
+    def test_page_with_the_old_policy_is_stale(self):
+        old = self.page.replace(self.policy_text, "default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'")
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            (package / 'viewer.html').write_bytes(old.encode('utf-8'))
+            errors = v3.verify_package(package)[0]
+            self.assertIn('viewer_csp_weak: viewer.html: script-src unsafe-inline', errors)
+            self.assertIn('viewer_stale: viewer.html', errors)
+            self.assertEqual(self.run_builder('--package', str(package), '--viewer')[0], 0)
+            self.assertEqual(v3.verify_package(package), ([], []))
+
+    # ---- (2) line ends: a package saved with CRLF is the same package
+
+    @staticmethod
+    def to_crlf(folder, ends=b'\r\n'):
+        for path in Path(folder).rglob('*'):
+            if path.is_file() and path.suffix.casefold() in v3.TEXT_SUFFIXES:
+                path.write_bytes(v3.eol_lf(path.read_bytes()).replace(b'\n', ends))
+
+    def test_a_whole_package_saved_with_crlf_is_not_stale(self):
+        stamp = 1_000_000_000_000_000_000
+        for source in (self.fixture_dir, self.template_dir):
+            for ends in (b'\r\n',):
+                with tempfile.TemporaryDirectory() as directory:
+                    package = self.copy_of(directory, source)
+                    self.to_crlf(package.parent, ends)
+                    self.assertIn(ends, (package / 'tokens.json').read_bytes())
+                    changed = [p for p in package.rglob('*') if p.is_file()]
+                    for path in changed:
+                        os.utime(path, ns=(stamp, stamp))
+                    before = {p: (p.read_bytes(), os.stat(p).st_mtime_ns) for p in changed}
+                    self.assertEqual(v3.verify_package(package), ([], []), (source.name, ends))
+                    code, out, err = cli('--package', str(package))
+                    self.assertEqual((code, err), (0, ''), (source.name, ends))
+                    code, out, err = self.run_builder('--package', str(package), '--design-md', '--viewer', '--check')
+                    self.assertEqual((code, out.strip(), err), (0, 'CHECKED: design-md=ok viewer=ok', ''), (source.name, ends))
+                    code, out, err = self.run_builder('--package', str(package), '--design-md', '--viewer')
+                    self.assertEqual((code, out.strip(), err), (0, 'BUILT: design-md=unchanged viewer=unchanged adapters=0 written, 0 skipped', ''), (source.name, ends))
+                    self.assertEqual({p: (p.read_bytes(), os.stat(p).st_mtime_ns) for p in changed}, before, (source.name, ends))  # nothing rewritten
+
+    def test_a_text_file_is_listed_with_its_lf_size_and_a_binary_file_with_its_own(self):
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4">\n<path d="M0 0h4v4z"/>\n</svg>\n'
+        binary = b'x\r\ny\r\nz\r'
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory)
+            put(directory, 'notes.md', 'a\nb\r\nc\rd\r\n\r\ne\n')  # eight characters of text, nine line ends of three kinds
+            put(directory, 'assets/Icons/mark.svg', svg.replace('\n', '\r\n'))
+            put(directory, 'assets/Icons/blob.bin', binary)
+            put(directory, 'assets/Icons/README.md', 'mark.svg blob.bin\n')
+            data = self.build.collect_package(Path(directory))
+            lf = {f['path']: f['size'] for f in data['files']}
+            self.assertEqual(lf['notes.md'], len('a\nb\nc\nd\n\ne\n'))
+            self.assertEqual(lf['assets/Icons/mark.svg'], len(svg))
+            self.assertEqual(lf['assets/Icons/blob.bin'], len(binary))  # not text: as stored
+            asset = {a['path']: a for a in data['assets']}['assets/Icons/mark.svg']
+            self.assertEqual(asset['size'], len(svg))
+            self.assertEqual(asset['inline'], 'data:image/svg+xml;base64,' + base64.b64encode(svg.encode()).decode())
+            put(directory, 'notes.md', 'a\nb\nc\nd\n\ne\n')
+            put(directory, 'assets/Icons/mark.svg', svg)
+            same = self.build.collect_package(Path(directory))
+        self.assertEqual(same['files'], data['files'])
+        self.assertEqual(same['assets'], data['assets'])
+
+    def test_a_lone_cr_counts_once(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory)
+            put(directory, 'notes.md', b'a\rb\rc\r')
+            sizes = {f['path']: f['size'] for f in self.build.collect_package(Path(directory))['files']}
+        self.assertEqual(sizes['notes.md'], 6)
+
+    def test_the_embed_limit_is_measured_with_lf(self):
+        head, tail = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><text>', '</text></svg>'
+        cap = self.build.INLINE_CAP
+        for extra, expected in ((0, True), (1, False)):
+            filler = 'ab\n' * ((cap - len(head) - len(tail) + extra) // 3)
+            body = head + filler + 'c' * ((cap - len(head) - len(tail) + extra) - len(filler)) + tail
+            self.assertEqual(len(body), cap + extra)
+            with tempfile.TemporaryDirectory() as directory:
+                for ends in ('\n', '\r\n', '\r'):
+                    path = Path(directory) / 'a.svg'
+                    path.write_bytes(body.replace('\n', ends).encode('utf-8'))
+                    got = self.build.inline_asset(path)
+                    self.assertEqual(got is not None, expected, (extra, ends))
+                    if expected:
+                        self.assertEqual(got, 'data:image/svg+xml;base64,' + base64.b64encode(body.encode()).decode(), ends)
+                    self.assertEqual(self.build.inline_asset(path, cap=cap - 10), None)
+
+    def test_a_readme_cut_does_not_depend_on_line_ends(self):
+        line = 'word word word word word word word\n'
+        body = line * (v3.CAP_COMPONENT_README // len(line) + 20)
+        pages = []
+        for ends in ('\n', '\r\n'):
+            with tempfile.TemporaryDirectory() as directory:
+                package = self.copy_of(directory)
+                (package / 'components' / 'Button' / 'README.md').write_bytes(body.replace('\n', ends).encode('utf-8'))
+                pages.append(self.build.render_viewer(self.build.collect_package(package)))
+        self.assertEqual(pages[0], pages[1])
+        self.assertIn(f'README cut at {v3.CAP_COMPONENT_README} bytes', pages[0])
+
+    def test_a_readme_that_fits_with_lf_is_not_cut_in_a_crlf_copy(self):
+        line = 'word word word word word word word\n'  # 36 characters
+        body = (line * (v3.CAP_COMPONENT_README // len(line) + 2))[:v3.CAP_COMPONENT_README - 1] + '\n'  # exactly the cap with LF
+        self.assertEqual(len(body.encode('utf-8')), v3.CAP_COMPONENT_README)
+        pages = []
+        for ends in ('\n', '\r\n'):
+            with tempfile.TemporaryDirectory() as directory:
+                package = self.copy_of(directory)
+                (package / 'components' / 'Button' / 'README.md').write_bytes(body.replace('\n', ends).encode('utf-8'))
+                pages.append(self.build.render_viewer(self.build.collect_package(package)))
+        self.assertEqual(pages[0], pages[1])
+        self.assertNotIn('README cut at', pages[0])
+
+    def test_a_crlf_that_straddles_a_read_piece_is_one_line_end(self):
+        piece = self.build.READ_PIECE
+        cases = {'straddle.md': ('a' * (piece - 1) + '\r\nb\r\n', 'a' * (piece - 1) + '\nb\n'),
+                 'lone.md': ('a' * (piece - 1) + '\rb\r', 'a' * (piece - 1) + '\nb\n'),
+                 'twice.md': ('a' * (piece - 1) + '\r\r\nb', 'a' * (piece - 1) + '\n\nb'),
+                 'tail.md': ('a' * (2 * piece - 1) + '\r', 'a' * (2 * piece - 1) + '\n'),
+                 'whole.md': ('a' * (piece - 1) + '\r\n', 'a' * (piece - 1) + '\n')}
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory)
+            for name, (raw, _lf) in cases.items():
+                put(directory, name, raw.encode('utf-8'))
+            sizes = {f['path']: f['size'] for f in self.build.collect_package(Path(directory))['files']}
+        for name, (_raw, lf) in cases.items():
+            self.assertEqual(sizes[name], len(lf), name)
+
+    def test_sizing_text_files_is_bounded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory)
+            put(directory, 'big.md', '\n'.join('line %d' % n for n in range(3000)))
+            self.to_crlf(directory)
+            stored = {}
+            for path in Path(directory).rglob('*'):
+                if path.is_file() and path.suffix.casefold() in v3.TEXT_SUFFIXES:
+                    stored[path.relative_to(directory).as_posix()] = path.stat().st_size
+
+            def shown(**limits):
+                with patch.multiple(self.build, **{'EOL_READ_MAX': self.build.EOL_READ_MAX, **limits}):
+                    files = self.build.collect_package(Path(directory))['files']
+                return {f['path']: f['size'] for f in files if f['path'] in stored}
+
+            def as_stored(sizes):
+                return sorted(path for path, size in sizes.items() if size == stored[path])
+
+            count, total, biggest = len(stored), sum(stored.values()), max(stored.values())
+            self.assertLess(sorted(stored.values())[-2], biggest)
+            for path in stored:
+                self.assertLess(len(v3.eol_lf((Path(directory) / path).read_bytes())), stored[path], path)  # every one has line ends to change
+            self.assertEqual(as_stored(shown()), [])  # all measured: every file here is CRLF, so none keeps its stored size
+            self.assertEqual(len(as_stored(shown(EOL_READ_FILES=count - 3))), 3)
+            self.assertEqual(as_stored(shown(EOL_READ_FILES=count)), [])
+            self.assertEqual(len(as_stored(shown(EOL_READ_FILES=0))), count)
+            self.assertEqual(len(as_stored(shown(EOL_READ_TOTAL=total - 1))), 1)
+            self.assertEqual(as_stored(shown(EOL_READ_TOTAL=total)), [])
+            self.assertEqual(as_stored(shown(EOL_READ_MAX=biggest - 1)), ['big.md'])
+            self.assertEqual(as_stored(shown(EOL_READ_MAX=biggest)), [])
+
+    def test_the_files_screen_says_how_sizes_are_measured(self):
+        files = re.search(r'<section id="files".*?</section>', self.page, re.S)[0]
+        self.assertIn('Sizes of text files are measured with LF line endings.', files)
+        self.assertEqual(self.page.count('measured with LF line endings'), 1)
+
+    # ---- NS-3: the guards that nothing pinned
+
+    def make_design_file(self, package, crlf):
+        """DESIGN.md of the package with its first ``crlf`` lines ending in CRLF and the others in LF; returns (path, number of lines).
+
+        The number of lines is made even, so that exactly half of them is a case on its own."""
+        design = package / 'DESIGN.md'
+        lines = v3.eol_lf(design.read_text(encoding='utf-8')).split('\n')[:-1]
+        if len(lines) % 2:
+            lines.append('')
+        design.write_bytes(''.join(line + ('\r\n' if n < crlf else '\n') for n, line in enumerate(lines)).encode('utf-8'))
+        return design, len(lines)
+
+    def test_rewritten_design_md_keeps_crlf_only_when_most_lines_have_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lines = self.make_design_file(self.copy_of(directory), 0)[1]
+        for crlf, whole in ((1, False), (lines // 2 - 1, False), (lines // 2, False), (lines // 2 + 1, True), (lines, True)):
+            with tempfile.TemporaryDirectory() as directory:
+                package = self.copy_of(directory)
+                design, count = self.make_design_file(package, crlf)
+                self.assertEqual(count, lines)
+                before = design.read_bytes()
+                self.assertEqual(before.count(b'\r\n'), crlf)
+                ViewerVerifyTests.change_one_hex(package)
+                code, out, err = self.run_builder('--package', str(package), '--design-md')
+                self.assertEqual((code, err), (0, ''), crlf)
+                raw = design.read_bytes()
+                self.assertEqual(raw.count(b'\r\n'), raw.count(b'\n') if whole else 0, (crlf, lines))
+                self.assertNotEqual(v3.eol_lf(raw), v3.eol_lf(before), crlf)  # it really was rewritten
+
+    def test_rewritten_design_md_is_measured_with_the_line_ends_it_will_have(self):
+        cap = v3.CAP_KEPT
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            tokens = json.loads((package / 'tokens.json').read_text(encoding='utf-8'))
+            index = json.loads((package / 'design-system.json').read_text(encoding='utf-8'))
+            tokens['color']['tokens'] += [{'name': f'extra-{n}', 'value': '#010203', 'usage': 'added for the size test'} for n in range(6)]
+            (package / 'tokens.json').write_bytes(json.dumps(tokens, indent=2).encode('utf-8'))
+            old = v3.eol_lf((package / 'DESIGN.md').read_text(encoding='utf-8'))
+            fresh = self.build.render_design_md(old, tokens, index)
+            pad = cap - 20 - len(fresh.encode('utf-8'))
+            old += 'y' * pad
+            fresh = self.build.render_design_md(old, tokens, index)
+            self.assertEqual(len(fresh.encode('utf-8')), cap - 20)
+            self.assertLess(len(old.replace('\n', '\r\n').encode('utf-8')), cap)  # the file as it is now is accepted
+            self.assertGreater(len(fresh.replace('\n', '\r\n').encode('utf-8')), cap)  # the file it would become is not
+            (package / 'DESIGN.md').write_bytes(old.replace('\n', '\r\n').encode('utf-8'))
+            before = (package / 'DESIGN.md').read_bytes()
+            code, out, err = self.run_builder('--package', str(package), '--design-md')
+            self.assertEqual((code, out), (1, ''))
+            self.assertRegex(err, rf'^limit_exceeded: DESIGN\.md: file size: \d+ > {cap}\n$')
+            self.assertGreater(int(re.search(r'size: (\d+)', err)[1]), cap)
+            self.assertEqual((package / 'DESIGN.md').read_bytes(), before)  # nothing written
+            (package / 'DESIGN.md').write_bytes(old.encode('utf-8'))  # the same text with LF is rewritten
+            code, out, err = self.run_builder('--package', str(package), '--design-md')
+            self.assertEqual((code, err), (0, ''))
+            self.assertEqual(len((package / 'DESIGN.md').read_bytes()), cap - 20)
+
+    def test_leak_pattern_for_network_shares_takes_host_names_with_dots(self):
+        back = chr(92)
+        for share in (back * 2 + 'fs01.corp.example' + back + 'share', back * 2 + '10.0.0.5' + back + 'c$', back * 2 + 'nas-01' + back + 'x',
+                      back * 2 + 'a.b' + back + '.hidden'):
+            self.assertEqual(self.injected(f'<p>{share}</p>'), ['viewer_leak: viewer.html: network share path'], share)
+        for fine in (back * 2 + 'fs01.corp' + back + ' x', back * 2 + 'fs01.corp' + back, 'a' + back + 'b.c' + back + 'd'):
+            self.assertEqual(self.injected(f'<p>{fine}</p>'), [], fine)
+
+    def test_leak_pattern_for_home_folders_of_a_mac(self):
+        slash = chr(47)
+        trace = slash + 'Us' + 'ers' + slash
+        self.assertEqual(self.injected(f'<p>see {trace}alice</p>'), ['viewer_leak: viewer.html: home path'])
+        self.assertEqual(self.injected(f'<p>{chr(233)}{trace}a</p>'), ['viewer_leak: viewer.html: home path'])  # a letter outside ASCII is no name character
+        self.assertEqual(self.injected(f'<p>(({trace}.hidden)</p>'), ['viewer_leak: viewer.html: home path'])
+        for fine in (f'see .{trace}x', f'.{slash}Us' + 'ers' + slash + 'x/y', f'folder {trace} x', f'go to {trace}', f'a:{trace}x', f'a-{trace}x', f'a_{trace}x'):
+            self.assertEqual(self.injected(f'<p>{fine}</p>'), [], fine)
+
+    # ---- NS-4: build and verify read a DESIGN.md with other line ends the same way
+
+    def test_a_design_file_with_lone_cr_is_read_alike_by_build_and_verify(self):
+        for ends in (b'\r', b'\r\n'):
+            with tempfile.TemporaryDirectory() as directory:
+                package = self.copy_of(directory)
+                design = package / 'DESIGN.md'
+                design.write_bytes(v3.eol_lf(design.read_bytes()).replace(b'\n', ends))
+                self.assertEqual(v3.verify_package(package), ([], []), ends)
+                code, out, err = self.run_builder('--package', str(package), '--design-md', '--viewer', '--check')
+                self.assertEqual((code, out.strip(), err), (0, 'CHECKED: design-md=ok viewer=ok', ''), ends)
+                new = ViewerVerifyTests.change_one_hex(package)  # a real difference is still found, by both
+                self.assertEqual(self.run_builder('--package', str(package), '--design-md', '--check')[0], 1, ends)
+                self.assertIn('design_md_stale: DESIGN.md', v3.verify_package(package)[0], ends)
+                self.assertEqual(self.run_builder('--package', str(package), '--design-md', '--viewer')[0], 0, ends)
+                self.assertEqual(v3.verify_package(package), ([], []), ends)
+                self.assertIn(new.encode('utf-8'), design.read_bytes().lower())
+
+    # ---- documents
+
+    def test_contract_describes_the_policy_and_the_new_code(self):
+        text = (ROOT / 'skills/design-system/references/system-contract.md').read_text(encoding='utf-8')
+        self.assertIn('viewer_csp_weak', text)
+        self.assertNotIn("script-src 'unsafe-inline'", text)
+        for name, value in v3.VIEWER_CSP_FIXED:
+            self.assertIn(f'{name} {value}', text, name)
+        self.assertIn("script-src 'sha256-", text)
+        self.assertIn('frame-ancestors', text)
+        self.assertIn('LF line endings', text)
+        self.assertEqual(len(re.findall(r'^\| `viewer_csp_weak` \|', text, re.M)), 1)
 
 
 class SizeCapAndContractDocTests(unittest.TestCase):

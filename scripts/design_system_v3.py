@@ -7,6 +7,8 @@ shape without the ``WARN `` prefix, which the CLI adds.
 """
 from __future__ import annotations
 
+import base64
+import hashlib
 import html
 import json
 import math
@@ -1168,6 +1170,11 @@ _V_LEAKS = (('user profile path', re.compile(r'c:[\\/]users', _V_FLAGS)), ('home
             ('loopback address', re.compile(r'127\.0\.0\.1')), ('workstation folder', re.compile(r'[.]opc' + 'os', _V_FLAGS)),
             ('network share path', re.compile(r'\\\\[\w.-]+\\[\w$.-]', re.ASCII)))
 _V_LEAD = ''.join(map(chr, range(33)))
+# The content-security policy of the page: these directives are written as they stand; ``script-src`` holds the hash of the one
+# script (``design_system_build.VIEWER_CSP`` is the template, a test keeps the two lists equal).
+VIEWER_CSP_FIXED = (('default-src', "'none'"), ('img-src', 'data:'), ('style-src', "'unsafe-inline'"),
+                    ('script-src-attr', "'none'"), ('base-uri', "'none'"), ('form-action', "'none'"))
+_V_CSP_HASH = re.compile(r"'sha256-([A-Za-z0-9+/]{1,100}={0,2})'", re.IGNORECASE)
 
 
 def eol_lf(value):
@@ -1177,6 +1184,45 @@ def eol_lf(value):
     if isinstance(value, bytes):
         return value.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
     return value.replace('\r\n', '\n').replace('\r', '\n')
+
+
+def csp_script_hash(script: str) -> str:
+    """The ``'sha256-...'`` source of a script for a content-security policy: base64 of the SHA-256 of its text, line ends as LF
+    (a browser reads CRLF and a lone CR in a page as LF, so a page saved with other line ends keeps its hash)."""
+    return "'sha256-" + base64.b64encode(hashlib.sha256(eol_lf(script).encode('utf-8', errors='replace')).digest()).decode('ascii') + "'"
+
+
+def _csp_parse(content: str) -> dict[str, list[str]]:
+    """Directive name (lower case) to its source list. Entities are undone as for any attribute; of a repeated directive the first counts."""
+    policy: dict[str, list[str]] = {}
+    for part in html.unescape(content[:100_000]).split(';'):
+        words = part.split()
+        if words:
+            policy.setdefault(words[0].lower(), words[1:])
+    return policy
+
+
+def _csp_weak(policy: dict[str, list[str]], scripts: list[str]) -> list[str]:
+    """What is wrong with a policy that already holds ``default-src 'none'``: a detail per fault, in a fixed order, empty when sound.
+
+    Every other directive must be the fixed one (directive names have no case, neither have keywords; the digest is exact); the
+    ``script-src`` list must be the hash of the one script of the page, with no ``'unsafe-inline'`` or any other source."""
+    weak = [name for name, value in VIEWER_CSP_FIXED if name != 'default-src' and [t.lower() for t in policy.get(name, [])] != [value]]
+    known = {name for name, _ in VIEWER_CSP_FIXED} | {'script-src'}
+    weak.extend(sorted((name if re.fullmatch(r'[a-z][a-z-]{0,30}', name) else 'unknown directive') for name in policy if name not in known))
+    tokens = policy.get('script-src', [])
+    sources = [_V_CSP_HASH.fullmatch(token) for token in tokens]
+    if any(token.lower() == "'unsafe-inline'" for token in tokens):
+        weak.append('script-src unsafe-inline')
+    elif not any(sources):
+        weak.append('script-src hash missing')
+    elif len(tokens) != 1:
+        weak.append('script-src')
+    elif len(scripts) == 1 and tokens[0][len("'sha256-"):-1] != csp_script_hash(scripts[0])[len("'sha256-"):-1]:
+        weak.append('script-src hash mismatch')
+    if len(scripts) != 1:
+        weak.append(f'script count {len(scripts)}')
+    return weak
 
 
 def _split_raw_text(text: str) -> tuple[str, list[str], list[str]]:
@@ -1271,7 +1317,8 @@ def validate_viewer(text: str, size: int, data: dict) -> tuple[list[str], list[s
     markup, scripts, styles = _split_raw_text(text)
 
     forbidden = [m[1].lower() for m in _V_FORBIDDEN_TAG.finditer(markup)]
-    external = csp = lang = img_without_alt = False
+    external = lang = img_without_alt = False
+    policy: dict[str, list[str]] | None = None  # the first content-security policy that closes everything by default
     h1 = 0
     for tag in _V_TAG.finditer(markup):
         name = tag[1].lower()
@@ -1284,8 +1331,10 @@ def validate_viewer(text: str, size: int, data: dict) -> tuple[list[str], list[s
             equiv = attrs.get('http-equiv', '').strip().lower()
             if equiv == 'refresh':
                 forbidden.append('meta refresh')
-            elif equiv == 'content-security-policy' and "default-src 'none'" in attrs.get('content', '').lower():
-                csp = True
+            elif equiv == 'content-security-policy' and policy is None:
+                parsed = _csp_parse(attrs.get('content', ''))
+                if [t.lower() for t in parsed.get('default-src', [])] == ["'none'"]:
+                    policy = parsed
         elif name == 'html' and attrs.get('lang', '').strip():
             lang = True
         elif name == 'img' and 'alt' not in attrs:
@@ -1306,8 +1355,11 @@ def validate_viewer(text: str, size: int, data: dict) -> tuple[list[str], list[s
     for label, pattern in _V_API:
         if any(pattern.search(body) for body in scripts):
             err('viewer_forbidden_api', label)
-    if not csp:
+    if policy is None:
         err('viewer_missing_csp')
+    else:
+        for detail in _csp_weak(policy, scripts):
+            err('viewer_csp_weak', detail)
     if not lang:
         err('viewer_a11y', 'lang missing')
     if not _V_TITLE.search(markup):
@@ -1490,6 +1542,7 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
     else:
         design = text_of('DESIGN.md', CAP_KEPT)
         if design:
+            design = (eol_lf(design[0]), design[1])  # read as the build reads it: CRLF and a lone CR are LF
             for line in validate_design_md_structure(design[0]):
                 err(line)
             if tokens is not _FAIL:
