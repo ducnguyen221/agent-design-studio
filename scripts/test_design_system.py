@@ -197,9 +197,9 @@ class PathTests(unittest.TestCase):
     def test_fixture_design_navigation_and_contract(self):
         import re
         root = Path(__file__).resolve().parents[1] / 'skills/design-system/tests/fixture'
-        required = {'design-system/brand/identity.md', 'design-system/foundations/colors.md',
-                    'design-system/components/button.md', 'design-system/patterns/action-feedback.md',
-                    'design-system/surfaces/web/screens/index.md', 'design-system/assets/manifest.md'}
+        required = {'design-system/README.md', 'design-system/components/Button/README.md',
+                    'design-system/patterns/ActionFeedback.md', 'design-system/surfaces/web/rules.md',
+                    'design-system/surfaces/web/screens/index.md', 'design-system/assets/Icons/README.md'}
         distances = {'design-system/DESIGN.md': 0}
         queue = list(distances)
         for name in queue:
@@ -215,8 +215,9 @@ class PathTests(unittest.TestCase):
                     queue.append(relative)
         self.assertTrue(required <= distances.keys(), required - distances.keys())
         self.assertTrue(all(distances[name] <= 3 for name in required))
-        manifest = json.loads((root / 'design-system/manifest.json').read_text(encoding='utf-8'))
-        self.assertEqual(verifier.validate_manifest(manifest, root), [])
+        canonical = json.loads((root / 'design-system/canonical-map.json').read_text(encoding='utf-8'))
+        self.assertEqual(v3.validate_canonical_map(canonical, root / 'design-system'), [])
+        self.assertFalse((root / 'design-system/manifest.json').exists())
 
     def test_canonical_error_labels_do_not_echo_controls(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -1270,6 +1271,41 @@ class CliV3Tests(unittest.TestCase):
         self.assertTrue(TEMPLATE.is_file())
         errors, _ = v3.verify_package(TEMPLATE.parent, 'minimal')
         self.assertEqual(errors, [])
+
+    def test_shipped_packages_have_no_warnings(self):
+        for package, profile in ((TEMPLATE.parent, 'minimal'), (FIXTURE.parent, 'full')):
+            with self.subTest(package=package.name):
+                errors, warnings = v3.verify_package(package, profile)
+                self.assertEqual((errors, warnings), ([], []))
+
+    def test_shipped_packages_are_standard_trees(self):
+        for package in (TEMPLATE.parent, FIXTURE.parent):
+            with self.subTest(package=package.name):
+                for name in ('manifest.json', 'tokens.css', 'index.html'):
+                    self.assertFalse((package / name).exists(), name)
+                self.assertEqual(sorted(p.name for p in (package / 'components/Cover').iterdir()), ['preview.html'])
+        self.assertEqual(sorted(p.name for p in (FIXTURE.parent / 'patterns').iterdir()), ['ActionFeedback.md'])
+        self.assertEqual(json.loads((TEMPLATE.parent / 'canonical-map.json').read_text(encoding='utf-8'))['profile'], 'minimal')
+        self.assertEqual(json.loads((FIXTURE.parent / 'canonical-map.json').read_text(encoding='utf-8'))['profile'], 'full')
+
+    def test_shipped_generated_files_are_current(self):
+        loader_spec = importlib.util.spec_from_file_location('design_system_builder_shipped', Path(__file__).with_name('build-design-system.py'))
+        builder = importlib.util.module_from_spec(loader_spec)
+        loader_spec.loader.exec_module(builder)
+        for package in (TEMPLATE.parent, FIXTURE.parent):
+            with self.subTest(package=package.name):
+                out, err = io.StringIO(), io.StringIO()
+                with redirect_stdout(out), redirect_stderr(err):
+                    code = builder.main(['--package', str(package), '--design-md', '--viewer', '--check'])
+                self.assertEqual((code, out.getvalue().strip(), err.getvalue()), (0, 'CHECKED: design-md=ok viewer=ok', ''))
+
+    def test_shipped_viewer_counts(self):
+        # (tokens, components, assets) the page lists: components = folders under components/ except Cover; assets = files under assets/ except group READMEs.
+        for package, expected in ((TEMPLATE.parent, (21, 0, 0)), (FIXTURE.parent, (23, 1, 1))):
+            with self.subTest(package=package.name):
+                page = (package / 'viewer.html').read_text(encoding='utf-8')
+                counts = tuple(page.count(f'data-{kind}="') for kind in ('token', 'component', 'asset'))
+                self.assertEqual(counts, expected)
 
 
 class BoundedInputTests(unittest.TestCase):
@@ -2758,9 +2794,6 @@ class ViewerBuildTests(unittest.TestCase):
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'skills/design-system/tests/fixture/design-system/design-system.json'
 TEMPLATE = ROOT / 'skills/design-system/templates/brand-v3/design-system.json'
-# Dropped at TK8, when the v3 fixture and template exist.
-CliV3Tests.test_fixture_full_passes = unittest.skipUnless(FIXTURE.is_file(), 'v3 fixture arrives in TK8')(CliV3Tests.test_fixture_full_passes)
-CliV3Tests.test_template_minimal_passes = unittest.skipUnless(TEMPLATE.is_file(), 'v3 template arrives in TK8')(CliV3Tests.test_template_minimal_passes)
 
 
 if __name__ == '__main__':

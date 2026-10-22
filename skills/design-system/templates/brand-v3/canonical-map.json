@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1",
+  "system": {
+    "id": "sample-studio",
+    "version": "0.1.0",
+    "status": "draft"
+  },
+  "profile": "minimal",
+  "canonical": {
+    "brand": {
+      "kind": "file",
+      "path": "README.md"
+    },
+    "tokens": {
+      "kind": "file",
+      "path": "tokens.json"
+    }
+  },
+  "components": {},
+  "checks": {
+    "contrast": [
+      {
+        "fg": "text",
+        "bg": "bg",
+        "min": 4.5,
+        "large": false
+      },
+      {
+        "fg": "muted",
+        "bg": "bg",
+        "min": 4.5,
+        "large": false
+      }
+    ]
+  },
+  "decisions": []
+}

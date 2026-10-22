@@ -12,4 +12,4 @@ no successful submit/conditional validation. Accessibility: lang=en, native cont
 label for input, live status and 3px focus outline; runtime behavior unverified here.
 
 [HTML entry](../../../../index.html) · [Page module](../../../../src/page.js)
-· [Button](../../../components/button.md) · [Action feedback](../../../patterns/action-feedback.md)
+· [Button](../../../components/Button/README.md) · [Action feedback](../../../patterns/ActionFeedback.md)

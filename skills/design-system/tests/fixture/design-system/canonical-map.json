@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1",
+  "system": {
+    "id": "fixture-studio",
+    "version": "0.1.0",
+    "status": "approved"
+  },
+  "profile": "full",
+  "canonical": {
+    "brand": {
+      "kind": "file",
+      "path": "README.md"
+    },
+    "tokens": {
+      "kind": "file",
+      "path": "tokens.json"
+    },
+    "components": {
+      "kind": "repo-path",
+      "path": "src/Button.js"
+    }
+  },
+  "components": {
+    "Button": {
+      "source": "src/Button.js"
+    }
+  },
+  "checks": {
+    "contrast": [
+      {
+        "fg": "text",
+        "bg": "bg",
+        "min": 4.5,
+        "large": false
+      },
+      {
+        "fg": "muted",
+        "bg": "bg",
+        "min": 4.5,
+        "large": false
+      },
+      {
+        "fg": "accent-text",
+        "bg": "accent",
+        "min": 4.5,
+        "large": false
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "id": "accent-drift",
+      "status": "pending",
+      "note": "The accent token differs from the --accent custom property in src/tokens.css; the owner decision is pending."
+    }
+  ]
+}

@@ -10,6 +10,6 @@
   validation/recovery logic unknown/not implemented. [Page source](../../src/page.js).
 - Accessibility: native button and labeled input; role=status/aria-live=polite feedback;
   focus outline declared. Actual keyboard/announcement checks need browser evidence.
-- Components: [Button](../components/button.md); consumer [entry screen](../surfaces/web/screens/index.md).
+- Components: [Button](../components/Button/README.md); consumer [entry screen](../surfaces/web/screens/index.md).
 
 No template slots are defined: this is a pattern used by one concrete screen, not a kit.
