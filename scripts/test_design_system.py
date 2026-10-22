@@ -2735,7 +2735,7 @@ class ViewerBuildTests(unittest.TestCase):
         ids = re.findall(r'\sid="([^"]*)"', text)
         self.assertEqual(sorted(i for i in set(ids) if ids.count(i) > 1), [])
         self.assertEqual(self.sections(text), EIGHT)
-        inside = text.split('<figure aria-label="Cover">')[1].split('</figure>')[0]
+        inside = text.split('<figure class="cover" aria-label="Cover">')[1].split('</figure>')[0]
         self.assertEqual(sorted(re.findall(r'\sid="([^"]*)"', inside)), ['cover-colors', 'cover-grad', 'cover-h-colors', 'cover-overview', 'cover-q'])
         self.assertIn('fill="url(#cover-grad)"', inside)
         self.assertIn('stroke:url( #cover-grad )', inside)
@@ -2856,6 +2856,60 @@ class ViewerBuildTests(unittest.TestCase):
         self.assertEqual(self.build.count_tokens(None), 0)
         self.assertEqual(self.build.count_tokens({'color': {'tokens': [{'name': 'a'}, {'x': 1}, 3]}, 'type': {'groups': [{'styles': [{'name': 's'}, {}]}, 5]},
                                                   'spacing': {'tokens': 'no'}, 'other': 4}), 2)
+
+    def test_cover_classes_take_their_values_from_tokens(self):
+        # The contract routes every fill, stroke and rx of the cover through a class; the page drops the preview's <style>, so it
+        # must write those classes itself from tokens.json (first theme), scoped to the cover figure. Before: shapes painted black.
+        for package in (TEMPLATE.parent, FIXTURE.parent):
+            with self.subTest(package=package.name):
+                text, _ = self.page(package)
+                self.assertIn('<figure class="cover" aria-label="Cover">', text)
+                head = text.split('</head>')[0]
+                self.assertIn('.cover .fill-accent{fill:#2563eb}', head)
+                self.assertIn('.cover .fill-accent-text{fill:#ffffff}', head)
+                self.assertIn('.cover .radius-md{rx:8px}', head)
+                self.assertEqual(text.count('<style>'), 1)
+
+    def test_cover_css_names_only_classes_the_svg_uses_with_values_a_token_gives(self):
+        # fill-/stroke- take a colour token (alias followed, first theme wins); a radius token name sets rx; everything else is
+        # left out: no token, a value the page cannot write as hex or a plain length, or a class name that could not stand in a selector.
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">'
+               '<rect class="fill-link stroke-text radius-sm fill-nobody fill-a{b} radius-odd other fill-lab1" width="4" height="4"/>'
+               "<circle CLASS='  fill-bg  stroke-accent ' r='1'/><text>Title</text><text>Tagline</text></svg>")
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + svg + '\n')
+            edit_plain(directory, 'tokens.json', lambda d: d['radius']['tokens'].append({'name': 'radius-odd', 'value': 'url(x)', 'usage': 'u'}))
+            edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('lab1', 'lab(50% 0 0)')))
+            text, _ = self.page(directory)
+        head = text.split('</head>')[0]
+        self.assertEqual(re.findall(r'\.cover \.[^{]*\{[^}]*\}', head),
+                         ['.cover .fill-bg{fill:#ffffff}', '.cover .fill-link{fill:#0057b8}', '.cover .radius-sm{rx:2px}',
+                          '.cover .stroke-accent{stroke:#0057b8}', '.cover .stroke-text{stroke:#111111}'])
+        self.assertNotIn('url(x)', head)
+        self.assertNotIn('lab(', head)
+        self.assertNotIn('a{b}', head)
+
+    def test_a_page_without_a_cover_writes_no_cover_rules(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n<svg><script>1</script></svg>\n')
+            text, data = self.page(directory)
+        self.assertIsNone(data['cover_svg'])
+        self.assertNotIn('.cover .', text)  # the fixed sheet keeps its .cover svg sizing rule; no token rule is written
+        self.assertEqual(self.build.cover_css(json.loads((FIXTURE.parent / 'tokens.json').read_text(encoding='utf-8')), None), '')
+
+    def test_a_viewer_without_the_cover_rules_is_stale(self):
+        with tempfile.TemporaryDirectory() as directory:
+            shutil.copytree(FIXTURE.parents[1], Path(directory) / 'fixture')  # with its parent: the map points at src/ beside the package
+            package = Path(directory) / 'fixture' / 'design-system'
+            page = (package / 'viewer.html').read_text(encoding='utf-8')
+            put(package, 'viewer.html', page.replace('.cover .fill-accent{fill:#2563eb}', ''))
+            errors, _ = v3.verify_package(package, 'full')
+        self.assertEqual(errors, ['viewer_stale: viewer.html'])
+
+    def test_contract_names_the_cover_class_rule(self):
+        contract = (TEMPLATE.parents[2] / 'references' / 'system-contract.md').read_text(encoding='utf-8')
+        for phrase in ('`fill-<name>`', '`stroke-<name>`', 'first theme', 'scoped to the cover figure'):
+            self.assertIn(phrase, contract)
 
 
 class ViewerVerifyTests(unittest.TestCase):
@@ -3394,7 +3448,7 @@ class ViewerGuardTests(unittest.TestCase):
             data = self.build.collect_package(Path(directory))
             text = self.build.render_viewer(data)
         self.assertEqual(data['cover_svg'], svg)
-        inside = text.split('<figure aria-label="Cover">')[1].split('</figure>')[0]
+        inside = text.split('<figure class="cover" aria-label="Cover">')[1].split('</figure>')[0]
         self.assertIn('aria-labelledby="cover-colors  cover-overview cover-h-colors"', inside)
         self.assertIn("aria-describedby='cover-overview'", inside)
         self.assertIn('aria-controls="cover-colors"', inside)

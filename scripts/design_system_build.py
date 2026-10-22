@@ -799,6 +799,58 @@ def sanitize_svg(text: str) -> str | None:
     return text.strip() if _scan_svg(text) is not None else None
 
 
+_SVG_CLASS = re.compile(r'[A-Za-z][A-Za-z0-9_-]{0,63}')
+COVER_SCOPE = 'cover'  # the class of the figure that holds the cover; every cover rule starts with it
+
+
+def cover_classes(svg: str) -> list[str]:
+    """The class names the tags of a cover SVG carry, each once, sorted. A name outside letters, digits, ``_`` and ``-`` (at most
+    64, starting with a letter) is left out, so every name returned can stand in a selector as it is."""
+    names: set[str] = set()
+    for tag in _SVG_TAG_TEXT.finditer(svg):
+        for attr in _SVG_ATTR_TEXT.finditer(tag[0]):
+            if attr[2].casefold() == 'class':
+                value = attr[4] if attr[4] is not None else attr[5]
+                names.update(name for name in value.split() if _SVG_CLASS.fullmatch(name))
+    return sorted(names)
+
+
+def cover_css(tokens: dict, svg: str | None) -> str:
+    """Rules that give the classes of the cover SVG the values of the tokens they name, scoped to the cover figure.
+
+    The contract routes every ``fill``, ``stroke`` and ``rx`` of the cover through a class, and the page drops the ``<style>`` of
+    the preview; without these rules a browser paints the shapes black. ``fill-<name>`` and ``stroke-<name>`` take the colour
+    token ``<name>`` in the first theme (an alias is followed); a class that is the name of a radius token sets ``rx``. Only a
+    value the page can write as ``#rrggbb`` or a plain CSS length is used, so a rule holds nothing but a checked name and a
+    checked value: a class with no token, or a token with any other value, gets no rule. The preview's own CSS never reaches the page.
+    """
+    if not svg or not isinstance(tokens, dict):
+        return ''
+    color = tokens.get('color') if isinstance(tokens.get('color'), dict) else {}
+    by_name = {t['name']: t for t in color.get('tokens', []) if isinstance(t, dict) and isinstance(t.get('name'), str)} \
+        if isinstance(color.get('tokens'), list) else {}
+    theme_ids = [t['id'] for t in color.get('themes', []) if isinstance(t, dict) and isinstance(t.get('id'), str)] \
+        if isinstance(color.get('themes'), list) else []
+    theme = theme_ids[0] if theme_ids else None
+    radius = tokens.get('radius') if isinstance(tokens.get('radius'), dict) else {}
+    lengths = {t['name']: _css_length(t.get('value')) for t in radius.get('tokens', []) if isinstance(t, dict) and isinstance(t.get('name'), str)} \
+        if isinstance(radius.get('tokens'), list) else {}
+    rules = []
+    for name in cover_classes(svg):
+        prop = value = None
+        if name.startswith(('fill-', 'stroke-')):
+            prop, token = name.split('-', 1)
+            try:
+                value = _hex_for_css(v3._resolve_color(by_name, theme_ids, token, theme)[0])
+            except ValueError:
+                value = None
+        elif lengths.get(name):
+            prop, value = 'rx', lengths[name]
+        if prop and value:
+            rules.append(f'.{COVER_SCOPE} .{name}{{{prop}:{value}}}')
+    return ''.join(rules)
+
+
 def viewer_csp(script: str) -> str:
     """The content-security policy for a page whose one script is ``script``."""
     return VIEWER_CSP.replace('{script}', v3.csp_script_hash(script))
@@ -1327,13 +1379,18 @@ def _overview_value(design: str, label: str) -> str:
     return ''
 
 
+def _cover_svg(data: dict) -> str | None:
+    """The cover SVG the page embeds, checked again here, or None."""
+    cover = data.get('cover_svg')
+    return sanitize_svg(cover) if isinstance(cover, str) and cover else None
+
+
 def _overview(data: dict) -> str:
     index = data.get('index') if isinstance(data.get('index'), dict) else {}
     system = data.get('canonical', {}).get('system') if isinstance(data.get('canonical'), dict) else None
     system = system if isinstance(system, dict) else {}
     design = data.get('design_md') or ''
-    cover = data.get('cover_svg')
-    cover = sanitize_svg(cover) if isinstance(cover, str) and cover else None  # the page checks again what it embeds
+    cover = _cover_svg(data)
     texts = (_scan_svg(cover) or []) if cover else []
     tagline = texts[1] if len(texts) > 1 else _summary(data.get('readme') or '')
     facts = [('Status', system.get('status')), ('Version', system.get('version')), ('System id', system.get('id')),
@@ -1342,7 +1399,7 @@ def _overview(data: dict) -> str:
     body = '\n'.join(v3._section_lines(design, 'Overview')).strip()
     entries = [(f['path'], f['size']) for f in data.get('files') or []]
     return '\n'.join((
-        f'<figure aria-label="Cover">{isolate_svg_ids(cover)}</figure>' if cover else '<p class="empty">No cover image</p>',
+        f'<figure class="{COVER_SCOPE}" aria-label="Cover">{isolate_svg_ids(cover)}</figure>' if cover else '<p class="empty">No cover image</p>',
         f'<p class="lead">{_esc(_line(index.get("title", "")))}'
         + (f' <span class="mut">{_esc(_line(tagline))}</span>' if tagline else '') + '</p>',
         f'<dl>{rows}</dl>' if rows else '',
@@ -1386,7 +1443,8 @@ _STYLE = (
     'pre{padding:10px;overflow:auto}.sw{display:inline-block;width:1.1rem;height:1.1rem;border:1px solid var(--line);'
     'vertical-align:middle;margin-right:6px}.card{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:12px 0;'
     'background:var(--card)}.bar{height:10px;background:var(--acc);max-width:100%}.box{width:56px;height:36px;background:var(--card);'
-    'border:1px solid var(--line)}img,svg{max-width:100%;height:auto}figure{margin:0 0 16px}.mut{color:var(--mut)}.lead{font-size:1.1rem}'
+    'border:1px solid var(--line)}img,svg{max-width:100%;height:auto}figure{margin:0 0 16px}.cover svg{height:240px;width:auto}'
+    '.mut{color:var(--mut)}.lead{font-size:1.1rem}'
     '.plain{list-style:none;padding-left:18px}.plain .plain{padding-left:14px}dt{font-weight:600}dd{margin:0 0 6px}'
     '@supports selector(:has(a)){main:has(section:target) section:not(:target){display:none}'
     'main:not(:has(section:target)) section:not(#overview){display:none}}')
@@ -1409,7 +1467,7 @@ def render_viewer(data: dict) -> str:
         '<!doctype html>', '<html lang="en">', '<head>', '<meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
         f'<meta http-equiv="Content-Security-Policy" content="{viewer_csp(_SCRIPT)}">',
-        f'<title>{_esc(title + TITLE_SUFFIX)}</title>', f'<style>{_STYLE}</style>', '</head>', '<body>',
+        f'<title>{_esc(title + TITLE_SUFFIX)}</title>', f'<style>{_STYLE}{cover_css(tokens, _cover_svg(data))}</style>', '</head>', '<body>',
         f'<header><h1>{_esc(title)}</h1><p class="mut">Static viewer generated from the package files. Not a Claude Design render.</p></header>',
         f'<nav aria-label="Screens">{nav}<label>Filter tokens <input id="q" type="search"></label><span id="qn" class="mut" role="status"></span></nav>',
         f'<main>\n{sections}\n</main>', f'<script>{_SCRIPT}</script>', '</body>', '</html>', ''))
