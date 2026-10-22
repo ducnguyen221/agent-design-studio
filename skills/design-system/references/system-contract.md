@@ -227,6 +227,7 @@ Every code the package verifier can print, with its level. `tokens.json` codes a
 | `readme_forbidden_section` | error | `README.md: <heading>` |
 | `readme_unknown_token` | warning | `README.md: <name>` |
 | `token_shape`, `token_name_invalid`, `duplicate_name`, `missing_usage`, `invalid_value`, `forbidden_color_syntax`, `missing_target`, `reference_cycle`, `alias_too_deep`, `limit_exceeded`, `unsupported_family` | error (`missing_usage` on a text style: warning) | `tokens.json: ...` as in `token-contract.md` |
+| `limit_exceeded` | error (build) | `DESIGN.md: file size: <n> > 512000`: the file the build would read or leave behind is over the cap |
 | `font_file_missing`, `font_file_invalid`, `font_file_too_large` | error | `fonts/<file>` |
 | `design_md_missing`, `design_md_stale`, `design_md_section_missing`, `design_md_section_order`, `design_md_broken_ref`, `design_md_overview_incomplete` | error | `DESIGN.md[: detail]` as in `design-md-spec.md` |
 | `design_md_color_passthrough` | warning (build) | `<token name>` |

@@ -3971,6 +3971,85 @@ class PackAndTemplateTests(unittest.TestCase):
         self.assertLessEqual(len(text.split('\n---\n', 1)[1].encode('utf-8')), 8000)  # Codex reads at most 8000 bytes of a skill body
         self.assertNotRegex(text, r'\b(?:FR|TK|SC|CQ|RQ)\d')
 
+    # --- TK10 fix 1: what the skill tells an agent must work from an installed copy -------------------------------
+
+    @staticmethod
+    def _skill_text():
+        return (ROOT / 'skills/design-system/SKILL.md').read_text(encoding='utf-8')
+
+    def _section(self, name):
+        text = self._skill_text()
+        match = re.search(rf'^## {re.escape(name)}\n(.*?)(?=^## |\Z)', text, re.MULTILINE | re.DOTALL)
+        self.assertIsNotNone(match, name)
+        return match[1]
+
+    def test_minimal_package_with_a_component_needs_profile_full(self):
+        """The package `create` leaves is minimal; `document` adds a component, so the skill must say to switch the profile."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'design-system'
+            shutil.copytree(ROOT / 'skills/design-system/templates/brand-v3', root)
+            target = root / 'components/Sample'
+            target.mkdir()
+            for name in ('README.md', 'preview.html'):
+                shutil.copy(ROOT / 'skills/design-system/templates/component-v3' / name, target / name)
+            derive(root)
+            errors, _ = v3.verify_package(root)
+            self.assertEqual(errors, ['minimal_profile_violation: components/Sample: only Cover is allowed'])
+            put(root, 'README.md', '## Content fundamentals\n\nPlain words.\n\n## Visual foundations\n\nQuiet colour.\n\n## Iconography\n\nNone.\n')
+            edit_json(root, 'canonical-map.json', lambda doc: (doc.update(profile='full'),
+                      doc['components'].update({'Sample': {'source': 'https://example.com/sample'}})), derived=False)
+            derive(root)
+            errors, _ = v3.verify_package(root)
+            self.assertEqual(errors, [])
+        for name in ('document', 'create'):
+            section = self._section(name)
+            for needle in ('minimal', '`profile`', '`full`', 'canonical-map.json'):
+                self.assertIn(needle, section, (name, needle))
+        self.assertRegex(self._section('document'), r'(?i)only `Cover`')
+
+    def test_commands_name_the_plugin_root(self):
+        text = self._skill_text()
+        self.assertRegex(text, r'`<plugin>`[^\n]*`scripts/`')
+        self.assertIn('two folders above this file', text)
+        self.assertIn('absolute', text)
+        commands = [line for line in text.splitlines() if re.match(r'^python \S*(build|verify)-design-system\.py', line)]
+        self.assertGreaterEqual(len(commands), 3)
+        for line in commands:
+            self.assertTrue(line.startswith('python <plugin>/scripts/'), line)
+
+    def test_mode_table_has_needs_and_read_first(self):
+        rows = [line for line in self._section('Choose a mode').splitlines() if line.startswith('|')]
+        header = [cell.strip() for cell in rows[0].strip('|').split('|')]
+        self.assertEqual(header, ['Mode', 'Use when', 'Needs', 'Writes', 'Read first'])
+        body = [[cell.strip() for cell in row.strip('|').split('|')] for row in rows[2:]]
+        self.assertEqual([row[0] for row in body], [f'`{mode}`' for mode in MODES])
+        skill = ROOT / 'skills/design-system'
+        for row in body:
+            self.assertTrue(all(row), row)
+            names = re.findall(r'`([^`/]+\.(?:md|json))`|`(templates/[^`]+/)`', row[4])
+            self.assertTrue(names, row)
+            for single, folder in names:
+                found = list(skill.rglob(single)) if single else [skill / folder]
+                self.assertTrue(found and all(path.exists() for path in found), (row[0], single or folder))
+        document = next(row for row in body if row[0] == '`document`')
+        self.assertIn('system-contract.md', document[4])
+        create = next(row for row in body if row[0] == '`create`')
+        self.assertRegex(create[2], r'right to use')
+
+    def test_never_invent_a_logo_gotcha_gives_a_reason(self):
+        line = next(item for item in self._section('Gotchas').splitlines() if 'logo' in item)
+        self.assertRegex(line, r'\b(?:because|since)\b')
+
+    def test_skill_body_leaves_room_for_the_adapter_step(self):
+        body = self._skill_text().split('\n---\n', 1)[1].encode('utf-8')
+        self.assertLessEqual(len(body), 7600)
+
+    def test_code_index_lists_design_md_limit_exceeded(self):
+        contract = (ROOT / 'skills/design-system/references/system-contract.md').read_text(encoding='utf-8')
+        index = contract.split('## Code index', 1)[1]
+        self.assertTrue(any('`limit_exceeded`' in row and '`DESIGN.md: file size:' in row and 'error' in row
+                            for row in index.splitlines() if row.startswith('|')))
+
     def test_templates_have_no_dtcg_value_key(self):
         for path in sorted((ROOT / 'skills/design-system/templates').rglob('*')):
             if path.is_file() and path.suffix in {'.md', '.json', '.html', '.tmpl'}:
