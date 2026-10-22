@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -115,11 +116,16 @@ def _adapter_plan(package: Path, root: Path) -> tuple[str, tuple[list[str], list
     if not root.is_dir():
         raise Refused(f'input_error: adapters root not found: {v3._label(root)}')
     try:
-        rel = package.resolve().relative_to(root.resolve()).as_posix()
+        rel = package.resolve().relative_to(root.resolve()).as_posix()  # resolve(): a link inside the root that leads out is outside
+    except (ValueError, OSError):
+        raise Refused('input_error: package outside adapters root') from None
+    try:
         return rel, build.write_adapters(root, rel, check=True)
     except FileNotFoundError as exc:
         raise Refused(f'input_error: adapter template not found: {exc.args[0]}') from None
-    except (ValueError, OSError):  # a package outside the root, or one whose path cannot go into a code span
+    except ValueError as exc:  # a package outside the root, or a folder name that cannot go into a command line
+        raise Refused(f'input_error: {exc}') from None
+    except OSError:
         raise Refused('input_error: package outside adapters root') from None
 
 
@@ -154,7 +160,7 @@ def main(argv: list[str] | None = None) -> int:
                 states['viewer'], found = _viewer(args.package, args.check)
                 warnings.extend(found)
         written, skipped = plan if args.check or args.adapters is None else build.write_adapters(args.adapters, package_rel)
-    except Refused as exc:
+    except (Refused, build.AdapterWriteError) as exc:
         print(exc, file=sys.stderr)
         return 1
     except Exception as exc:  # whatever else a hostile package provokes ends as one line, never a traceback
@@ -163,6 +169,9 @@ def main(argv: list[str] | None = None) -> int:
     for warning in warnings:
         print(warning)
     for name in skipped:
+        if not os.path.isfile(args.adapters / name):  # a folder, a device or a broken link: nothing to merge a proposal into
+            print(f'WARN adapter_not_file: {name}')
+            continue
         print(f'WARN adapter_exists: {name}')
         if not args.check:  # what the file would hold, for the owner to merge by hand
             print(f'--- proposed {name} ---')

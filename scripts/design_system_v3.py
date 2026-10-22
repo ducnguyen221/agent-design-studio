@@ -1151,6 +1151,9 @@ _V_FORBIDDEN_TAG = re.compile(r'<(iframe|frameset|frame|object|embed|portal|form
 # check refuses it, which is the safe side. ``template`` and ``noscript`` stay in the list so that they can be skipped whole.
 _V_HEAD_END = re.compile(r'</(?:head|html)(?=[\s/>])|<(?!(?:html|head|meta|title|link|style|template|noscript)(?=[\s/>]))[A-Za-z][A-Za-z0-9:-]*(?=[\s/>])',
                          _V_FLAGS)
+# Character data other than white space in the head: a browser closes the head there and parses what follows into the body. The
+# text of a ``<title>`` is part of the head and is skipped whole; any other text follows a ``>`` or opens the page.
+_V_HEAD_TEXT = re.compile(r'<title(?=[\s/>])[^<>]*>[^<]*|(?:\A|>)(?P<text>[^<]*)', _V_FLAGS)
 _V_INERT = re.compile(r'<(/?)(template|noscript)(?=[\s/>])[^<>]*>', _V_FLAGS)
 _V_TITLE = re.compile(r'<title(?=[\s/>])[^<>]*>\s*[^<\s]', _V_FLAGS)
 _V_HANDLER = re.compile(r'''[\s"'/]on[a-z]+\s*=''', _V_FLAGS)
@@ -1296,8 +1299,9 @@ def _url_targets(css: str):
 
 def _head_markup(markup: str) -> str:
     """The part of the page in which a content-security meta takes effect: the head, before any script, without the inert
-    content of ``template`` and ``noscript``. A browser ignores a policy meta anywhere else (the body, after ``</html>``, inside
-    those two elements) and applies one only to what follows it, so a meta in another place is no policy. Linear in the text."""
+    content of ``template`` and ``noscript``, and before the first character data other than white space (outside ``<title>``).
+    A browser ignores a policy meta anywhere else (the body, after ``</html>``, inside those two elements, after stray text) and
+    applies one only to what follows it, so a meta in another place is no policy. Linear in the text."""
     end = _V_HEAD_END.search(markup)
     head = markup[:end.start()] if end else markup
     kept: list[str] = []
@@ -1314,7 +1318,11 @@ def _head_markup(markup: str) -> str:
             depth += 1
     if not depth:
         kept.append(head[pos:])
-    return ''.join(kept)
+    head = ''.join(kept)
+    for text in _V_HEAD_TEXT.finditer(head):  # stray text ends the head: a meta after it lands in the body and no policy applies
+        if text['text'] and text['text'].strip('\t\n\f\r '):
+            return head[:text.start('text')]
+    return head
 
 
 def _expected_counts(data: dict) -> dict[str, int]:

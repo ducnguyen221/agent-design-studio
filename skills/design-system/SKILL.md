@@ -53,7 +53,7 @@ Read-only. Fill the six parts of [audit-report.md](templates/audit-report.md), e
 
 ## document
 
-Write `components/<Comp>/README.md` from [component-v3/README.md](templates/component-v3/README.md); its first line is the one-sentence summary the viewer and Claude Design show. Add `preview.html` ([template](templates/component-v3/preview.html)) only for a component that renders from real source. A `minimal` package holds only `Cover`: set `profile` to `full` in `canonical-map.json` first (the README's three headings, a `components.<Comp>.source` per component). Then build with `--viewer` and verify.
+Write `components/<Comp>/README.md` from [component-v3/README.md](templates/component-v3/README.md); its first line is the one-sentence summary the viewer and Claude Design show. Profile `full` needs `preview.html` ([template](templates/component-v3/preview.html)) for every component; with no renderable source keep its `@dsCard` marker card and say so. A `minimal` package holds only `Cover`: set `profile` to `full` in `canonical-map.json` first (the README's three headings, a `components.<Comp>.source` per component). Then build with `--viewer` and verify.
 
 ## extend
 

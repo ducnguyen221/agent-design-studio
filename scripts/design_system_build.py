@@ -1418,18 +1418,35 @@ def render_viewer(data: dict) -> str:
 # --------------------------------------------------------------------------- agent adapters
 
 ADAPTER_NAMES = ('AGENTS.md', 'CLAUDE.md', 'GEMINI.md')
-# One folder name of the package path as it is written into an adapter: no control character, no backtick or brace (they would
-# end a code span or a placeholder), no character a Windows path refuses, not empty, not a dot segment.
-_ADAPTER_SEGMENT = re.compile(r'[^\x00-\x1f\x7f`{}\\:*?"<>|]+')
+# One folder name of the package path as it is written into an adapter, where it becomes part of a command line that an agent
+# runs: ASCII letters, digits, dot, underscore and hyphen only (so no space, quote, ``$``, ``&``, ``;``, bracket, control
+# character, bidi or other invisible character, no non-ASCII letter), at most 100 characters, no leading hyphen (it would read as
+# an option), not only dots. ``.`` and ``..`` and an empty segment are refused as a path outside the root.
+_ADAPTER_SEGMENT = re.compile(r'[A-Za-z0-9._][A-Za-z0-9._-]{0,99}')
+ADAPTER_SEGMENT_HINT = 'letters, digits, . _ - only, at most 100, no leading -'
+
+
+class AdapterWriteError(Exception):
+    """A wrapper file could not be written. ``failed`` names it, ``written`` lists those created before it, ``pending`` the
+    ones not tried (``failed`` first); ``cause`` is the exception name. ``str()`` is the finished one-line message."""
+
+    def __init__(self, failed: str, written: list[str], pending: list[str], cause: str):
+        self.failed, self.written, self.pending, self.cause = failed, written, pending, cause
+        super().__init__(f'adapter_write_failed: {failed}: {cause} (written: {", ".join(written) or "none"}; '
+                         f'not written: {", ".join(pending) or "none"})')
 
 
 def adapter_text(name: str, package_rel: str = 'design-system') -> str:
     """Text of one wrapper file: its template with every ``{package}`` replaced by ``package_rel`` (POSIX, relative to the folder
     the wrapper is written into). Raises ``FileNotFoundError`` (argument: the template name) when the template is missing and
-    ``ValueError`` when ``package_rel`` is not a plain relative path of at least one folder name."""
+    ``ValueError`` when ``package_rel`` is not a plain relative path of at least one folder name (the message is a finished
+    ``input_error`` detail, with the offending name escaped to ASCII)."""
     segments = package_rel.split('/')
-    if not package_rel or any(s in ('', '.', '..') or not _ADAPTER_SEGMENT.fullmatch(s) for s in segments):
+    if not package_rel or any(s in ('', '.', '..') for s in segments):
         raise ValueError('package outside adapters root')
+    for segment in segments:
+        if not _ADAPTER_SEGMENT.fullmatch(segment) or segment.strip('.') == '':
+            raise ValueError(f'adapter path segment not allowed: {ascii(segment[:40])} ({ADAPTER_SEGMENT_HINT})')
     try:
         raw = (ADAPTERS / f'{name}.tmpl').read_bytes()
     except OSError:
@@ -1442,7 +1459,8 @@ def write_adapters(root: Path, package_rel: str = 'design-system', check: bool =
 
     A name that already exists in ``root`` (a file, a folder, a link) is skipped and never touched; files are created
     exclusively and never through a link. With ``check`` nothing is written and the first list holds what would be. Every
-    template is read before the first write, so a missing template or a bad ``package_rel`` leaves ``root`` as it was."""
+    template is read before the first write, so a missing template or a bad ``package_rel`` leaves ``root`` as it was. A write
+    that fails midway raises ``AdapterWriteError``, which names what was written and what was not; a file it had begun is removed."""
     texts = {name: adapter_text(name, package_rel) for name in ADAPTER_NAMES}
     written: list[str] = []
     skipped: list[str] = []
@@ -1452,11 +1470,21 @@ def write_adapters(root: Path, package_rel: str = 'design-system', check: bool =
             skipped.append(name)
             continue
         if not check:
+            created = False
             try:
                 with open(target, 'xb') as handle:
+                    created = True
                     handle.write(texts[name].encode('utf-8'))
             except FileExistsError:  # created between the test and the open
                 skipped.append(name)
                 continue
+            except OSError as exc:  # not created, or created and then not filled
+                if created:
+                    try:
+                        os.unlink(target)  # the half-written file belongs to this run
+                    except OSError:
+                        pass
+                later = [n for n in ADAPTER_NAMES[ADAPTER_NAMES.index(name) + 1:] if not os.path.lexists(Path(root) / n)]
+                raise AdapterWriteError(name, written, [name, *later], type(exc).__name__) from None
         written.append(name)
     return written, skipped
