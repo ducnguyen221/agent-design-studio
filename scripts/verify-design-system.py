@@ -6,42 +6,14 @@ import json
 import math
 import re
 import sys
-from pathlib import Path, PureWindowsPath
-from urllib.parse import urlsplit
+from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import design_system_v3 as v3  # noqa: E402
+from design_system_v3 import EXCLUDED, SENSITIVE, STATUSES, safe_path  # noqa: E402,F401  (re-exported: tests and callers use these names)
+
+_external_url = v3.external_url
 TYPES = {'color', 'dimension', 'fontFamily', 'fontWeight', 'number', 'duration'}
-STATUSES = {'draft', 'pending', 'approved', 'deprecated', 'as-is', 'proposed'}
-EXCLUDED = {'.secret', 'node_modules', 'vendor', 'dist', 'build', 'generated', '.git', '__pycache__'}
-SENSITIVE = re.compile(r'(?i)(?:^\.env|^(?:auth|oauth_creds)\.json$|credentials|\.(?:pem|key|pfx|p12|crt|cer)$)')
-
-
-def safe_path(root: Path, relative: str) -> Path:
-    """Resolve a scoped, non-sensitive relative path before any content read."""
-    if not isinstance(relative, str) or not relative or '\\' in relative or ':' in relative:
-        raise ValueError('invalid_path')
-    path = Path(relative)
-    if path.is_absolute() or PureWindowsPath(relative).drive or '..' in path.parts:
-        raise ValueError('path_escape')
-    def excluded(parts: tuple[str, ...]) -> bool:
-        return any(part != part.rstrip(' .') or part.casefold() in EXCLUDED or SENSITIVE.search(part) for part in parts)
-
-    if excluded(path.parts):
-        raise ValueError('excluded_path')
-    lexical = root / path
-    for parent in (lexical, *lexical.parents):
-        if parent == root:
-            break
-        if parent.is_symlink() or (hasattr(parent, 'is_junction') and parent.is_junction()):
-            raise ValueError('linked_path')
-    target = lexical.resolve()
-    resolved_root = root.resolve()
-    if excluded(resolved_root.parts[1:]):
-        raise ValueError('excluded_root')
-    if not target.is_relative_to(resolved_root):
-        raise ValueError('path_escape')
-    if excluded(target.relative_to(resolved_root).parts):
-        raise ValueError('excluded_path')
-    return target
 
 
 def _number(value: object) -> bool:
@@ -52,28 +24,6 @@ def _number(value: object) -> bool:
 
 def _token_name(value: str) -> bool:
     return bool(value) and not value.startswith('$') and not any(c in '.{}#/\\:' or ord(c) < 32 or ord(c) == 127 for c in value)
-
-
-def _external_url(value: object) -> bool:
-    """Check a typed HTTPS pointer without fetching or printing its value."""
-    if not isinstance(value, str) or not value or '\\' in value or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in value):
-        return False
-    try:
-        parsed = urlsplit(value)
-        host = parsed.hostname
-        port = parsed.port
-        if parsed.scheme != 'https' or not host or parsed.username is not None or parsed.password is not None:
-            return False
-        if port is not None and port < 1:
-            return False
-        if ':' in host:
-            import ipaddress
-            ipaddress.IPv6Address(host)
-            return True
-        host = host.encode('idna').decode('ascii').rstrip('.')
-        return len(host) <= 253 and all(re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?', label) for label in host.split('.'))
-    except (ValueError, UnicodeError):
-        return False
 
 
 def _valid_value(kind: str, value: object) -> bool:
@@ -246,8 +196,13 @@ def _load(root: Path, name: str) -> object:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[1])
-    parser.add_argument('--tokens', help='DTCG subset JSON relative to root')
-    parser.add_argument('--manifest', help='index JSON; paths relative to root')
+    parser.add_argument('--package', type=Path, help='design-system package folder (format v3)')
+    parser.add_argument('--profile', choices=v3.PROFILES, help='full or minimal; default: profile in canonical-map.json, else full')
+    parser.add_argument('--format-version', default=str(v3.FORMAT_VERSION), help='only 3 is supported')
+    parser.add_argument('--tokens', help='tokens.json in the v3 list grammar, relative to root')
+    parser.add_argument('--dtcg', help='DTCG subset JSON relative to root')
+    parser.add_argument('--canonical-map', help='canonical-map.json relative to root')
+    parser.add_argument('--manifest', help='deprecated alias of --canonical-map')
     parser.add_argument('--legacy-tokens', help='explicit legacy map; never DTCG certified')
     parser.add_argument('--self-test', action='store_true')
     args = parser.parse_args(argv)
@@ -255,27 +210,45 @@ def main(argv: list[str] | None = None) -> int:
         import unittest
         suite = unittest.defaultTestLoader.discover(str(Path(__file__).parent), pattern='test_design_system.py')
         return 0 if unittest.TextTestRunner().run(suite).wasSuccessful() else 1
+    if args.format_version != str(v3.FORMAT_VERSION):
+        print('input_error: unsupported --format-version', file=sys.stderr)
+        return 1
+    errors: list[str] = []
+    warnings: list[str] = []
+    map_file = args.canonical_map or args.manifest
     try:
-        errors = []
+        if args.package is not None:
+            if not args.package.is_dir():
+                print(f'input_error: package not found: {v3._label(args.package)}', file=sys.stderr)
+                return 1
+            package_errors, package_warnings = v3.verify_package(args.package, args.profile)
+            errors.extend(package_errors)
+            warnings.extend(package_warnings)
         if args.tokens:
-            errors.extend(validate_tokens(_load(args.root, args.tokens)))
+            errors.extend(v3.validate_tokens_v3(_load(args.root, args.tokens), args.package))
+        if args.dtcg:
+            errors.extend(validate_tokens(_load(args.root, args.dtcg)))
         if args.manifest:
-            errors.extend(validate_manifest(_load(args.root, args.manifest), args.root))
+            warnings.append('deprecated_flag: --manifest')
+        if map_file:
+            errors.extend(v3.validate_canonical_map(_load(args.root, map_file), args.package or args.root))
         if args.legacy_tokens:
             legacy = _load(args.root, args.legacy_tokens)
             if not isinstance(legacy, dict) or not legacy:
                 errors.append('invalid_legacy: expected nonempty map')
             else:
                 print('legacy: readable map; DTCG validation not applied')
-        if not any((args.tokens, args.manifest, args.legacy_tokens)):
+        if args.package is None and not any((args.tokens, args.dtcg, map_file, args.legacy_tokens)):
             errors.extend(verify_pack(args.root))
     except (OSError, ValueError, RuntimeError) as exc:
         print(f'input_error: {type(exc).__name__}', file=sys.stderr)
         return 1
-    for error in errors:
+    for warning in warnings:
+        print(f'WARN {warning}')
+    for error in dict.fromkeys(errors):
         print(error, file=sys.stderr)
     if not errors:
-        print('PASS: structural checks only; runtime and visual quality unverified')
+        print(v3.pass_line(warnings, bundle=args.package is not None and v3.has_bundle(args.package)))
     return 1 if errors else 0
 
 
