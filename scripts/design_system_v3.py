@@ -1146,6 +1146,12 @@ _V_RAW_CLOSE = {'script': re.compile(r'</script(?=[\s/>])', _V_FLAGS), 'style': 
 _V_TAG = re.compile(r'<([A-Za-z][A-Za-z0-9:-]*)(?=[\s/>])([^<>]*)>', _V_FLAGS)
 _V_ATTR = re.compile(r'''([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'<>]+)))?''')
 _V_FORBIDDEN_TAG = re.compile(r'<(iframe|frameset|frame|object|embed|portal|form|base|applet)(?=[\s/>]|$)', _V_FLAGS)
+# Where a browser reads the head: up to the first element that is not head content (a script, the body, any visible element) or
+# the end of the page. The head is also left at ``</head>``: a meta put after it is parsed into the head by a browser, but this
+# check refuses it, which is the safe side. ``template`` and ``noscript`` stay in the list so that they can be skipped whole.
+_V_HEAD_END = re.compile(r'</(?:head|html)(?=[\s/>])|<(?!(?:html|head|meta|title|link|style|template|noscript)(?=[\s/>]))[A-Za-z][A-Za-z0-9:-]*(?=[\s/>])',
+                         _V_FLAGS)
+_V_INERT = re.compile(r'<(/?)(template|noscript)(?=[\s/>])[^<>]*>', _V_FLAGS)
 _V_TITLE = re.compile(r'<title(?=[\s/>])[^<>]*>\s*[^<\s]', _V_FLAGS)
 _V_HANDLER = re.compile(r'''[\s"'/]on[a-z]+\s*=''', _V_FLAGS)
 _V_URL_CALL = re.compile(r'url\(', _V_FLAGS)
@@ -1288,6 +1294,29 @@ def _url_targets(css: str):
         yield css[m.end():m.end() + 80].lstrip(' \t\r\n\f"\'')
 
 
+def _head_markup(markup: str) -> str:
+    """The part of the page in which a content-security meta takes effect: the head, before any script, without the inert
+    content of ``template`` and ``noscript``. A browser ignores a policy meta anywhere else (the body, after ``</html>``, inside
+    those two elements) and applies one only to what follows it, so a meta in another place is no policy. Linear in the text."""
+    end = _V_HEAD_END.search(markup)
+    head = markup[:end.start()] if end else markup
+    kept: list[str] = []
+    depth = pos = 0
+    for tag in _V_INERT.finditer(head):
+        if tag[1]:
+            if depth:
+                depth -= 1
+                if not depth:
+                    pos = tag.end()
+        else:
+            if not depth:
+                kept.append(head[pos:tag.start()])
+            depth += 1
+    if not depth:
+        kept.append(head[pos:])
+    return ''.join(kept)
+
+
 def _expected_counts(data: dict) -> dict[str, int]:
     from design_system_build import count_tokens  # late: that module imports this one
     return {'data-token': count_tokens(data.get('tokens')),
@@ -1331,10 +1360,6 @@ def validate_viewer(text: str, size: int, data: dict) -> tuple[list[str], list[s
             equiv = attrs.get('http-equiv', '').strip().lower()
             if equiv == 'refresh':
                 forbidden.append('meta refresh')
-            elif equiv == 'content-security-policy' and policy is None:
-                parsed = _csp_parse(attrs.get('content', ''))
-                if [t.lower() for t in parsed.get('default-src', [])] == ["'none'"]:
-                    policy = parsed
         elif name == 'html' and attrs.get('lang', '').strip():
             lang = True
         elif name == 'img' and 'alt' not in attrs:
@@ -1344,6 +1369,14 @@ def validate_viewer(text: str, size: int, data: dict) -> tuple[list[str], list[s
                 external = True
             elif 'url(' in value[:100_000].lower() and any(_outside(t, allow_data=True) for t in _url_targets(html.unescape(value[:100_000]))):
                 external = True
+    for tag in _V_TAG.finditer(_head_markup(markup)):  # only a meta the browser honours can be the policy
+        if tag[1].lower() == 'meta':
+            attrs = _tag_attrs(tag[2])
+            if attrs.get('http-equiv', '').strip().lower() == 'content-security-policy':
+                parsed = _csp_parse(attrs.get('content', ''))
+                if [t.lower() for t in parsed.get('default-src', [])] == ["'none'"]:
+                    policy = parsed
+                    break
     if any(_V_IMPORT.search(body) or any(_outside(t, allow_data=True) for t in _url_targets(body)) for body in styles):
         external = True
     if external:

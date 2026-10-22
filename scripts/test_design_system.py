@@ -3848,6 +3848,82 @@ class ViewerHardeningTests(unittest.TestCase):
         self.assertIn('LF line endings', text)
         self.assertEqual(len(re.findall(r'^\| `viewer_csp_weak` \|', text, re.M)), 1)
 
+    # ---- (5) TK19 fix 1: where the policy meta counts, and the two guards the review found loose (NS-1, NS-2)
+
+    def test_the_policy_meta_counts_only_inside_the_head(self):
+        """A browser applies a policy meta only when it is a child of ``head`` and only to what follows it."""
+        missing = ['viewer_missing_csp: viewer.html']
+        bare = self.page.replace(self.meta + '\n', '')
+        self.assertNotIn('Content-Security-Policy', bare)
+        misplaced = {
+            'body': bare.replace('<body>\n', '<body>\n' + self.meta + '\n', 1),
+            'end of body': bare.replace('</body>', self.meta + '</body>', 1),
+            'after </html>': bare.rstrip('\n') + '\n' + self.meta + '\n',
+            'in a template': bare.replace('</head>', '<template>' + self.meta + '</template>\n</head>', 1),
+            'in a noscript': bare.replace('</head>', '<noscript>' + self.meta + '</noscript>\n</head>', 1),
+            'after </head>': bare.replace('</head>', '</head>' + self.meta, 1),
+            'after a script in the head': bare.replace('</head>', '<script>var early=1;</script>' + self.meta + '\n</head>', 1),
+            'after an element that opens the body': bare.replace('</head>', '<div></div>' + self.meta + '\n</head>', 1),
+        }
+        for where, page in misplaced.items():
+            self.assertNotIn('viewer_csp_weak', ''.join(self.checked(page)), where)
+            self.assertIn(missing[0], self.checked(page), where)
+        self.assertEqual(self.checked(misplaced['body']), missing)
+        self.assertEqual(self.checked(misplaced['after </html>']), missing)
+        self.assertEqual(self.checked(misplaced['in a template']), missing)
+        self.assertEqual(self.checked(misplaced['in a noscript']), missing)
+        # a nested template still hides it; the text after the template is the head again
+        nested = bare.replace('</head>', '<template><template></template>' + self.meta + '</template>\n</head>', 1)
+        self.assertEqual(self.checked(nested), missing)
+        # what stays valid: the real meta first or after head-only elements, and inert copies around it
+        self.assertEqual(self.checked(self.page), [])
+        weak = self.meta.replace("default-src 'none'", 'default-src *')
+        inert_first = self.page.replace(self.meta, '<template>' + weak + '</template><noscript>' + weak + '</noscript>' + self.meta, 1)
+        self.assertEqual(self.checked(inert_first), [])
+        implied = self.page.replace('<head>\n', '', 1).replace('</head>\n', '', 1)  # a browser makes the head itself
+        self.assertEqual(self.checked(implied), [])
+        later = self.page.replace('<title>', '<link rel="icon" href="#"><title>', 1)
+        self.assertEqual(self.checked(later), [])
+
+    def test_the_head_ends_at_the_first_element_that_is_not_head_content(self):
+        for opener in ('<header>', '<p>', '<h1>', '<main>', '<script>', '<body>', '<img alt="">', '<header-x>'):
+            page = self.page.replace(self.meta + '\n', '', 1).replace('<title>', opener + self.meta + '<title>', 1)
+            self.assertIn('viewer_missing_csp: viewer.html', self.checked(page), opener)
+        for opener in ('<head>', '<title>t</title>', '<link rel="icon" href="#">', '<style></style>', '<meta name="a">'):
+            page = self.page.replace(self.meta, opener + self.meta, 1)
+            self.assertEqual(self.checked(page), [], opener)
+
+    def test_a_directive_without_quotes_or_with_extra_sources_is_not_the_policy(self):
+        """Two mutants of the keyword and first-policy checks that no test killed (NS-2)."""
+        bare = self.policy_text.replace("base-uri 'none'", 'base-uri none')
+        self.assertIn('base-uri none', bare)
+        self.assertEqual(self.checked(self.with_policy(bare)), ['viewer_csp_weak: viewer.html: base-uri'])
+        self.assertEqual(self.checked(self.with_policy(self.policy_text.replace("base-uri 'none'", "base-uri 'none' none"))),
+                         ['viewer_csp_weak: viewer.html: base-uri'])
+        self.assertEqual(self.checked(self.with_policy(self.policy_text.replace("default-src 'none'", "default-src 'none' https:"))),
+                         ['viewer_missing_csp: viewer.html'])
+        self.assertEqual(self.checked(self.with_policy(self.policy_text.replace("default-src 'none'", "default-src 'none' 'self'"))),
+                         ['viewer_missing_csp: viewer.html'])
+    def test_head_scan_runs_in_linear_time(self):
+        """The head scan adds two patterns and one pass; hostile heads of 400 000 characters stay far under a second."""
+        pieces = ('<template>', '</template>', '<noscript>', '</noscript>', '<template ' + 'a=' * 5, '<noscript <', '<meta ', '<head' * 3,
+                  '<template><noscript></template>', '</html ', '<' * 4, '<meta http-equiv="content-security-policy" content="')
+        for piece in pieces:
+            text = '<!doctype html><html lang="en"><head>' + piece * (400_000 // len(piece))
+            for page in (text, text + self.meta, self.meta + text):
+                start = time.perf_counter()
+                v3.validate_viewer(page, len(page.encode('utf-8')), {})
+                elapsed = time.perf_counter() - start
+                self.assertLess(elapsed, 2.0, f'{piece!r}: {elapsed:.2f} s')
+            start = time.perf_counter()
+            v3._head_markup(text)
+            self.assertLess(time.perf_counter() - start, 1.0, piece)
+
+    def test_contract_says_where_the_policy_meta_counts(self):
+        text = (ROOT / 'skills/design-system/references/system-contract.md').read_text(encoding='utf-8')
+        for words in ('in the head, before the first script', '`template` and `noscript`', 'after `</html>`', 'after `</head>`'):
+            self.assertIn(words, text)
+
 
 class SizeCapAndContractDocTests(unittest.TestCase):
     """TK10: one condition prints one code; long contract references carry a short table of contents."""
