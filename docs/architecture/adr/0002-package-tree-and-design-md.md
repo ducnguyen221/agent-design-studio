@@ -1,15 +1,15 @@
 # 0002. Ship one package tree with DESIGN.md as the agent entry file and generated front matter
 
-Status: accepted · Sprint: SPR-32 · Related: ADR 0001, PLAN section "Hợp đồng bàn giao" (items 1, 2, 7), SPEC FR5, FR10, FR12
+Status: accepted · Sprint: SPR-32 · Related: ADR 0001; `skills/design-system/references/system-contract.md` (the tree); `skills/design-system/references/design-md-spec.md` (the front matter)
 Format pin: Claude Design `v:3` and the Design Markdown spec `version: alpha`, both read on 2026-10-22
 
 ## Context
 
 The owner asked on 2026-10-22 for one standard folder per design system, with a Design Markdown file as the root that any agent can read. Constraints found while checking that wish against the two consumers:
 
-- Claude Design opens `README.md` first (the brand book), reads `tokens.json` as the data source (ADR 0001), and refuses a set of paths inside the package: `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `package.json` and other toolchain manifests at any depth, dot-prefixed segments, `node_modules`, lockfiles, 8.3 names, and `index.html` at the package root. Any other Markdown file outside `components/` and `archived/` becomes a further brand-book section, at most 24 of them. Full side-by-side review: TK3 evidence (kept outside this repository).
+- Claude Design opens `README.md` first (the brand book), reads `tokens.json` as the data source (ADR 0001), and refuses a set of paths inside the package: `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `package.json` and other toolchain manifests at any depth, dot-prefixed segments, `node_modules`, lockfiles, 8.3 names, and `index.html` at the package root. Any other Markdown file outside `components/` and `archived/` becomes a further brand-book section, at most 24 of them. The full side-by-side review of the page's own files is sprint evidence kept outside this repository.
 - Google Labs' Design Markdown spec (`alpha`, Apache-2.0) defines a YAML front matter with token groups (`colors`, `typography`, `rounded`, `spacing`, …) and eight `##` sections in a fixed order. It is a reading format for coding agents, not a token store: it has no themes and no `usage`.
-- `tokens.json` must stay the only data source (`Q2`). The verifier and generator are stdlib-only, so there is no YAML parser; whatever is generated must be checkable by regenerating and checking string equality.
+- `tokens.json` must stay the only data source (owner decision of 2026-10-22, ADR 0001). The verifier and generator are stdlib-only, so there is no YAML parser; whatever is generated must be checkable by regenerating and checking string equality.
 - Agent harnesses load `AGENTS.md`/`CLAUDE.md`/`GEMINI.md` from the folder they work in. Those files cannot live inside the package (refused) and would be loaded as rules if they sat inside the plugin under their real names.
 
 Affected: the `design-system` skill (five modes), `verify-design-system.py`, `build-design-system.py`, the brand template, the fixture, and every project that adopts a package.
@@ -20,12 +20,12 @@ Affected: the `design-system` skill (five modes), `verify-design-system.py`, `bu
 |---|---|---|---|
 | A. `DESIGN.md` is a short prose contract | Hand-written reading order, owner, status, canonical pointers; no front matter | Cheap, cannot drift from tokens because it carries none; but agents outside Claude Design still have to parse `tokens.json` themselves and nothing is lintable | Teams that never use a Design Markdown-aware agent |
 | B. `DESIGN.md` follows the Google `alpha` shape; front matter generated one-way from `tokens.json`; body of eight sections written by hand; Overview carries the contract | Agents get tokens and prose in one file; staleness is detectable by regenerating; body stays human-owned | Front matter is lossy (first theme only, no `usage`); the Google spec is alpha and may move | The package must serve Claude Design and other agents at once |
-| C. Front matter is the data source, `tokens.json` generated from it | One hand-edited file | Breaks `Q2`; loses themes, `usage`, fonts and the family caps Claude Design needs | Only if Claude Design were dropped as a consumer |
+| C. Front matter is the data source, `tokens.json` generated from it | One hand-edited file | Breaks the single-data-source decision; loses themes, `usage`, fonts and the family caps Claude Design needs | Only if Claude Design were dropped as a consumer |
 | Keep the status quo | The branch's `DESIGN.md` prose plus `manifest.json` | No generator work; but no shared entry file for agents and a manifest name that collides with the file Claude Design generates | Not viable: the manifest name alone forces a change |
 
 ## Decision
 
-Option B, with the tree below as the package contract. Chosen because it is the only option that satisfies both consumers and `Q2` at the same time: Claude Design keeps `README.md` + `tokens.json`, other agents get `DESIGN.md`, and one generator keeps the two in step.
+Option B, with the tree below as the package contract. Chosen because it is the only option that satisfies both consumers and the single-data-source decision at the same time: Claude Design keeps `README.md` + `tokens.json`, other agents get `DESIGN.md`, and one generator keeps the two in step.
 
 - **Tree**: the canonical tree is reproduced verbatim in `skills/design-system/references/system-contract.md` (section "Package tree"). Root files: `DESIGN.md`, `README.md`, `tokens.json`, `design-system.json`, `canonical-map.json`, `viewer.html` (all required); `provenance.md`, `CHANGELOG.md`, `components/`, `assets/`, `fonts/`, `patterns/`, `surfaces/` (conditional or optional). Nothing hand-written may use a name the page generates (`manifest.json`, `tokens.css`, `api/**`, `migration-map.json`, `publish-progress.json`, `archived/**`).
 - **`canonical-map.json`** replaces the branch's `manifest.json` (same schema, new name) because Claude Design regenerates `manifest.json` on every build.

@@ -1,6 +1,6 @@
 # 0001. Use the Claude Design v3 token list as the canonical token format
 
-Status: accepted · Sprint: SPR-32 · Related: ADR 0002, PLAN section "Hợp đồng bàn giao" (items 4, 6), SPEC FR6
+Status: accepted · Sprint: SPR-32 · Related: ADR 0002; `skills/design-system/references/token-contract.md` (the grammar this ADR fixes); `skills/design-system/references/system-contract.md`
 Format pin: `v:3`, read on 2026-10-22 (research preview; a format change supersedes this ADR with a new one)
 
 ## Context
@@ -11,7 +11,7 @@ Three token shapes coexist in this repository and in the systems it has produced
 2. The unreleased branch `sprint/tk1-uiux-source-foundation` validated a DTCG 2025.10 subset (`$type`, `$value`, sRGB component arrays, same-file aliases).
 3. Claude Design (the artifact type this skill targets) reads `tokens.json` as a list grammar: `color.themes[]` plus one flat `color.tokens[{name,value,usage}]`, `type.{fonts,families,groups[].styles[]}`, and list families for `spacing`, `radius`, optional `shadow` and other single-value families.
 
-Constraints that matter: the Claude Design page cannot read a DTCG map at all (the family renders empty and its entries are dropped on the first in-page edit); the colour protocol used by the routing skill emits `oklch()`, which the DTCG subset rejects because it only accepts sRGB components; the verifier must stay Python 3.12 stdlib with no network; the owner decided on 2026-10-22 (`Q2`) that `tokens.json` is the single data source and that `DESIGN.md` front matter and any DTCG file are derived outputs. Affected parties: the `design-system` skill, its verifier and generator, the template and fixture, and every agent that opens a package.
+Constraints that matter: the Claude Design page cannot read a DTCG map at all (the family renders empty and its entries are dropped on the first in-page edit); the colour protocol used by the routing skill emits `oklch()`, which the DTCG subset rejects because it only accepts sRGB components; the verifier must stay Python 3.12 stdlib with no network; the owner decided on 2026-10-22 that `tokens.json` is the single data source and that `DESIGN.md` front matter and any DTCG file are derived outputs. Affected parties: the `design-system` skill, its verifier and generator, the template and fixture, and every agent that opens a package.
 
 ## Options
 
@@ -24,7 +24,7 @@ Constraints that matter: the Claude Design page cannot read a DTCG map at all (t
 
 ## Decision
 
-Option A: `tokens.json` in the Claude Design v3 list grammar is the canonical token file; DTCG is an exporter output and the `_why` map is read-only legacy. The reason is the constraint set, not preference: the target page reads only the list grammar, the colour protocol needs `oklch()`, and `Q2` fixes a single data source.
+Option A: `tokens.json` in the Claude Design v3 list grammar is the canonical token file; DTCG is an exporter output and the `_why` map is read-only legacy. The reason is the constraint set, not preference: the target page reads only the list grammar, the colour protocol needs `oklch()`, and the owner's decision of 2026-10-22 fixes a single data source.
 
 Concretely:
 

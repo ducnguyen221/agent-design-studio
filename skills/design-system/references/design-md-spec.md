@@ -49,14 +49,14 @@ Keys defined upstream that we do not emit: `description` (the Overview paragraph
 Serialisation rules, so that regeneration is byte-stable and the verifier can check string equality:
 
 - Two-space indentation; no blank lines, no comments, no timestamps inside the block.
-- A key is written bare when it matches `^[A-Za-z_][A-Za-z0-9_-]*$`, otherwise in double quotes (token names may start with a digit or contain `.`).
-- String values are always double-quoted; numbers are bare. `version: alpha` is the only bare string.
+- A key is written bare when it matches `^[A-Za-z_][A-Za-z0-9_-]*$` and is not, ignoring case, one of the YAML words `true`, `false`, `yes`, `no`, `on`, `off`, `y`, `n`, `null`, `~`; otherwise it is double-quoted (token names may start with a digit, contain `.`, or spell one of those words).
+- String values are always double-quoted and escaped the JSON way: `\` becomes `\\`, `"` becomes `\"`, a control character becomes `\n`, `\t` or `\u00XX`; nothing else is escaped. A YAML double-quoted scalar reads exactly these escapes, so a reader with a YAML parser and the string-equality check of the verifier agree on the bytes. The same escaping applies to a quoted key. Numbers are bare. `version: alpha` is the only bare string.
 - Within each group, entries keep the order of `tokens.json`; typography entries keep group order, then style order.
 - Line endings are `\n`; the block ends with `---\n`.
 
 ## Mapping from tokens.json
 
-Only the first theme (`color.themes[0]`) is emitted; a colour token with no value in the first theme borrows the first theme that has one (Claude Design does the same).
+Only the first theme (`color.themes[0]`) is emitted; a colour token with no value in the first theme borrows the first theme that has one (Claude Design does the same). A token with no valid value in any theme fails validation (`invalid_value`) before anything is generated.
 
 | v3 source | Emitted as | Notes |
 |---|---|---|
@@ -67,7 +67,7 @@ Only the first theme (`color.themes[0]`) is emitted; a colour token with no valu
 | `lab()`, `lch()`, `color()` | the original string, unchanged | build prints `WARN design_md_color_passthrough: <name>` |
 | alias `"{x}"` | `"{colors.x}"` | aliases are not resolved; the target must exist (verifier) |
 | `type.groups[g].styles[s]` | `typography.<style.name>:` | one entry per style |
-| `style.family` else `group.family` | `fontFamily: "<type.families[key]>"` | the CSS stack string, verbatim |
+| `style.family` else `group.family` | `fontFamily: "<type.families[key]>"` | the whole CSS stack string, quoted and escaped as above: a stack `"Inter", sans-serif` is written `fontFamily: "\"Inter\", sans-serif"` |
 | `style.fontSize` | `fontSize: "<value>"`; a bare number becomes `"<n>px"` | |
 | `style.fontWeight` | `fontWeight: <number>`; `normal`/`bold` → `400`/`700`; a range such as `"300 800"` stays a quoted string | |
 | `style.lineHeight` | `lineHeight: <number>` when unitless, otherwise `"<value>"` | |
@@ -87,7 +87,7 @@ colors:
 
 ## What the verifier checks
 
-Run by `verify-design-system.py` as part of `verify_package` (row 9 of the SPEC table). Errors go to stderr as `<code>: DESIGN.md[: detail]` and exit 1.
+Run by `verify-design-system.py` as part of `verify_package` (the `DESIGN.md` entry of `system-contract.md`, section "Required files"). Errors go to stderr as `<code>: DESIGN.md[: detail]` and exit 1.
 
 | Code | Trigger |
 |---|---|

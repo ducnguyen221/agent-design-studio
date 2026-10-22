@@ -17,18 +17,18 @@ The file is one JSON object with these families:
 - Every family except `type` is a list of tokens `{name, value, usage}`. A map in place of a list is not accepted.
 - `usage` is a non-empty string of at most 1 000 characters saying what the token is for. A text style should have one too (warning only).
 - A text style is `{name, family?, fontSize, fontWeight, lineHeight, ...}` inside a group; `family` on the style overrides the group's. Other optional fields (`letterSpacing`, `fontStyle`, `opticalSize`, `sample`, `usage`) are accepted and ignored by derived outputs.
-- Token names match `^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$`, and are unique across all families except `type`. Style names share one separate namespace. Theme ids and family keys follow the same name rule.
+- Token names match `^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$`, and are unique across all families except `type`. Style names share one separate namespace. Theme ids follow the same name rule (`token_name_invalid`); a family key that breaks it is `unsupported_family`.
 - There is no `motion` family in v3. Motion stays in prose (`06-motion-spec.md` of the routing skill); a `motion` key is `unsupported_family`.
-- The platform limit for the file is 512 000 bytes.
+- The platform limit for the file is 512 000 bytes (`limit_exceeded`).
 
 ## Values and aliases
 
-- A colour `value` is either a string or a map `{<themeId>: <string>}`. A theme with no entry borrows the first theme's value. Every theme id used must be declared in `color.themes`.
+- A colour `value` is either a string or a map `{<themeId>: <string>}`. A theme with no entry borrows the first theme's value; when the first theme itself has no entry, it borrows the first theme that has one, so a value present only in a later theme serves the first theme too. A token with no valid value in any theme is `invalid_value` (the page would drop it). Every theme id used must be declared in `color.themes`.
 - Accepted colour strings: hex with 3, 4, 6 or 8 digits; `rgb()`, `rgba()`, `hsl()`, `hsla()`, `oklch()`, `oklab()`, `lab()`, `lch()` and `color()` with plain numbers; or an alias `"{name}"` that points at another colour token.
 - Refused colour syntax: `var()`, `url()`, `color-mix()` and colour names (`forbidden_color_syntax`).
 - Aliases are not resolved in the file. The target must exist (`missing_target`), the chain must not loop (`reference_cycle`) and may be at most 16 deep (`alias_too_deep`).
 - Contrast and hex conversion go through `parse_color`, which converts each function to sRGB and clamps colours that fall outside the gamut. `lab()`, `lch()` and `color()` are valid in the file; where a conversion is not available the derived output keeps the original string and warns.
-- `fontSize`, `radius` and `spacing` values are CSS lengths (`4px`, `0.5rem`, `50%`), `0`, or a bare number meaning pixels. `fontWeight` is a number, `normal`, `bold` or a range string such as `"300 800"`. `lineHeight` is a unitless number or a length.
+- `fontSize`, `radius` and `spacing` values are CSS lengths (`4px`, `0.5rem`, `50%`), `0`, or a bare number meaning pixels. `fontWeight` is a number from 1 to 1000, `normal`, `bold` or a range string such as `"300 800"`. `lineHeight` is a unitless number below 10 or a length.
 
 Example (three colour tokens, with an alias and an `oklch()` value):
 
@@ -47,6 +47,8 @@ Example (three colour tokens, with an alias and an `oklch()` value):
 
 ## Limits
 
+Each count above its cap is one `limit_exceeded`; one condition has exactly one code. File sizes follow the "Size caps" section of `system-contract.md`.
+
 | Limit | Value | Code when exceeded |
 |---|---|---|
 | themes | 8 | `limit_exceeded` |
@@ -54,8 +56,9 @@ Example (three colour tokens, with an alias and an `oklch()` value):
 | families | 12 | `limit_exceeded` |
 | type groups / text styles | 12 / 80 | `limit_exceeded` |
 | tokens per family other than colour | 60 | `limit_exceeded` |
+| `tokens.json` file size | 512 000 bytes | `limit_exceeded` |
 | alias chain | 16 | `alias_too_deep` |
-| font file | 1 000 000 bytes | `limit_exceeded` |
+| font file, stored size | 1 000 000 bytes (750 000 raw) | `font_file_too_large` |
 
 ## Derived outputs
 
@@ -74,22 +77,23 @@ The verifier does not write CSS and does not certify runtime themes. A claim tha
 
 ## Error codes
 
-Each is printed as `<code>: <path>[: detail]` on stderr. These are the names tests and the generator use.
+Each is printed as `<code>: <path>[: detail]` on stderr. These are the names tests and the generator use; one condition maps to exactly one code.
 
 | Code | When | Path and detail |
 |---|---|---|
 | `token_shape` | a family is not `{tokens: [...]}` (except `type`), a token is not an object, `name` or `value` is missing, a `type` part has the wrong shape | `tokens.json: <family>[<i>]` |
-| `token_name_invalid` | a name does not match the name rule (token, style, theme id, family key) | `tokens.json: <family>.<name>` |
+| `token_name_invalid` | a token, style or theme id does not match the name rule | `tokens.json: <family>.<name>` |
 | `duplicate_name` | a name repeats across families, or a style name repeats | `tokens.json: <name>: <family A>, <family B>` |
 | `missing_usage` | `usage` is missing, empty or over 1 000 characters (a text style: warning only) | `tokens.json: <family>.<name>` |
-| `invalid_value` | a colour, length, weight or line height is malformed; a theme map uses an undeclared id | `tokens.json: <family>.<name>[@<theme>]` |
+| `invalid_value` | a colour, length, weight or line height is malformed; a theme map uses an undeclared id; a colour has no valid value in any theme | `tokens.json: <family>.<name>[@<theme>]` |
 | `forbidden_color_syntax` | `var()`, `url()`, `color-mix()` or a colour name | `tokens.json: color.<name>[@<theme>]` |
 | `missing_target` | an alias points at a name that does not exist | `tokens.json: color.<name> -> {x}` |
 | `reference_cycle` | an alias points at itself or loops | `tokens.json: color.<name>: a -> b -> a` |
 | `alias_too_deep` | an alias chain is longer than 16 | `tokens.json: color.<name>: <n>` |
-| `limit_exceeded` | a limit in the table above | `tokens.json: <limit>: <n> > <max>` |
+| `limit_exceeded` | a count or the file size in the table above, including more than 12 families | `tokens.json: <limit>: <n> > <max>` (for example `tokens.json: families: 13 > 12`) |
 | `font_file_missing` | `type.fonts[].file` is not under `fonts/` | `fonts/<file>` |
 | `font_file_invalid` | the first 4 bytes are not `wOFF`, `wOF2`, `\0\1\0\0`, `true` or `OTTO` | `fonts/<file>` |
-| `unsupported_family` | a `motion` family; more than 12 families; a family name that is not an identifier | `tokens.json: <family>` |
+| `font_file_too_large` | the stored-size estimate `4 * ceil(raw / 3)` is over 1 000 000 | `fonts/<file>: <raw> raw, <stored> stored > 1000000` |
+| `unsupported_family` | a `motion` family, or a family key that does not match the name rule (the family count is `limit_exceeded`, never this code) | `tokens.json: <family>` |
 
 Codes for `DESIGN.md` (`design_md_missing`, `design_md_stale`, `design_md_section_missing`, `design_md_section_order`, `design_md_broken_ref`, `design_md_overview_incomplete`) are listed in `design-md-spec.md`, section "What the verifier checks". The build-time warning `WARN design_md_color_passthrough: <name>` is printed when a `lab()`, `lch()` or `color()` value is copied through unchanged. Format pin: `FORMAT_VERSION = 3`, `FORMAT_READ_ON = "2026-10-22"`; any other `--format-version` is an `input_error`.
