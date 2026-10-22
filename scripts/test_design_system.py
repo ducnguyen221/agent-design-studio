@@ -2929,18 +2929,24 @@ class ViewerVerifyTests(unittest.TestCase):
             put(package, 'notes.md', 'a new file')  # the page lists every file, so a new file makes it stale
             self.assertEqual(v3.verify_package(package)[0], ['viewer_stale: viewer.html'])
 
+    @staticmethod
+    def change_one_hex(package):
+        """Change one colour value of tokens.json (one that no contrast pair uses); returns the new value."""
+        tokens = json.loads((package / 'tokens.json').read_text(encoding='utf-8'))
+        pairs = {name for pair in json.loads((package / 'canonical-map.json').read_text(encoding='utf-8'))['checks']['contrast']
+                 for name in (pair['fg'], pair['bg'])}
+        text = (package / 'tokens.json').read_text(encoding='utf-8')
+        old = next(v for v in (next(iter(t['value'].values())) for t in tokens['color']['tokens']
+                               if t['name'] not in pairs and isinstance(t['value'], dict))
+                   if text.count(f'"{v}"') == 1)  # the first theme's value is the one the front matter carries
+        new = old[:-1] + ('0' if old[-1] != '0' else '1')
+        (package / 'tokens.json').write_bytes(text.replace(f'"{old}"', f'"{new}"').encode('utf-8'))
+        return new
+
     def test_design_md_stale_after_hex_edit(self):
         with tempfile.TemporaryDirectory() as directory:
             package = self.copy_of(directory)
-            tokens = json.loads((package / 'tokens.json').read_text(encoding='utf-8'))
-            pairs = {name for pair in json.loads((package / 'canonical-map.json').read_text(encoding='utf-8'))['checks']['contrast']
-                     for name in (pair['fg'], pair['bg'])}
-            text = (package / 'tokens.json').read_text(encoding='utf-8')
-            old = next(v for v in (next(iter(t['value'].values())) for t in tokens['color']['tokens']
-                                   if t['name'] not in pairs and isinstance(t['value'], dict))
-                       if text.count(f'"{v}"') == 1)  # the first theme's value is the one the front matter carries
-            new = old[:-1] + ('0' if old[-1] != '0' else '1')
-            (package / 'tokens.json').write_bytes(text.replace(f'"{old}"', f'"{new}"').encode('utf-8'))
+            new = self.change_one_hex(package)
             errors, warnings = v3.verify_package(package)
             self.assertEqual((errors, warnings), (['design_md_stale: DESIGN.md', 'viewer_stale: viewer.html'], []))
             code, out, err = cli('--package', str(package))
@@ -2953,6 +2959,68 @@ class ViewerVerifyTests(unittest.TestCase):
             package = self.copy_of(directory)
             (package / 'viewer.html').write_bytes((package / 'viewer.html').read_bytes().replace(b'<h1>', b'<h1 class="x">'))
             self.assertEqual(v3.verify_package(package)[0], ['viewer_stale: viewer.html'])
+
+    # ---- line ends: a file saved with CRLF is the same file
+
+    def test_eol_lf(self):
+        self.assertEqual(v3.eol_lf('a\r\nb\rc\nd'), 'a\nb\nc\nd')
+        self.assertEqual(v3.eol_lf(b'a\r\nb\rc\nd\r\r\n'), b'a\nb\nc\nd\n\n')
+        self.assertEqual(v3.eol_lf(''), '')
+
+    def test_line_ends_alone_do_not_make_a_generated_file_stale(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            page = package / 'viewer.html'
+            page.write_bytes(page.read_bytes().replace(b'\n', b'\r\n'))
+            self.assertEqual(v3.verify_package(package), ([], []))
+            half = page.read_bytes().replace(b'\r\n', b'\n', 50)  # mixed line ends
+            page.write_bytes(half)
+            self.assertEqual(v3.verify_package(package), ([], []))
+            page.write_bytes(half.replace(b'<h1>', b'<h1 class="x">'))  # a real difference is still found
+            self.assertEqual(v3.verify_package(package)[0], ['viewer_stale: viewer.html'])
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            design = package / 'DESIGN.md'
+            design.write_bytes(design.read_bytes().replace(b'\n', b'\r\n'))
+            (package / 'viewer.html').write_bytes(self.build.render_viewer(self.build.collect_package(package)).encode('utf-8'))  # lists file sizes
+            self.assertEqual(v3.verify_package(package), ([], []))
+            self.assertEqual(cli('--package', str(package))[0], 0)
+            new = self.change_one_hex(package)  # a real difference is still found in a CRLF file
+            self.assertEqual(v3.verify_package(package)[0], ['design_md_stale: DESIGN.md', 'viewer_stale: viewer.html'])
+            self.assertIn(new, self.build.render_viewer(self.build.collect_package(package)))
+
+    def test_build_leaves_a_file_with_other_line_ends_alone(self):
+        stamp = 1_000_000_000_000_000_000
+        for ends in (b'\r\n', b'\r'):
+            with tempfile.TemporaryDirectory() as directory:
+                package = self.copy_of(directory)
+                design, page = package / 'DESIGN.md', package / 'viewer.html'
+                design.write_bytes(design.read_bytes().replace(b'\n', ends))
+                page.write_bytes(self.build.render_viewer(self.build.collect_package(package)).encode('utf-8').replace(b'\n', ends))
+                for path in (design, page):
+                    os.utime(path, ns=(stamp, stamp))
+                before = {path: (path.read_bytes(), os.stat(path).st_mtime_ns) for path in (design, page)}
+                code, out, err = self.run_builder('--package', str(package), '--design-md', '--viewer', '--check')
+                self.assertEqual((code, out.strip(), err), (0, 'CHECKED: design-md=ok viewer=ok', ''), ends)
+                code, out, err = self.run_builder('--package', str(package), '--design-md', '--viewer')
+                self.assertEqual((code, out.strip(), err), (0, 'BUILT: design-md=unchanged viewer=unchanged adapters=0 written, 0 skipped', ''), ends)
+                self.assertEqual({path: (path.read_bytes(), os.stat(path).st_mtime_ns) for path in before}, before, ends)  # not rewritten
+
+    def test_build_keeps_the_line_ends_of_the_design_file_it_rewrites(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            design = package / 'DESIGN.md'
+            design.write_bytes(design.read_bytes().replace(b'\n', b'\r\n'))
+            new = self.change_one_hex(package)
+            code, out, err = self.run_builder('--package', str(package), '--design-md', '--check')
+            self.assertEqual((code, err.strip()), (1, 'design_md_stale: DESIGN.md'))  # the front matter really differs
+            code, out, err = self.run_builder('--package', str(package), '--design-md', '--viewer')
+            self.assertEqual((code, err), (0, ''), out)
+            raw = design.read_bytes()
+            self.assertEqual(raw.count(b'\n'), raw.count(b'\r\n'))  # no bare LF: not a mixed file
+            self.assertGreater(raw.count(b'\r\n'), 20)
+            self.assertIn(new.encode('utf-8'), raw.lower())
+            self.assertEqual(v3.verify_package(package), ([], []))
 
     def test_stale_checks_need_usable_inputs(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -3177,6 +3245,55 @@ class ViewerVerifyTests(unittest.TestCase):
             errors, _warnings = v3.verify_package(Path(directory))
         self.assertIn('viewer_leak: viewer.html: user profile path', errors)
         self.assertNotIn('Users', ''.join(errors))  # the line names the kind of trace, never its text
+
+    def test_viewer_leak_is_found_after_the_generator_escaped_the_text(self):
+        """The generator writes a colon before two slashes as a character reference, so the page never holds such a URL raw."""
+        slash, back = chr(47), chr(92)
+        cases = (('Open ' + 'file:' + slash * 2 + slash + 'D:/work/index.html to preview.', 'file URL'),
+                 ('Copy it from C:' + slash + 'Users' + slash + 'alice.', 'user profile path'),
+                 ('Copy it from C:' + back + 'Users' + back + 'alice.', 'user profile path'),
+                 ('On a Mac it lives in ' + slash + 'Users' + slash + 'alice/work.', 'home path'),
+                 ('The share is ' + back * 2 + 'fileserver' + back + 'share.', 'network share path'))
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            readme = package / 'components' / 'Button' / 'README.md'
+            original = readme.read_text(encoding='utf-8')
+            for sentence, label in cases:
+                readme.write_bytes((original + '\n' + sentence + '\n').encode('utf-8'))
+                code, out, err = self.run_builder('--package', str(package), '--design-md', '--viewer')
+                self.assertEqual((code, err), (0, ''), sentence)
+                self.assertEqual(v3.verify_package(package)[0], [f'viewer_leak: viewer.html: {label}'], sentence)
+                if label == 'file URL':  # the reason for the scan on the unescaped text
+                    self.assertNotIn(sentence.split()[1], (package / 'viewer.html').read_text(encoding='utf-8'))
+            readme.write_bytes(original.encode('utf-8'))
+            self.run_builder('--package', str(package), '--design-md', '--viewer')
+            self.assertEqual(v3.verify_package(package), ([], []))
+
+    def test_viewer_leak_patterns_do_not_hit_look_alikes(self):
+        slash, back = chr(47), chr(92)
+        for fine in ('GET ' + slash + 'users' + slash + '42 and ' + slash + 'usr' + slash + 'local and C:' + slash + 'Windows' + slash + 'System32',
+                     'components' + slash + 'Users' + slash + 'README.md and Users' + slash + 'x', 'a' + back * 2 + 'b and ' + back * 2 + ' and ' + back + 'a' + back + 'b',
+                     'a ' + back * 2 + 'x then plain text'):
+            self.assertEqual(self.injected(f'<p>{fine}</p>'), [], fine)
+
+    def test_viewer_leak_is_found_in_comments_scripts_and_styles(self):
+        trace = chr(47) + 'home' + chr(47) + 'someone'
+        for snippet in (f'<!-- {trace} -->', f'<script>var p = "{trace}";</script>', f'<style>/* {trace} */</style>', f'<p title="{trace}">x</p>',
+                        f'<p>{trace}</p>'):
+            self.assertEqual(self.injected(snippet), ['viewer_leak: viewer.html: home path'], snippet)
+
+    # ---- spellings that a single-letter edit of the checker used to survive
+
+    def test_viewer_checks_survive_odd_spellings(self):
+        for snippet in ('<a href=" //cdn.example/x">x</a>', '<a href="\x01javascript:x">x</a>', '<a href="\x01\x02 //cdn.example/x">x</a>'):
+            self.assertIn('viewer_external_ref: viewer.html: src/href/url() leaves the page', self.injected(snippet), snippet)
+        self.assertEqual(self.injected('<LINK REL=STYLESHEET href=a.css>'), ['viewer_forbidden_tag: viewer.html: link rel=stylesheet'])
+        self.assertEqual(self.injected('<link rel="Alternate StyleSheet" href="a.css">'), ['viewer_forbidden_tag: viewer.html: link rel=stylesheet'])
+        self.assertEqual(self.checked(re.sub(r'<title>', '<title> ', self.page, count=1))[0], [])
+        self.assertEqual(self.checked(re.sub(r'<title>', '<TITLE >\n', self.page, count=1).replace('</title>', '</TITLE>', 1))[0], [])
+        meta = re.search(r'<meta http-equiv="Content-Security-Policy"[^>]*>', self.page)[0]
+        self.assertEqual(self.checked(self.page.replace(meta, meta.replace("default-src 'none'", "DEFAULT-SRC 'NONE'")))[0], [])
+        self.assertEqual(self.checked(self.page.replace(meta, meta.replace('Content-Security-Policy', 'CONTENT-SECURITY-POLICY')))[0], [])
 
     # ---- bounded work
 

@@ -1160,10 +1160,23 @@ _V_API = (
     ('document.write', re.compile(r'\bdocument\s*\.\s*write(?:ln)?\b')),
 )
 # Machine-local traces a published page must not carry. Each pattern is spelled so that its own source line holds none of them.
-_V_LEAKS = (('user profile path', re.compile(r'c:\\users', _V_FLAGS)), ('home path', re.compile(r'/home/', _V_FLAGS)),
+# Both spellings of a Windows profile path count, a macOS home folder (case matters: a lower-case API route is no trace and a
+# folder named ``Users`` inside the package, or the tail of a Windows path, is preceded by a name character or a colon), and a network share.
+_V_LEAKS = (('user profile path', re.compile(r'c:[\\/]users', _V_FLAGS)), ('home path', re.compile(r'/home/', _V_FLAGS)),
+            ('home path', re.compile(r'(?<![\w.:-])/Us' + r'ers/[\w.-]', re.ASCII)),
             ('file URL', re.compile(r'file:/{3}', _V_FLAGS)), ('local host name', re.compile(r'local' + 'host', _V_FLAGS)),
-            ('loopback address', re.compile(r'127\.0\.0\.1')), ('workstation folder', re.compile(r'[.]opc' + 'os', _V_FLAGS)))
+            ('loopback address', re.compile(r'127\.0\.0\.1')), ('workstation folder', re.compile(r'[.]opc' + 'os', _V_FLAGS)),
+            ('network share path', re.compile(r'\\\\[\w.-]+\\[\w$.-]', re.ASCII)))
 _V_LEAD = ''.join(map(chr, range(33)))
+
+
+def eol_lf(value):
+    """``value`` (text or bytes) with every CRLF and every lone CR turned into LF: a file saved with other line ends is the same file.
+
+    The staleness checks of DESIGN.md and viewer.html and the build command match files through this, on both sides."""
+    if isinstance(value, bytes):
+        return value.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
+    return value.replace('\r\n', '\n').replace('\r', '\n')
 
 
 def _split_raw_text(text: str) -> tuple[str, list[str], list[str]]:
@@ -1308,8 +1321,9 @@ def validate_viewer(text: str, size: int, data: dict) -> tuple[list[str], list[s
             found = len(re.findall(r'(?<![\w-])' + attribute + r'\s*=', markup))
             if found != expected:
                 err('viewer_coverage', f'{attribute} {found} != {expected}')
+    unescaped = html.unescape(text)  # the generator writes ``:`` before two slashes as a reference; a browser (and a reader) sees the URL
     for label, pattern in _V_LEAKS:
-        if pattern.search(text):
+        if pattern.search(text) or pattern.search(unescaped):
             err('viewer_leak', label)
     return errors, warnings
 
@@ -1484,7 +1498,7 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
             if buildable:
                 import design_system_build as build  # late: that module imports this one
                 try:
-                    if build.split_front_matter(design[0])[0] != build.render_front_matter(tokens, index):
+                    if eol_lf(build.split_front_matter(design[0])[0]) != eol_lf(build.render_front_matter(tokens, index)):
                         err('design_md_stale: DESIGN.md')
                 except Exception as exc:  # a package the generator cannot read is reported, not raised
                     err(f'design_md_stale: DESIGN.md: cannot regenerate ({type(exc).__name__})')
@@ -1509,7 +1523,7 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
             for line in viewer_errors:
                 err(line)
             warnings.extend(viewer_warnings)
-            if fresh is not None and size <= CAP_VIEWER and page != fresh:
+            if fresh is not None and size <= CAP_VIEWER and eol_lf(page) != eol_lf(fresh):
                 err('viewer_stale: viewer.html')
 
     cover = 'components/Cover/preview.html'

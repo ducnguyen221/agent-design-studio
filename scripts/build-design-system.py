@@ -68,6 +68,8 @@ def _design_md(package: Path, tokens: dict, index: dict, check: bool) -> tuple[s
         existing = '' if raw is None else raw.decode('utf-8')
     except UnicodeError:
         raise Refused('input_error: DESIGN.md: not valid UTF-8') from None
+    crlf = existing.count('\r\n') * 2 > existing.count('\n')  # the file's own line ends are kept when it is rewritten
+    existing = v3.eol_lf(existing)  # a file saved with CRLF (or CR) is the same file
     try:
         text = build.render_design_md(existing, tokens, index)
     except OSError:
@@ -75,6 +77,8 @@ def _design_md(package: Path, tokens: dict, index: dict, check: bool) -> tuple[s
     warnings = [f'WARN {line}' for line in build.design_md_warnings(tokens)]
     if text == existing and raw is not None:
         return 'unchanged', warnings
+    if crlf:
+        text = text.replace('\n', '\r\n')
     size = len(text.encode('utf-8'))
     if size > v3.CAP_KEPT:  # the file this run would leave behind must be one the next run accepts
         raise Refused(f'limit_exceeded: DESIGN.md: file size: {size} > {v3.CAP_KEPT}')
@@ -97,7 +101,7 @@ def _viewer(package: Path, check: bool) -> tuple[str, list[str]]:
     if len(text) > build.VIEWER_WARN:
         warnings.append(f'WARN viewer_large: viewer.html: {len(text)} > {build.VIEWER_WARN}')
     raw = _read(package, 'viewer.html', build.VIEWER_MAX)
-    if raw == text:
+    if raw is not None and v3.eol_lf(raw) == v3.eol_lf(text):
         return 'unchanged', warnings
     if check:
         raise Refused('viewer_missing: viewer.html' if raw is None else 'viewer_stale: viewer.html')
