@@ -6,7 +6,8 @@
 
 A seven-step UI design process an AI coding agent runs end to end — intake, fidelity,
 wireframe, three real directions, a token system, motion, review. A separate Design System
-skill creates, extracts, audits, and extends systems owned by a product. Both leave
+skill creates, extracts, audits, documents and extends the system a product owns, as one
+folder of files that imports into Claude Design and that any agent can read. Both leave
 traceable artifacts; the UI process keeps its two human decision gates.
 
 🔗 **[ducnguyen221.github.io/agent-design-studio](https://ducnguyen221.github.io/agent-design-studio)** ·
@@ -24,7 +25,8 @@ clear, and no reviewer.
 This pack supplies all four through two skills. `design-routing` is the UI workflow and its
 sixteen references carry the craft — decision orders, thresholds, curve values, colour
 maths, and the parts that tell the agent to stop and build nothing. `design-system` owns
-reusable system work across products and codebases.
+reusable system work across products and codebases and has four references of its own,
+so the pack holds twenty.
 
 **Every capability is a slot.** If your setup has a stronger specialist for a step, the
 router uses it; if not, the built-in playbook runs. The two skills have separate jobs:
@@ -125,11 +127,12 @@ and its [Markdown template](skills/design-routing/templates/reference-design.md)
 separates observation, inference and unknowns, then carries your chosen constraints into
 the design process. Analysis alone does not start a render gate.
 
-For a reusable product Design System, invoke `design-system` directly. It has four modes:
+For a reusable product Design System, invoke `design-system` directly. It has five modes:
 `create` from selected references or brand material, `extract` from a codebase,
-`audit` an existing system against implementation, and `extend` an approved system.
-The result starts as a run-scoped proposal/report; existing canonical sources stay in
-charge until the owner confirms a promotion and a reviewer checks it.
+`audit` an existing system against implementation, `document` one component, and
+`extend` an approved system. The result starts as a run-scoped proposal/report; existing
+canonical sources stay in charge until the owner confirms a promotion and a reviewer
+checks it. The folder it produces is described in [Design System folder](#design-system-folder).
 
 Use this handoff when reference analysis should inform a reusable system: first select
 references with the user, distill them with the guide and
@@ -149,7 +152,9 @@ On whole-interface asks it usually triggers on its own:
 > "Design the onboarding screen in our React app, here's the brief."
 
 When many design skills are installed, invoking `design-routing` directly is the reliable
-path.
+path (`/agent-design-studio:design-routing`). Some hosts send "make me a page" to a built-in
+artifact tool before any skill is considered; see
+[Using with design:design-system](#using-with-designdesign-system).
 
 It deliberately stays out of other narrow single-step work — critiquing an existing page,
 converting an approved design to HTML, picking a palette, drawing charts, or tuning the
@@ -188,30 +193,40 @@ skills/design-routing/
 
 ```
 skills/design-system/
-├── SKILL.md                    create / extract / audit / extend router
+├── SKILL.md                    create / extract / audit / document / extend router
+├── agents/openai.yaml          Codex adapter; implicit invocation on
 ├── references/
-│   ├── system-contract.md      canonical ownership, lifecycle and promotion rules
-│   ├── source-code-audit.md    scoped source evidence and coverage
-│   └── token-contract.md       supported token subset and existing-source rules
-└── templates/
-    ├── DESIGN.md               system entrypoint, canonical map and ownership
-    ├── component-v3/           reusable component README and preview
-    └── audit-report.md         run-scoped evidence, coverage and drift
+│   ├── system-contract.md      package tree, required files, read order, error codes
+│   ├── token-contract.md       v3 token grammar, derived DTCG, legacy maps
+│   ├── design-md-spec.md       DESIGN.md: front matter keys and the eight sections
+│   └── source-code-audit.md    scoped source evidence and coverage
+├── templates/
+│   ├── brand-v3/               starter package (profile minimal), fictional brand
+│   ├── DESIGN.md               DESIGN.md starter: eight sections
+│   ├── component-v3/           component README and preview
+│   ├── agent-adapters/         AGENTS.md / CLAUDE.md / GEMINI.md templates (.tmpl)
+│   ├── audit-report.md         run-scoped evidence, coverage and drift
+│   └── extend-proposal.md      delta, migration and promotion record
+└── tests/fixture/              anonymous full-profile package used by the verifier
 ```
 
-`design-routing` retains its sixteen references and its UI build/reference-only scope.
-`design-system` is a separate entrypoint for product-owned, reusable system work. Each skill
-loads only the references for its current task, so context stays lean.
+`design-routing` keeps its sixteen references and its UI build/reference-only scope.
+`design-system` is a separate entrypoint for product-owned, reusable system work, with four
+references: twenty in the pack. Each skill loads only the references for its current task,
+so context stays lean.
 
 ## Verify a Design System contract
 
 From this repository, run `python scripts/verify-design-system.py --self-test` for
 the contract tests, or `python scripts/verify-design-system.py` for the skill pack.
-For a product index, use `--root <project> --manifest <relative-manifest.json>`;
-all manifest paths are relative to that project root. `--tokens <relative.json>`
-checks the supported DTCG subset; `--legacy-tokens <relative.json>` only checks a
-legacy map. These checks never fetch external pointers or generate CSS. Structural
-success does not verify rendering, source coverage, accessibility or asset rights.
+To check a package folder, use `--package <dir>` (`--profile full|minimal`). Single files
+have their own flags, with paths relative to `--root`: `--tokens` (v3 list grammar),
+`--canonical-map`, `--dtcg` (the DTCG subset) and `--legacy-tokens` (a legacy map only);
+`--manifest` remains a deprecated alias of `--canonical-map`. The checks never fetch
+outside pointers, run package code or generate CSS. Structural success does not verify
+rendering, source coverage, accessibility or asset rights. CI
+(`.github/workflows/verify-skills.yml`) runs the same checks on every push to `main` and
+`sprint/**`.
 
 ## This site was designed by the process
 
@@ -236,6 +251,72 @@ Issues and pull requests welcome. The one rule that matters: **every reference i
 playbook an agent can execute** — decision orders, checklists, thresholds, tables. If a
 change reads like an essay, it belongs somewhere else.
 
+## Design System folder
+
+`design-system` keeps a system as one folder, the same one Claude Design imports (package
+format v3, read 22 Oct 2026, research preview):
+
+```
+design-system/
+├── DESIGN.md            entry file for any agent: front matter from tokens.json + 8 sections
+├── README.md            brand book that Claude Design reads first
+├── tokens.json          every token value, the data root
+├── design-system.json   index, written last
+├── canonical-map.json   one owner per domain, contrast pairs, decisions
+├── viewer.html          offline page, generated
+├── components/          Cover/ plus one folder per component (README.md, preview.html)
+└── assets/              one folder per group, each with a README of sources and rights
+```
+
+DESIGN.md is the entry file for any agent; README.md is the brand book Claude Design reads
+first; tokens.json holds every value. The `DESIGN.md` front matter and `viewer.html` are
+derived from the files next to them, so edit `tokens.json`, regenerate, then verify:
+
+```bash
+python scripts/build-design-system.py --package design-system --design-md --viewer
+python scripts/verify-design-system.py --package design-system
+```
+
+`viewer.html` is a static page, not a Claude Design render. It shows tokens, component
+summaries and assets as text and inline images, works offline and runs no package code;
+open a component's `preview.html` to see it drawn.
+
+Claude Design refuses `AGENTS.md`, `CLAUDE.md` and `GEMINI.md` inside the package, so
+those wrappers live one folder up, in the project that uses the system. Pass the folder
+that holds `design-system/`; existing files are never overwritten (a proposal is printed
+and counted as skipped):
+
+```bash
+python scripts/build-design-system.py --package design-system --adapters <project-root>
+```
+
+To start, copy `skills/design-system/templates/brand-v3/` to `design-system/` and replace
+every placeholder. `python scripts/export-dtcg.py --package design-system --out tokens.dtcg.json`
+derives a DTCG file when another tool wants one; it lists every token it had to skip.
+
+## Using with design:design-system
+
+Anthropic's `design` plugin also ships a skill named `design-system`. Both can be
+installed. Four things to know:
+
+1. **Measured activation.** Six prompts were run headless on Claude Code 2.1.309 with
+   claude-sonnet-5-5, once each (22-23 Oct 2026). Five behaved as expected: three requests
+   for system work (an audit with the folder path given, component documentation, a brand
+   note turned into a folder) loaded `agent-design-studio:design-system` as the first tool
+   call, and a palette-only ask and a brand-kit image ask did not. The Anthropic skill was
+   never called. One run per prompt is a sample, not a rate.
+2. **Whole pages may need the skill named.** The one miss was a plain "build a landing page
+   for a bakery" brief: the host sent it to its built-in artifact tool before any skill
+   was considered, and no wording in a skill file can change that. In such a host call
+   `/agent-design-studio:design-routing` or say "use design-routing" for whole-page work;
+   automatic activation on a bare page brief is not guaranteed there.
+3. **Call by full name.** A bare `/design-system` is ambiguous when both plugins are
+   installed. Use `/agent-design-studio:design-system` (in prose: `agent-design-studio:design-system`),
+   or turn one of the two plugins off in `/plugin`.
+4. **Where the trigger text lives.** The description agents match against is the 947
+   characters in the front matter of `skills/design-system/SKILL.md`; edit it there to
+   change when the skill activates.
+
 ## Acknowledgments
 
 This process distils ideas from four open projects. The reasoning was re-expressed in our
@@ -256,6 +337,11 @@ is separate from the MIT license of its [official agent skills](https://github.c
 | [anthropics/skills → `skills/frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) | Apache-2.0 | Anti-generic calibration, the two-pass plan-then-critique method, restraint, and writing treated as design material |
 | [plannotator/effective-html](https://github.com/plannotator/effective-html) | MIT | Choosing fidelity first, wireframes kept deliberately unfinished, prototypes that model real states, and the one-entrance routing shape |
 | [alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design) | MIT | The three-direction gate, the brand asset protocol, the colour derivation method, and the scored critique |
+
+The Design System skill also follows two published shapes, re-expressed in our own words with
+no text copied: Google Labs' [Design Markdown](https://github.com/google-labs-code/design.md)
+(Apache-2.0, spec `alpha`, read 22 Oct 2026) for the section and key names of `DESIGN.md`, and
+Anthropic's `design:design-system` skill for the idea of audit, document and extend modes.
 
 Thank you to their authors.
 

@@ -98,7 +98,7 @@ which for one reference below is earlier than the step that writes its artifact.
 | 2 | Fidelity — how finished this needs to be, and why | `choosing-fidelity.md`, then `image-sourcing.md` if images are content | `01-fidelity.md` |
 | 3 | Wireframe — structure only, deliberately unfinished | `wireframe-playbook.md` | `02-wireframe.html` + `.png` |
 | 4 | Direction gate — three genuinely different real renders, each with up to two static motion hypotheses | `direction-gate.md`; `typography-en-vi.md` when EN/VI type is a direction decision | `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, `03-direction-decision.md` |
-| 5 | Design System delta + static build, confirmed in a browser before animation | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md`; `typography-en-vi.md` for EN/VI font and scale choices; `agent-design-studio:design-system` `create/extend` for the system contract | `04-design-system/` proposal and canonical pointer, `05-implementation.md` |
+| 5 | Design System delta + static build, confirmed in a browser before animation | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md`; `typography-en-vi.md` for EN/VI font and scale choices; `agent-design-studio:design-system` `create/extend` for the system contract | `04-design-system/` v3 package delta and canonical pointer, `05-implementation.md` |
 | 6 | Motion pass — decide and implement only after the static page works | `motion-playbook.md`, then `references/motion-patterns.md` and `templates/06-motion-spec.md` | `06-motion-spec.md` |
 | 7 | Review loop | `uat-report-schema.md`; `typography-en-vi.md` for EN/VI type verification | `07-uat-report.md` |
 
@@ -125,9 +125,10 @@ For a starting point, `templates/static-motion-demo.html` and
 
 At Step 5, pass the approved direction, selected reference handoff, brand/asset rights,
 surface, current token/component source and target Design System baseline to
-`agent-design-studio:design-system` `create` or `extend`. Keep its draft/delta and
-evidence in the run's `04-design-system/`; existing product CSS/TS/Figma sources retain
-their declared authority. The router can implement the static screen, but only the
+`agent-design-studio:design-system` `create` or `extend`. Keep its draft/delta and evidence in the run's `04-design-system/`, laid out as the
+design-system v3 package (`DESIGN.md`, `tokens.json`, `canonical-map.json`, `components/`,
+`assets/`; only the files that change) beside a pointer to the canonical package; existing
+product CSS/TS/Figma sources retain their declared authority. The router can implement the static screen, but only the
 Design System skill authors the system contract. Promote approved deltas to the stable
 system after the Step 7 ship review; unresolved owner/reviewer decisions stay pending.
 
