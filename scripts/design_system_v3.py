@@ -7,6 +7,7 @@ shape without the ``WARN `` prefix, which the CLI adds.
 """
 from __future__ import annotations
 
+import html
 import json
 import math
 import os
@@ -1133,6 +1134,186 @@ def pass_line(warnings: list[str], bundle: bool = False) -> str:
             f'unchecked: {", ".join((*UNCHECKED, *extra))}')
 
 
+# --------------------------------------------------------------------------- viewer.html
+
+CAP_VIEWER, WARN_VIEWER = 512_000, 300_000
+_V_FLAGS = re.IGNORECASE | re.ASCII  # ASCII only: U+017F must not read as an ``s`` and U+0130 must not change a length
+_V_RAW_OPEN = re.compile(r'<(script|style)(?=[\s/>])[^<>]*>|<!--', _V_FLAGS)
+_V_RAW_CLOSE = {'script': re.compile(r'</script(?=[\s/>])', _V_FLAGS), 'style': re.compile(r'</style(?=[\s/>])', _V_FLAGS),
+                'comment': re.compile(r'--!?>')}
+_V_TAG = re.compile(r'<([A-Za-z][A-Za-z0-9:-]*)(?=[\s/>])([^<>]*)>', _V_FLAGS)
+_V_ATTR = re.compile(r'''([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'<>]+)))?''')
+_V_FORBIDDEN_TAG = re.compile(r'<(iframe|frameset|frame|object|embed|portal|form|base|applet)(?=[\s/>]|$)', _V_FLAGS)
+_V_TITLE = re.compile(r'<title(?=[\s/>])[^<>]*>\s*[^<\s]', _V_FLAGS)
+_V_HANDLER = re.compile(r'''[\s"'/]on[a-z]+\s*=''', _V_FLAGS)
+_V_URL_CALL = re.compile(r'url\(', _V_FLAGS)
+_V_IMPORT = re.compile(r'@import\b', _V_FLAGS)
+_V_SCHEME = re.compile(r'[a-z][a-z0-9+.-]*:')
+_V_LOAD_ATTRS = ('src', 'srcset', 'href', 'xlink:href', 'poster', 'action', 'formaction', 'ping', 'background', 'data')
+_V_API = (
+    ('fetch', re.compile(r'\bfetch\b')), ('XMLHttpRequest', re.compile(r'\bXMLHttpRequest\b')),
+    ('import(', re.compile(r'\bimport\s*\(')), ('importScripts', re.compile(r'\bimportScripts\b')),
+    ('eval(', re.compile(r'\beval\s*\(')), ('new Function', re.compile(r'\bnew\s+Function\b')),
+    ('WebSocket', re.compile(r'\bWebSocket\b')), ('EventSource', re.compile(r'\bEventSource\b')),
+    ('serviceWorker', re.compile(r'\bserviceWorker\b')), ('sendBeacon', re.compile(r'\bsendBeacon\b')),
+    ('new Worker', re.compile(r'\bnew\s+(?:Shared)?Worker\b')), ('window.open', re.compile(r'\bwindow\s*\.\s*open\b')),
+    ('document.write', re.compile(r'\bdocument\s*\.\s*write(?:ln)?\b')),
+)
+# Machine-local traces a published page must not carry. Each pattern is spelled so that its own source line holds none of them.
+_V_LEAKS = (('user profile path', re.compile(r'c:\\users', _V_FLAGS)), ('home path', re.compile(r'/home/', _V_FLAGS)),
+            ('file URL', re.compile(r'file:/{3}', _V_FLAGS)), ('local host name', re.compile(r'local' + 'host', _V_FLAGS)),
+            ('loopback address', re.compile(r'127\.0\.0\.1')), ('workstation folder', re.compile(r'[.]opc' + 'os', _V_FLAGS)))
+_V_LEAD = ''.join(map(chr, range(33)))
+
+
+def _split_raw_text(text: str) -> tuple[str, list[str], list[str]]:
+    """(markup without script bodies, style bodies and comments, script bodies, style bodies).
+
+    One pass; each search resumes where the last one ended. A comment is inert, so a tag written inside one does not count
+    (a policy meta in a comment is no policy); one that never closes runs to the end of the page, as in a browser."""
+    markup: list[str] = []
+    bodies: dict[str, list[str]] = {'script': [], 'style': []}
+    pos = 0
+    while True:
+        opened = _V_RAW_OPEN.search(text, pos)
+        if not opened:
+            markup.append(text[pos:])
+            break
+        name = opened[1].lower() if opened[1] else 'comment'
+        if name == 'comment':
+            markup.append(text[pos:opened.start()])
+            body_start = opened.end()
+            if text.startswith('>', body_start) or text.startswith('->', body_start):  # ``<!-->`` and ``<!--->`` are empty comments
+                pos = body_start + (1 if text.startswith('>', body_start) else 2)
+                continue
+            closed = _V_RAW_CLOSE['comment'].search(text, body_start)
+            if not closed:
+                break
+            pos = closed.end()
+            continue
+        markup.append(text[pos:opened.end()])
+        closed = _V_RAW_CLOSE[name].search(text, opened.end())
+        bodies[name].append(text[opened.end():closed.start() if closed else len(text)])
+        if not closed:
+            break
+        pos = closed.start()
+    return ''.join(markup), bodies['script'], bodies['style']
+
+
+def _tag_attrs(body: str) -> dict[str, str]:
+    """Attribute name (lower case) to raw value for one tag body; the first spelling of a name wins, as in a browser."""
+    found: dict[str, str] = {}
+    for m in _V_ATTR.finditer(body):
+        name = m[1].lower()
+        if name not in found:
+            found[name] = m[2] if m[2] is not None else m[3] if m[3] is not None else (m[4] or '')
+    return found
+
+
+def _outside(value: str, allow_data: bool = False) -> bool:
+    """True when an attribute value or a ``url()`` target leaves the page: a scheme, a leading slash or backslash, ``http:`` anywhere.
+
+    Entities are undone first (a browser does), tabs and line ends inside are dropped, leading control characters and spaces too.
+    Only the first 2000 characters are looked at, so the cost is bounded by the text, never by one huge value."""
+    probe = html.unescape(value[:2000]).replace('\t', '').replace('\r', '').replace('\n', '').lstrip(_V_LEAD).lower()
+    if not probe or probe.startswith('#'):
+        return False
+    if allow_data and probe.startswith('data:image/'):
+        return False
+    return probe[0] in '/\\' or bool(_V_SCHEME.match(probe)) or 'http:' in probe or 'https:' in probe
+
+
+def _url_targets(css: str):
+    """The start of every ``url(...)`` target in a piece of CSS (quotes and spaces dropped); 80 characters are enough to classify."""
+    for m in _V_URL_CALL.finditer(css):
+        yield css[m.end():m.end() + 80].lstrip(' \t\r\n\f"\'')
+
+
+def _expected_counts(data: dict) -> dict[str, int]:
+    from design_system_build import count_tokens  # late: that module imports this one
+    return {'data-token': count_tokens(data.get('tokens')),
+            'data-component': len(data['components']) if isinstance(data.get('components'), list) else 0,
+            'data-asset': len(data['assets']) if isinstance(data.get('assets'), list) else 0}
+
+
+def validate_viewer(text: str, size: int, data: dict) -> tuple[list[str], list[str]]:
+    """Check a ``viewer.html`` page: (errors, warnings). ``text`` is the page (at most CAP_VIEWER bytes of it), ``size`` its byte size,
+    ``data`` what ``collect_package`` returned for the package; the coverage counts come from it and an empty ``data`` skips that check.
+
+    Regex on the string only, no HTML parser. Every scan runs once over the text or over a bounded slice and none nests a
+    quantifier, so the cost grows linearly with the size of the page."""
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    def err(code: str, detail: str = '') -> None:
+        line = f'{code}: viewer.html' + (f': {detail}' if detail else '')
+        if line not in errors:
+            errors.append(line)
+
+    if size > CAP_VIEWER:
+        errors.append(f'viewer_too_large: viewer.html: {size} > {CAP_VIEWER}')
+    elif size > WARN_VIEWER:
+        warnings.append(f'viewer_large: viewer.html: {size} > {WARN_VIEWER}')
+    text = text if isinstance(text, str) else ''
+    markup, scripts, styles = _split_raw_text(text)
+
+    forbidden = [m[1].lower() for m in _V_FORBIDDEN_TAG.finditer(markup)]
+    external = csp = lang = img_without_alt = False
+    h1 = 0
+    for tag in _V_TAG.finditer(markup):
+        name = tag[1].lower()
+        attrs = _tag_attrs(tag[2])
+        if name == 'h1':
+            h1 += 1
+        elif name == 'link' and 'stylesheet' in attrs.get('rel', '').lower().split():
+            forbidden.append('link rel=stylesheet')
+        elif name == 'meta':
+            equiv = attrs.get('http-equiv', '').strip().lower()
+            if equiv == 'refresh':
+                forbidden.append('meta refresh')
+            elif equiv == 'content-security-policy' and "default-src 'none'" in attrs.get('content', '').lower():
+                csp = True
+        elif name == 'html' and attrs.get('lang', '').strip():
+            lang = True
+        elif name == 'img' and 'alt' not in attrs:
+            img_without_alt = True
+        for attr, value in attrs.items():
+            if attr in _V_LOAD_ATTRS and _outside(value, allow_data=attr == 'src'):
+                external = True
+            elif 'url(' in value[:100_000].lower() and any(_outside(t, allow_data=True) for t in _url_targets(html.unescape(value[:100_000]))):
+                external = True
+    if any(_V_IMPORT.search(body) or any(_outside(t, allow_data=True) for t in _url_targets(body)) for body in styles):
+        external = True
+    if external:
+        err('viewer_external_ref', 'src/href/url() leaves the page')
+    for name in dict.fromkeys(forbidden):
+        err('viewer_forbidden_tag', name)
+    if _V_HANDLER.search(markup):
+        err('viewer_inline_handler', 'on* attribute')
+    for label, pattern in _V_API:
+        if any(pattern.search(body) for body in scripts):
+            err('viewer_forbidden_api', label)
+    if not csp:
+        err('viewer_missing_csp')
+    if not lang:
+        err('viewer_a11y', 'lang missing')
+    if not _V_TITLE.search(markup):
+        err('viewer_a11y', 'title missing')
+    if h1 != 1:
+        err('viewer_a11y', f'h1 count {h1}')
+    if img_without_alt:
+        err('viewer_a11y', 'img alt missing')
+    if isinstance(data, dict) and data:
+        for attribute, expected in _expected_counts(data).items():
+            found = len(re.findall(r'(?<![\w-])' + attribute + r'\s*=', markup))
+            if found != expected:
+                err('viewer_coverage', f'{attribute} {found} != {expected}')
+    for label, pattern in _V_LEAKS:
+        if pattern.search(text):
+            err('viewer_leak', label)
+    return errors, warnings
+
+
 # --------------------------------------------------------------------------- package
 
 def _no_descend(name: str, top: bool) -> bool:
@@ -1241,8 +1422,10 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
     index, _ = load('design-system.json', 'invalid_index_value: design-system.json: json', CAP_JSON,
                     lambda n: f'invalid_index_value: design-system.json: size: {n} > {CAP_JSON}')
     title = None
+    index_ok = False
     if index is not _FAIL:
         problems = validate_index(index)
+        index_ok = not problems
         for line in problems:
             err(line)
         if any(line.startswith('unsupported_format_version') for line in problems):
@@ -1287,6 +1470,7 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
             err(line)
         warnings.extend(readme_warnings)
 
+    buildable = index_ok and tokens_ok and isinstance(index, dict) and isinstance(tokens, dict)  # the generators need valid inputs
     if 'DESIGN.md' not in files:
         err('design_md_missing: DESIGN.md')
     else:
@@ -1297,6 +1481,36 @@ def verify_package(root: Path, profile: str | None = None) -> tuple[list[str], l
             if tokens is not _FAIL:
                 for line in check_design_md_refs(design[0], design_md_token_keys(tokens)):
                     err(line)
+            if buildable:
+                import design_system_build as build  # late: that module imports this one
+                try:
+                    if build.split_front_matter(design[0])[0] != build.render_front_matter(tokens, index):
+                        err('design_md_stale: DESIGN.md')
+                except Exception as exc:  # a package the generator cannot read is reported, not raised
+                    err(f'design_md_stale: DESIGN.md: cannot regenerate ({type(exc).__name__})')
+
+    if 'viewer.html' not in files:
+        err('viewer_missing: viewer.html')
+    else:
+        page = read('viewer.html', CAP_VIEWER)
+        if page is not None:
+            size = max(len(page), files['viewer.html']) if len(page) > CAP_VIEWER else len(page)
+            collected = fresh = None
+            if buildable:
+                import design_system_build as build  # late: that module imports this one
+                try:
+                    collected = build.collect_package(root)
+                    fresh = build.render_viewer(collected).encode('utf-8')
+                except build.PackageError as exc:  # carries a finished line
+                    err(str(exc))
+                except Exception as exc:  # whatever else a hostile package provokes is named by its type, never raised
+                    err(f'viewer_stale: viewer.html: cannot regenerate ({type(exc).__name__})')
+            viewer_errors, viewer_warnings = validate_viewer(page[:CAP_VIEWER].decode('utf-8', errors='replace'), size, collected or {})
+            for line in viewer_errors:
+                err(line)
+            warnings.extend(viewer_warnings)
+            if fresh is not None and size <= CAP_VIEWER and page != fresh:
+                err('viewer_stale: viewer.html')
 
     cover = 'components/Cover/preview.html'
     if cover not in files:

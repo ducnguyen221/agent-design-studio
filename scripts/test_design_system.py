@@ -309,22 +309,64 @@ KEYMAP = {'components__Cover__preview__html': 'components/Cover/preview.html',
           'canonical__map__json': 'canonical-map.json'}
 
 
-def make(root, profile='full', **overrides):
-    """Write a valid package; keyword names map to paths through KEYMAP, a None value drops the file."""
+def derive(root):
+    """Regenerate the DESIGN.md front matter and viewer.html of a package the way the build CLI does.
+
+    Silent when the inputs cannot be used (a test built on purpose a package the generators refuse): then the files stay as they are.
+    """
+    import design_system_build as build
+    root = Path(root)
+    try:
+        tokens = json.loads((root / 'tokens.json').read_text(encoding='utf-8'))
+        index = json.loads((root / 'design-system.json').read_text(encoding='utf-8'))
+        if (root / 'DESIGN.md').is_file():
+            existing = (root / 'DESIGN.md').read_bytes().decode('utf-8')
+            (root / 'DESIGN.md').write_bytes(build.render_design_md(existing, tokens, index).encode('utf-8'))
+        (root / 'viewer.html').write_bytes(build.render_viewer(build.collect_package(root)).encode('utf-8'))
+    except Exception:  # noqa: BLE001 - unusable inputs: leave the package as the test wrote it
+        pass
+
+
+def make(root, profile='full', derived=True, **overrides):
+    """Write a valid package; keyword names map to paths through KEYMAP, a None value drops the file.
+
+    DESIGN.md front matter and viewer.html are regenerated from the written files unless ``derived`` is False.
+    """
     files = base_files(profile)
     for key, value in overrides.items():
         files[KEYMAP[key]] = value
     for rel, content in files.items():
         if content is not None:
             put(root, rel, content)
+    if derived:
+        derive(root)
     return Path(root)
 
 
-def edit_json(root, rel, change):
+def make_plain(root, profile='full', **overrides):
+    """``make`` without the generated files: the build tests start from sources only."""
+    return make(root, profile, derived=False, **overrides)
+
+
+def put_d(root, rel, content):
+    """``put`` a file into a made package, then bring DESIGN.md and viewer.html up to date (the page lists every file)."""
+    put(root, rel, content)
+    derive(root)
+
+
+def edit_json(root, rel, change, derived=True):
+    """Change a JSON file of the package; the generated files follow unless ``derived`` is False."""
     path = Path(root) / rel
     doc = json.loads(path.read_text(encoding='utf-8'))
     change(doc)
     put(root, rel, doc)
+    if derived and rel in ('tokens.json', 'design-system.json', 'canonical-map.json') and (Path(root) / 'viewer.html').is_file():
+        derive(root)
+
+
+def edit_plain(root, rel, change):
+    """``edit_json`` that leaves the generated files alone: the build tests check what goes stale."""
+    edit_json(root, rel, change, derived=False)
 
 
 def tok(**families):
@@ -655,7 +697,7 @@ class ComponentTests(unittest.TestCase):
             package = Path(directory) / 'design-system'
             make(package)
             put(package, 'components/Button/README.md', 'A button.\n' + 'x' * 64000)
-            put(package, 'components/Button/preview.html', '<!-- @dsCard height=20 -->\n')
+            put_d(package, 'components/Button/preview.html', '<!-- @dsCard height=20 -->\n')
             errors, warnings = self.verify(package)
             self.assertEqual(errors, ['component_without_source: components/Button'])
             self.assertIn('card_marker_height: components/Button/preview.html: 20', warnings)
@@ -668,7 +710,7 @@ class ComponentTests(unittest.TestCase):
     def test_template_page_marker_exempt(self):
         with tempfile.TemporaryDirectory() as directory:
             make(directory)
-            put(directory, 'components/Dashboard/preview.html', '<!-- @dsCard page group="Templates" -->\n<p>x</p>\n')
+            put_d(directory, 'components/Dashboard/preview.html', '<!-- @dsCard page group="Templates" -->\n<p>x</p>\n')
             self.assertEqual(self.verify(directory)[0], [])
             put(directory, 'components/Other/preview.html', '<!-- @dsCard page group="Other" -->\n')
             errors = self.verify(directory)[0]
@@ -679,7 +721,7 @@ class ComponentTests(unittest.TestCase):
             make(directory)
             put(directory, 'components/lib/util.js', 'x')
             put(directory, 'components/src/Button.js', 'x')
-            put(directory, 'components/index.d.ts', 'x')
+            put_d(directory, 'components/index.d.ts', 'x')
             self.assertEqual(self.verify(directory)[0], [])
             self.assertTrue(v3.has_bundle(Path(directory)))
         with tempfile.TemporaryDirectory() as directory:
@@ -691,7 +733,7 @@ class AssetTests(unittest.TestCase):
     def test_asset_group_readme_missing(self):
         with tempfile.TemporaryDirectory() as directory:
             make(directory)
-            put(directory, 'assets/Wordmark/mark.svg', '<svg></svg>')
+            put_d(directory, 'assets/Wordmark/mark.svg', '<svg></svg>')
             self.assertEqual(v3.verify_package(Path(directory))[0], ['asset_group_readme_missing: assets/Wordmark/README.md'])
 
     def test_asset_unlisted(self):
@@ -699,9 +741,9 @@ class AssetTests(unittest.TestCase):
             make(directory)
             put(directory, 'assets/Wordmark/README.md', 'mark.svg - own work, free to use.\n')
             put(directory, 'assets/Wordmark/mark.svg', '<svg></svg>')
-            put(directory, 'assets/Wordmark/sub/other.svg', '<svg></svg>')
+            put_d(directory, 'assets/Wordmark/sub/other.svg', '<svg></svg>')
             self.assertEqual(v3.verify_package(Path(directory))[0], ['asset_unlisted: assets/Wordmark/sub/other.svg'])
-            put(directory, 'assets/Wordmark/README.md', 'mark.svg and sub/other.svg, own work.\n')
+            put_d(directory, 'assets/Wordmark/README.md', 'mark.svg and sub/other.svg, own work.\n')
             self.assertEqual(v3.verify_package(Path(directory))[0], [])
 
     def test_asset_too_large(self):
@@ -1000,7 +1042,7 @@ class RefusedPathTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             make(directory)
             self.assertEqual(v3.verify_package(Path(directory)), ([], []))
-            put(directory, 'AGENTS.md', 'adapter\n')
+            put_d(directory, 'AGENTS.md', 'adapter\n')
             self.assertEqual(v3.verify_package(Path(directory))[0], ['refused_path: AGENTS.md'])
             code, out, err = cli('--package', directory)
             self.assertEqual((code, err.strip()), (1, 'refused_path: AGENTS.md'))
@@ -1183,7 +1225,7 @@ class CliV3Tests(unittest.TestCase):
             self.assertEqual((code, err), (0, ''))
             self.assertEqual(out.strip(), 'PASS: structural checks only; Claude Design format v3 pinned 2026-10-22 (research preview); '
                                           'unchecked: live-render, browser-display, real-import')
-            put(directory, 'components/bundle.js', '/* @ds-bundle {"name":"Button"} */\n')
+            put_d(directory, 'components/bundle.js', '/* @ds-bundle {"name":"Button"} */\n')
             code, out, err = cli('--package', directory, '--profile', 'full', '--format-version', '3')
             self.assertEqual(code, 0)
             self.assertTrue(out.strip().endswith('unchecked: live-render, browser-display, real-import, bundle'))
@@ -1191,7 +1233,7 @@ class CliV3Tests(unittest.TestCase):
     def test_cli_errors_go_to_stderr_and_exit_one(self):
         with tempfile.TemporaryDirectory() as directory:
             make(directory, DESIGN__md=None)
-            put(directory, 'notes/x.md', 'x')
+            put_d(directory, 'notes/x.md', 'x')
             code, out, err = cli('--package', directory)
             self.assertEqual(code, 1)
             self.assertEqual(err.strip(), 'design_md_missing: DESIGN.md')
@@ -1504,7 +1546,7 @@ class BoundedInputTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             make(directory)
             put(directory, 'assets/G/README.md', 'a.png\n' + 'x' * 600000)
-            put(directory, 'assets/G/a.png', b'\x89PNG')
+            put_d(directory, 'assets/G/a.png', b'\x89PNG')
             (errors, _warnings), reads = self.read_sizes(directory)
         self.assertTrue(all(0 < n <= 512001 for n in reads), sorted(set(reads)))
         self.assertEqual(errors, [])
@@ -1605,8 +1647,8 @@ class DesignMdBuildTests(unittest.TestCase):
         self.assertEqual(self.build.design_md_warnings(tokens), ['design_md_color_passthrough: mid', 'design_md_color_passthrough: edge'])
         self.assertEqual(self.build.design_md_warnings(tok(color=[color('ink', 'oklch(0 0 0)'), color('a', '{ink}')])), [])
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
-            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('mid', 'lab(50% 0 0)')))
+            make_plain(directory)
+            edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('mid', 'lab(50% 0 0)')))
             code, out, err = self.run_cli('--package', directory, '--design-md')
             self.assertEqual((code, err), (0, ''))
             self.assertIn('WARN design_md_color_passthrough: mid\n', out)
@@ -1726,7 +1768,7 @@ typography:
 
     def test_check_detects_stale(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             before = Path(directory, 'DESIGN.md').read_bytes()
             code, out, err = self.run_cli('--package', directory, '--design-md', '--check')
             self.assertEqual((code, out, err.strip()), (1, '', 'design_md_stale: DESIGN.md'))
@@ -1738,7 +1780,7 @@ typography:
 
     def test_build_twice_same_sha(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             path = Path(directory, 'DESIGN.md')
             code, out, err = self.run_cli('--package', directory, '--design-md')
             self.assertEqual((code, err), (0, ''))
@@ -1752,13 +1794,13 @@ typography:
             code, out, err = self.run_cli('--package', directory, '--design-md', '--check')
             self.assertEqual((code, out.strip(), err), (0, 'CHECKED: design-md=ok viewer=skipped', ''))
             errors, _warnings = v3.verify_package(Path(directory))
-            self.assertEqual(errors, [])
+            self.assertEqual(errors, ['viewer_missing: viewer.html'])  # DESIGN.md is current; the page was not asked for
 
     def test_build_after_token_edit_becomes_stale_then_fresh(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             self.assertEqual(self.run_cli('--package', directory, '--design-md')[0], 0)
-            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'][2].update(value='#0057b9'))
+            edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'][2].update(value='#0057b9'))
             code, _out, err = self.run_cli('--package', directory, '--design-md', '--check')
             self.assertEqual((code, err.strip()), (1, 'design_md_stale: DESIGN.md'))
             self.assertEqual(self.run_cli('--package', directory, '--design-md')[1].strip(),
@@ -1767,7 +1809,7 @@ typography:
 
     def test_cli_requires_content_flag(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             for argv in (['--package', directory], ['--package', directory, '--check'], ['--package', str(Path(directory, 'absent'))], []):
                 code, out, err = self.run_cli(*argv)
                 self.assertEqual((code, out, err.strip()), (1, '', 'input_error: choose --design-md/--viewer/--adapters'), argv)
@@ -1782,14 +1824,14 @@ typography:
 
     def test_cli_refuses_invalid_tokens_and_writes_nothing(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             before = Path(directory, 'DESIGN.md').read_bytes()
-            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('bad', 'red')))
+            edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('bad', 'red')))
             code, out, err = self.run_cli('--package', directory, '--design-md')
             self.assertEqual((code, out), (1, ''))
             self.assertIn('forbidden_color_syntax: tokens.json: color.bad', err)
             self.assertEqual(Path(directory, 'DESIGN.md').read_bytes(), before)
-            make(directory, tokens__json=None)
+            make_plain(directory, tokens__json=None)
             Path(directory, 'tokens.json').unlink()
             put(directory, 'design-system.json', '[')
             code, _out, err = self.run_cli('--package', directory, '--design-md')
@@ -1802,7 +1844,7 @@ typography:
 
     def test_cli_bounds_and_decodes_design_md(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, DESIGN__md='x' * 600000)
+            make_plain(directory, DESIGN__md='x' * 600000)
             code, _out, err = self.run_cli('--package', directory, '--design-md')
             self.assertEqual((code, err.strip()), (1, 'limit_exceeded: DESIGN.md: file size: 600000 > 512000'))
             self.assertEqual(Path(directory, 'DESIGN.md').stat().st_size, 600000)
@@ -1819,7 +1861,7 @@ typography:
             return real(root, relative)
 
         with tempfile.TemporaryDirectory() as directory, patch.object(self.cli_module.v3, 'safe_path', refuse_design_md):
-            make(directory)
+            make_plain(directory)
             before = Path(directory, 'DESIGN.md').read_bytes()
             code, out, err = self.run_cli('--package', directory, '--design-md')
             self.assertEqual((code, out, err.strip()), (1, '', 'refused_sensitive_path: DESIGN.md'))
@@ -1827,7 +1869,7 @@ typography:
 
     def test_cli_creates_design_md_from_the_template(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, DESIGN__md=None)
+            make_plain(directory, DESIGN__md=None)
             code, out, err = self.run_cli('--package', directory, '--design-md')
             self.assertEqual((code, err), (0, ''))
             self.assertIn('design-md=written', out)
@@ -1836,7 +1878,7 @@ typography:
 
     def test_build_leaves_other_package_files_alone(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             names = sorted(str(p.relative_to(directory)) for p in Path(directory).rglob('*') if p.is_file())
             before = {n: Path(directory, n).read_bytes() for n in names if n != 'DESIGN.md'}
             self.assertEqual(self.run_cli('--package', directory, '--design-md')[0], 0)
@@ -1859,7 +1901,7 @@ typography:
 
     def test_bom_without_front_matter_through_the_cli(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, DESIGN__md=b'\xef\xbb\xbf' + design_md().split('---\n', 2)[2].encode('utf-8'))
+            make_plain(directory, DESIGN__md=b'\xef\xbb\xbf' + design_md().split('---\n', 2)[2].encode('utf-8'))
             self.assertEqual(self.run_cli('--package', directory, '--design-md')[0], 0)
             raw = Path(directory, 'DESIGN.md').read_bytes()
             self.assertEqual(raw.count(b'\xef\xbb\xbf'), 0)
@@ -1868,7 +1910,7 @@ typography:
 
     def test_output_larger_than_the_cap_is_refused_before_writing(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, DESIGN__md='x' * v3.CAP_KEPT)
+            make_plain(directory, DESIGN__md='x' * v3.CAP_KEPT)
             before = Path(directory, 'DESIGN.md').read_bytes()
             for extra in ((), ('--check',)):
                 code, out, err = self.run_cli('--package', directory, '--design-md', *extra)
@@ -1935,7 +1977,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_sections_eight(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             text, _data = self.page(directory)
         self.assertEqual(self.sections(text), EIGHT)
         self.assertEqual(re.findall(r'<nav[^>]*>(.*?)</nav>', text, re.S)[0].count('href="#'), 8)
@@ -1949,11 +1991,11 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_title_static_label(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             text, _data = self.page(directory)
             self.assertIn('<title>Sample Studio — static viewer — not a Claude Design render</title>', text)
             self.assertIn('<h1>Sample Studio</h1>', text)
-            edit_json(directory, 'design-system.json', lambda d: d.update(title='<b>"Q" & co</b>\n\tx'))
+            edit_plain(directory, 'design-system.json', lambda d: d.update(title='<b>"Q" & co</b>\n\tx'))
             text, _data = self.page(directory)
         self.assertIn('<title>&lt;b&gt;&quot;Q&quot; &amp; co&lt;/b&gt; x — static viewer', text)
         self.assertEqual(len(re.findall(r'<title>', text)), 1)
@@ -1961,7 +2003,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_token_coverage(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
 
             def grow(doc):
                 doc['color']['tokens'].append(color('extra', '#123456'))
@@ -1970,7 +2012,7 @@ class ViewerBuildTests(unittest.TestCase):
                                             {'name': 'float', 'value': '0 8px 16px #00000040', 'usage': 'menu'}]}
                 doc['type']['groups'][0]['styles'].append({'name': 'caption', 'fontSize': '12px', 'usage': 'small'})
 
-            edit_json(directory, 'tokens.json', grow)
+            edit_plain(directory, 'tokens.json', grow)
             text, data = self.page(directory)
         expected = 4 + 1 + 1 + 1 + 1 + 2 + 1 + 1  # colours, spacing, radius, styles, then the additions
         self.assertEqual(text.count('data-token='), expected)
@@ -1980,7 +2022,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_component_and_asset_coverage(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, 'components/Button/README.md', '# Button\n\nA plain action control. It has two states.\n\n- primary\n- quiet\n')
             put(directory, 'components/Button/preview.html', '<!-- @dsCard height=120 group="Actions" -->\n<p>x</p>\n')
             put(directory, 'components/Card/preview.html', '<!-- @dsCard page group="Templates" -->\n<p>x</p>\n')
@@ -2011,7 +2053,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_no_components_message(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             text, _data = self.page(directory)
         self.assertIn('No components', text)
         self.assertNotIn('data-component=', text)
@@ -2019,7 +2061,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_excludes_self_from_files(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, 'viewer.html', '<p>old</p>')
             put(directory, 'sub/viewer.html', 'kept')
             put(directory, '.hidden', 'x')
@@ -2040,7 +2082,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_script_under_4kb(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, 'components/Evil/README.md', '<script>alert(1)</script>\n')
             text, _data = self.page(directory)
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', text)
@@ -2057,7 +2099,7 @@ class ViewerBuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             hostile = ('See [site](https://evil.example/a) and https://cdn.example/x.js or //cdn.example/y.\n\n'
                        '[proto](//evil.example) [abs](/etc/passwd) [up](../x) [js](javascript:alert(1)) ![pic](http://evil.example/i.png)\n')
-            make(directory, components__Cover__preview__html=COVER,
+            make_plain(directory, components__Cover__preview__html=COVER,
                  DESIGN__md=design_md(overview=OVERVIEW + '\n' + hostile))
             put(directory, 'components/Doc/README.md', hostile)
             put(directory, 'assets/G/README.md', 'a.svg\n\n' + hostile)
@@ -2074,7 +2116,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_idempotent(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, components__Cover__preview__html=COVER)
+            make_plain(directory, components__Cover__preview__html=COVER)
             put(directory, 'components/Button/README.md', 'A control.\n')
             put(directory, 'assets/G/README.md', 'a.png')
             put(directory, 'assets/G/a.png', PNG + bytes(50))
@@ -2098,7 +2140,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_check_detects_stale(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             code, _out, err = self.run_cli('--package', directory, '--viewer', '--check')
             self.assertEqual((code, err.strip()), (1, 'viewer_missing: viewer.html'))
             self.assertFalse(Path(directory, 'viewer.html').exists())
@@ -2113,7 +2155,7 @@ class ViewerBuildTests(unittest.TestCase):
             code, _out, err = self.run_cli('--package', directory, '--viewer', '--check')
             self.assertEqual((code, err.strip()), (1, 'viewer_stale: viewer.html'))
             self.assertEqual(path.read_bytes(), before)
-            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'][2].update(value='#0057b9'))
+            edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'][2].update(value='#0057b9'))
             self.assertEqual(self.run_cli('--package', directory, '--viewer')[1].strip(),
                              'BUILT: design-md=skipped viewer=written adapters=0 written, 0 skipped')
             code, out, _err = self.run_cli('--package', directory, '--design-md', '--viewer', '--check')
@@ -2121,7 +2163,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_cli_viewer_output_lines(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             code, out, err = self.run_cli('--package', directory, '--viewer')
             self.assertEqual((code, err), (0, ''))
             self.assertEqual(out.strip(), 'BUILT: design-md=skipped viewer=written adapters=0 written, 0 skipped')
@@ -2138,8 +2180,8 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_cli_viewer_refuses_bad_input_and_writes_nothing(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
-            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('bad', 'red')))
+            make_plain(directory)
+            edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('bad', 'red')))
             code, out, err = self.run_cli('--package', directory, '--viewer')
             self.assertEqual((code, out), (1, ''))
             self.assertIn('forbidden_color_syntax: tokens.json: color.bad', err)
@@ -2152,14 +2194,14 @@ class ViewerBuildTests(unittest.TestCase):
             return real(root, relative)
 
         with tempfile.TemporaryDirectory() as directory, patch.object(self.cli_module.v3, 'safe_path', refuse):
-            make(directory)
+            make_plain(directory)
             code, out, err = self.run_cli('--package', directory, '--viewer')
             self.assertEqual((code, out, err.strip()), (1, '', 'refused_sensitive_path: viewer.html'))
 
     def test_cli_viewer_size_limits(self):
         words = ('lorem ipsum dolor sit amet ' * 2400)[:63900] + '\n'
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             for n in range(5):
                 put(directory, f'components/C{n}/README.md', words)
             code, out, err = self.run_cli('--package', directory, '--viewer')
@@ -2168,7 +2210,7 @@ class ViewerBuildTests(unittest.TestCase):
             self.assertTrue(300000 < size <= 512000, size)
             self.assertIn(f'WARN viewer_large: viewer.html: {size} > 300000\n', out)
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             for n in range(9):
                 put(directory, f'components/C{n}/README.md', words)
             code, out, err = self.run_cli('--package', directory, '--viewer')
@@ -2191,7 +2233,7 @@ class ViewerBuildTests(unittest.TestCase):
             raise AssertionError(f'unbounded read of {self.name}')
 
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, '.env', 'SECRET_VALUE=1')
             put(directory, 'credentials.json', 'SECRET_VALUE')
             put(directory, 'assets/G/README.md', 'secret.pem, auth.json, x.png')
@@ -2223,7 +2265,7 @@ class ViewerBuildTests(unittest.TestCase):
             return real(root, relative)
 
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, 'assets/G/README.md', 'x.png')
             put(directory, 'assets/G/x.png', PNG)
             with patch.object(v3, 'safe_path', spy):
@@ -2259,7 +2301,7 @@ class ViewerBuildTests(unittest.TestCase):
             return Spy(handle) if 'b' in mode else handle
 
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, README__md='## Content fundamentals\n' + 'x' * 600000, DESIGN__md='y' * 700000)
+            make_plain(directory, README__md='## Content fundamentals\n' + 'x' * 600000, DESIGN__md='y' * 700000)
             put(directory, 'components/Big/README.md', 'z' * 300000)
             put(directory, 'components/Big/preview.html', '<!-- @dsCard -->\n' + 'p' * 600000)
             put(directory, 'assets/G/README.md', 'w' * 300000)
@@ -2273,7 +2315,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_large_asset_skipped(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, 'assets/G/README.md', 'big.png small.png')
             put(directory, 'assets/G/big.png', PNG + bytes(70000 - 8))
             put(directory, 'assets/G/small.png', PNG + bytes(2000 - 8))
@@ -2291,7 +2333,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_total_embedded_images_are_bounded(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, 'assets/G/README.md', 'img')
             for n in range(10):
                 put(directory, f'assets/G/i{n}.png', PNG + bytes(60000))
@@ -2315,7 +2357,7 @@ class ViewerBuildTests(unittest.TestCase):
                 '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><rect/></svg>',
                 '<svg xmlns="http://www.w3.org/2000/svg"><rect onclick="x()" width="1" height="1"/></svg>']
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + evil[0] + '\n')
+            make_plain(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + evil[0] + '\n')
             put(directory, 'assets/G/README.md', 'bad0.svg bad1.svg bad2.svg good.svg')
             for n, svg in enumerate(evil):
                 put(directory, f'assets/G/bad{n}.svg', svg)
@@ -2487,7 +2529,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_viewer_runs_in_linear_time_on_hostile_package(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, README__md='[' * 150000, DESIGN__md='---\nversion: alpha\n---\n## Overview\n' + '- Read order: ' + ',' * 100000 + '\n')
+            make_plain(directory, README__md='[' * 150000, DESIGN__md='---\nversion: alpha\n---\n## Overview\n' + '- Read order: ' + ',' * 100000 + '\n')
             put(directory, 'components/C/README.md', '`' * 60000)
             put(directory, 'assets/G/README.md', '*' * 60000)
             start = time.perf_counter()
@@ -2536,10 +2578,10 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_render_viewer_swatches_and_contrast(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
-            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].extend(
+            make_plain(directory)
+            edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'].extend(
                 [color('ink', 'oklch(0 0 0)'), color('mid', 'lab(50% 0 0)'), color('pale', '#777777')]))
-            edit_json(directory, 'canonical-map.json', lambda d: d['checks']['contrast'].extend(
+            edit_plain(directory, 'canonical-map.json', lambda d: d['checks']['contrast'].extend(
                 [{'fg': 'pale', 'bg': 'bg', 'min': 4.5}, {'fg': 'mid', 'bg': 'bg'}, {'fg': 'ink', 'bg': 'bg', 'large': True}, {'fg': 'nope', 'bg': 'bg'}]))
             text, _data = self.page(directory)
         self.assertIn('background:#000000', text)  # oklch(0 0 0)
@@ -2554,10 +2596,10 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_overview_and_agents_come_from_the_package(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, components__Cover__preview__html=COVER,
+            make_plain(directory, components__Cover__preview__html=COVER,
                  DESIGN__md=design_md(overview='- Read order: README.md, tokens.json, `components/`\n- Owner: Sample Studio team\n'
                                                '- Status: draft\n\nThe overview paragraph is here.\n'))
-            edit_json(directory, 'canonical-map.json', lambda d: d['system'].update(version='0.3.1', status='approved', id='sample-ds'))
+            edit_plain(directory, 'canonical-map.json', lambda d: d['system'].update(version='0.3.1', status='approved', id='sample-ds'))
             text, data = self.page(directory)
         overview = text.split('<section id="overview"')[1].split('</section>')[0]
         self.assertIn('<svg xmlns=', overview)
@@ -2574,7 +2616,7 @@ class ViewerBuildTests(unittest.TestCase):
             self.assertIn(harness, agents)
         self.assertEqual(data['design_md'].split('\n', 1)[0], '')  # body after the front matter
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, DESIGN__md=None, components__Cover__preview__html='<!-- @dsCard height=300 -->\n<svg><text>Only one</text></svg>\n')
+            make_plain(directory, DESIGN__md=None, components__Cover__preview__html='<!-- @dsCard height=300 -->\n<svg><text>Only one</text></svg>\n')
             text, _data = self.page(directory)
         self.assertIn('<p class="lead">Sample Studio <span class="mut">Plain words.</span></p>', text)  # README's first sentence
         self.assertIn('DESIGN.md has no Overview section', text)
@@ -2582,7 +2624,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_typography_and_spacing_screens(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             text, _data = self.page(directory)
         typography = text.split('<section id="typography"')[1].split('</section>')[0]
         self.assertIn('<code>Inter, sans-serif</code>', typography)
@@ -2595,7 +2637,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_component_summary_is_plain_text(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, 'components/A/README.md', '# A\n\nA **bold** and `code` and [link](x.md) summary. Next sentence.\n')
             put(directory, 'components/B/README.md', '```\ncode first\n```\n\n<b>Tag</b> text without a full stop\n')
             put(directory, 'components/C/README.md', '# only a heading\n')
@@ -2604,7 +2646,7 @@ class ViewerBuildTests(unittest.TestCase):
 
     def test_files_screen_shows_tree_with_sizes(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             text, data = self.page(directory)
         files = text.split('<section id="files"')[1].split('</section>')[0]
         size = dict((f['path'], f['size']) for f in data['files'])['components/Cover/preview.html']
@@ -2645,7 +2687,7 @@ class ViewerBuildTests(unittest.TestCase):
     def test_viewer_links_hostile_readme_and_design_run_in_linear_time(self):
         hostile = '[a](' * 7000 + '(x)' * 11000
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, DESIGN__md='---\nversion: alpha\n---\n## Overview\n' + '[a](' * 5000 + '(x)' * 9000 + '\n')
+            make_plain(directory, DESIGN__md='---\nversion: alpha\n---\n## Overview\n' + '[a](' * 5000 + '(x)' * 9000 + '\n')
             put(directory, 'components/C/README.md', hostile)
             put(directory, 'assets/G/README.md', hostile)
             start = time.perf_counter()
@@ -2686,7 +2728,7 @@ class ViewerBuildTests(unittest.TestCase):
                '<g id="colors"><rect id="q" width="4" height="4" fill="url(#grad)" style="stroke:url( #grad )"/>'
                '<use href="#colors"/><use xlink:href="#q"/></g><text id="overview">Title</text><text ID="h-colors">Tagline</text></svg>')
         with tempfile.TemporaryDirectory() as directory:
-            make(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + svg + '\n')
+            make_plain(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + svg + '\n')
             text, data = self.page(directory)
         ids = re.findall(r'\sid="([^"]*)"', text)
         self.assertEqual(sorted(i for i in set(ids) if ids.count(i) > 1), [])
@@ -2714,8 +2756,8 @@ class ViewerBuildTests(unittest.TestCase):
     def test_canonical_contrast_minimum_out_of_range_is_a_clean_error(self):
         for minimum in ('1' + '0' * 400, '1e999', '-1e999'):
             with tempfile.TemporaryDirectory() as directory:
-                make(directory)
-                edit_json(directory, 'canonical-map.json', lambda d: d['checks']['contrast'].append({'fg': 'text', 'bg': 'bg', 'min': 0}))
+                make_plain(directory)
+                edit_plain(directory, 'canonical-map.json', lambda d: d['checks']['contrast'].append({'fg': 'text', 'bg': 'bg', 'min': 0}))
                 path = Path(directory, 'canonical-map.json')
                 path.write_text(path.read_text(encoding='utf-8').replace('"min": 0', f'"min": {minimum}'), encoding='utf-8')
                 code, out, err = self.run_cli('--package', directory, '--viewer')
@@ -2729,14 +2771,14 @@ class ViewerBuildTests(unittest.TestCase):
     def test_cli_turns_any_unexpected_error_into_one_line(self):
         for error in (ZeroDivisionError('x'), KeyError('k'), OverflowError('o'), TypeError('t'), AttributeError('a')):
             with tempfile.TemporaryDirectory() as directory:
-                make(directory)
+                make_plain(directory)
                 with patch.object(self.build, 'collect_package', side_effect=error):
                     code, out, err = self.run_cli('--package', directory, '--viewer')
             self.assertEqual((code, out, err), (1, '', f'input_error: {type(error).__name__}\n'))
 
     def test_package_read_budget_is_total(self):
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             body = ('word ' * 12700)[:63500]
             for n in range(400):
                 put(directory, f'components/C{n:03d}/README.md', body)
@@ -2796,7 +2838,7 @@ class ViewerBuildTests(unittest.TestCase):
         for name in ('identity.png', 'valid_rsa.md', 'rsa.md', 'kdbx.md', 'idea.png'):
             self.assertFalse(v3.SENSITIVE.search(name), name)
         with tempfile.TemporaryDirectory() as directory:
-            make(directory)
+            make_plain(directory)
             put(directory, 'assets/G/README.md', 'a.png')
             put(directory, 'assets/G/id_rsa', 'SECRET_VALUE')
             put(directory, 'assets/G/vault.kdbx', 'SECRET_VALUE')
@@ -2812,6 +2854,440 @@ class ViewerBuildTests(unittest.TestCase):
         self.assertEqual(self.build.count_tokens(None), 0)
         self.assertEqual(self.build.count_tokens({'color': {'tokens': [{'name': 'a'}, {'x': 1}, 3]}, 'type': {'groups': [{'styles': [{'name': 's'}, {}]}, 5]},
                                                   'spacing': {'tokens': 'no'}, 'other': 4}), 2)
+
+
+class ViewerVerifyTests(unittest.TestCase):
+    """The package verifier on DESIGN.md front matter and viewer.html: stale files and the page checks of ``validate_viewer``."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.build = importlib.import_module('design_system_build')
+        path = Path(__file__).with_name('build-design-system.py')
+        loader_spec = importlib.util.spec_from_file_location('design_system_builder_verify', path)
+        cls.cli_module = importlib.util.module_from_spec(loader_spec)
+        loader_spec.loader.exec_module(cls.cli_module)
+        cls.fixture_dir = FIXTURE.parent
+        cls.template_dir = TEMPLATE.parent
+        cls.page = (cls.fixture_dir / 'viewer.html').read_text(encoding='utf-8')
+        cls.data = cls.build.collect_package(cls.fixture_dir)
+
+    def copy_of(self, directory, source=None):
+        """A copy of the sample (or of ``source``) in ``directory``; the sample's repo-path entries sit beside the package, so the whole
+        folder around it comes along."""
+        source = Path(source or self.fixture_dir)
+        shutil.copytree(source.parent, Path(directory) / 'copy', ignore=shutil.ignore_patterns('__pycache__'))
+        return Path(directory) / 'copy' / source.name
+
+    def checked(self, text, size=None):
+        return v3.validate_viewer(text, len(text.encode('utf-8')) if size is None else size, self.data)
+
+    def injected(self, snippet):
+        """The fixture page with ``snippet`` added at the end of <main>; returns the errors of ``validate_viewer``."""
+        self.assertEqual(self.page.count('</main>'), 1)
+        return self.checked(self.page.replace('</main>', snippet + '</main>'))[0]
+
+    def run_builder(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = self.cli_module.main(list(argv))
+        return code, out.getvalue(), err.getvalue()
+
+    # ---- the shipped sample and template are clean
+
+    def test_fixture_and_template_pass_every_check(self):
+        for source in (self.fixture_dir, self.template_dir):
+            self.assertEqual(v3.verify_package(source), ([], []), source)
+            text = (source / 'viewer.html').read_text(encoding='utf-8')
+            self.assertEqual(v3.validate_viewer(text, len(text.encode('utf-8')), self.build.collect_package(source)), ([], []), source)
+        self.assertEqual(v3.validate_viewer(self.page, len(self.page.encode('utf-8')), {}), ([], []))
+        self.assertEqual((v3.CAP_VIEWER, v3.WARN_VIEWER), (self.build.VIEWER_MAX, self.build.VIEWER_WARN))
+
+    # ---- missing, stale
+
+    def test_viewer_missing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            (package / 'viewer.html').unlink()
+            self.assertEqual(v3.verify_package(package), (['viewer_missing: viewer.html'], []))
+            code, out, err = cli('--package', str(package))
+            self.assertEqual((code, err.strip()), (1, 'viewer_missing: viewer.html'))
+            self.assertNotIn('PASS', out)
+
+    def test_viewer_stale_one_byte(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            raw = (package / 'viewer.html').read_bytes()
+            (package / 'viewer.html').write_bytes(raw + b'\n')  # one byte more
+            self.assertEqual(v3.verify_package(package), (['viewer_stale: viewer.html'], []))
+            cut = raw.index(b'Design') if b'Design' in raw else 100
+            changed = bytearray(raw)
+            changed[cut] = ord('X') if changed[cut] != ord('X') else ord('Y')  # one byte different, same length
+            (package / 'viewer.html').write_bytes(bytes(changed))
+            self.assertEqual(v3.verify_package(package)[0], ['viewer_stale: viewer.html'])
+            (package / 'viewer.html').write_bytes(raw)
+            self.assertEqual(v3.verify_package(package), ([], []))
+            put(package, 'notes.md', 'a new file')  # the page lists every file, so a new file makes it stale
+            self.assertEqual(v3.verify_package(package)[0], ['viewer_stale: viewer.html'])
+
+    def test_design_md_stale_after_hex_edit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            tokens = json.loads((package / 'tokens.json').read_text(encoding='utf-8'))
+            pairs = {name for pair in json.loads((package / 'canonical-map.json').read_text(encoding='utf-8'))['checks']['contrast']
+                     for name in (pair['fg'], pair['bg'])}
+            text = (package / 'tokens.json').read_text(encoding='utf-8')
+            old = next(v for v in (next(iter(t['value'].values())) for t in tokens['color']['tokens']
+                                   if t['name'] not in pairs and isinstance(t['value'], dict))
+                       if text.count(f'"{v}"') == 1)  # the first theme's value is the one the front matter carries
+            new = old[:-1] + ('0' if old[-1] != '0' else '1')
+            (package / 'tokens.json').write_bytes(text.replace(f'"{old}"', f'"{new}"').encode('utf-8'))
+            errors, warnings = v3.verify_package(package)
+            self.assertEqual((errors, warnings), (['design_md_stale: DESIGN.md', 'viewer_stale: viewer.html'], []))
+            code, out, err = cli('--package', str(package))
+            self.assertEqual((code, err.splitlines()), (1, ['design_md_stale: DESIGN.md', 'viewer_stale: viewer.html']))
+            code, out, err = self.run_builder('--package', str(package), '--design-md', '--viewer')
+            self.assertEqual((code, err), (0, ''), out)
+            self.assertEqual(v3.verify_package(package), ([], []))  # one command brings it back
+            self.assertIn(new, (package / 'viewer.html').read_text(encoding='utf-8'))
+        with tempfile.TemporaryDirectory() as directory:  # only the page is stale when only the page changed
+            package = self.copy_of(directory)
+            (package / 'viewer.html').write_bytes((package / 'viewer.html').read_bytes().replace(b'<h1>', b'<h1 class="x">'))
+            self.assertEqual(v3.verify_package(package)[0], ['viewer_stale: viewer.html'])
+
+    def test_stale_checks_need_usable_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory, derived=False)
+            edit_json(directory, 'tokens.json', lambda d: d['color']['tokens'].append(dict(d['color']['tokens'][0])), derived=False)
+            put(directory, 'viewer.html', 'not a page')
+            errors, _warnings = v3.verify_package(Path(directory))  # duplicate names: the generators are not asked
+            self.assertTrue(any(e.startswith('duplicate_name') for e in errors), errors)
+            self.assertFalse([e for e in errors if e.startswith(('design_md_stale', 'viewer_stale'))], errors)
+            self.assertIn('viewer_missing_csp: viewer.html', errors)  # the page checks still run
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            with patch.object(self.build, 'render_viewer', side_effect=ZeroDivisionError('boom')):
+                errors, _warnings = v3.verify_package(Path(directory))
+            self.assertEqual(errors, ['viewer_stale: viewer.html: cannot regenerate (ZeroDivisionError)'])
+            with patch.object(self.build, 'render_front_matter', side_effect=TypeError('boom')):
+                errors, _warnings = v3.verify_package(Path(directory))
+            self.assertEqual(errors, ['design_md_stale: DESIGN.md: cannot regenerate (TypeError)'])
+
+    def test_package_error_from_the_generator_is_one_line(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make(directory)
+            edit_json(directory, 'canonical-map.json', lambda d: d['checks']['contrast'].append({'fg': 'text', 'bg': 'bg', 'min': 10 ** 400}),
+                      derived=False)
+            path = Path(directory, 'canonical-map.json')
+            path.write_text(path.read_text(encoding='utf-8').replace(str(10 ** 400), '1e999'), encoding='utf-8')
+            errors, _warnings = v3.verify_package(Path(directory))
+        self.assertTrue(any(e.startswith('invalid_manifest: canonical-map.json: checks.contrast') for e in errors), errors)
+        self.assertEqual(len(errors), len(set(errors)), errors)
+
+    # ---- size
+
+    def test_viewer_too_large(self):
+        small = self.page
+        self.assertEqual(v3.validate_viewer(small, 512_000, self.data), ([], ['viewer_large: viewer.html: 512000 > 300000']))
+        errors, warnings = v3.validate_viewer(small, 512_001, self.data)
+        self.assertEqual((errors, warnings), (['viewer_too_large: viewer.html: 512001 > 512000'], []))
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            (package / 'viewer.html').write_bytes(self.page.encode('utf-8') + b'<!--' + b'x' * 5_000_000 + b'-->')
+            start = time.perf_counter()
+            errors, warnings = v3.verify_package(package)
+            elapsed = time.perf_counter() - start
+        self.assertEqual([e for e in errors if e.startswith('viewer_too_large')], [f'viewer_too_large: viewer.html: {len(self.page.encode("utf-8")) + 5_000_007} > 512000'])
+        self.assertFalse([e for e in errors if e.startswith('viewer_stale')], errors)  # a page over the cap is reported as too large and not regenerated
+        self.assertEqual(warnings, [])
+        self.assertLess(elapsed, 3.0, f'{elapsed:.2f} s')
+
+    def test_viewer_large_warns(self):
+        self.assertEqual(v3.validate_viewer(self.page, 300_000, self.data), ([], []))
+        self.assertEqual(v3.validate_viewer(self.page, 300_001, self.data), ([], ['viewer_large: viewer.html: 300001 > 300000']))
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            (package / 'viewer.html').write_bytes(self.page.encode('utf-8') + b'<!--' + b'x' * 300_000 + b'-->')
+            errors, warnings = v3.verify_package(package)
+        self.assertEqual(errors, ['viewer_stale: viewer.html'])
+        self.assertEqual(len(warnings), 1)
+        self.assertRegex(warnings[0], r'^viewer_large: viewer\.html: \d+ > 300000$')
+
+    # ---- outside resources
+
+    def test_viewer_external_ref(self):
+        bad = [
+            '<script src="https://cdn.example/x.js"></script>', '<img src="//cdn.example/a.png" alt="">', '<a href="/etc/hosts">x</a>',
+            '<a href="HTTP://example.test/">x</a>', '<a href="  https://example.test/">x</a>', '<a href="&#104;ttps://example.test/">x</a>',
+            '<a href="java&#115;cript:alert(1)">x</a>', '<a href="mailto:a@example.test">x</a>', '<a href="\\\\host\\share">x</a>',
+            '<div style="background:url(https://example.test/a.png)">x</div>', "<div style=\"background:url('//example.test/a.png')\">x</div>",
+            '<div style="background:url( &quot;http://example.test/a.png&quot; )">x</div>',
+            '<style>a{background:url(//example.test/a.png)}</style>', '<style>@import "x.css";</style>',
+            '<style>a{background:url( "HTTPS://example.test/a.png" )}</style>', '<svg><image href="http://example.test/a.png"/></svg>',
+            '<svg><use xlink:href="//example.test/y.svg#a"/></svg>', '<img srcset="a.png 1x, https://example.test/b.png 2x" alt="">',
+            '<video poster="https://example.test/p.png"></video>', '<img src=//example.test/a.png alt="">', '<a href=\'https://example.test/\'>x</a>',
+            '<img src="data:text/html;base64,AAAA" alt="">',
+        ]
+        for snippet in bad:
+            errors = self.injected(snippet)
+            self.assertTrue(any(e.startswith('viewer_external_ref: viewer.html') for e in errors), (snippet, errors))
+        first = self.injected('<script src="https://cdn.example/x.js"></script>')
+        self.assertIn('viewer_external_ref: viewer.html: src/href/url() leaves the page', first)
+        good = [
+            '<a href="components/Button/preview.html">x</a>', '<a href="#colors">x</a>', '<a href="notes/a%20b.md#part">x</a>',
+            '<img src="data:image/png;base64,AAAA//==" alt="">', '<div style="fill:url(#cover-g)">x</div>', '<style>a{fill:url( #g )}</style>',
+            '<style>a{background:url(data:image/png;base64,AA//AA)}</style>', '<p>see https&#58;//example.test/x and url(https&#58;//example.test/y)</p>',
+            '<p>see https://example.test/x</p>', '<code>src&#61;"//x"</code>', '<link rel="icon" href="x.png">', '<a data-href="//x">x</a>',
+        ]
+        for snippet in good:
+            errors = self.injected(snippet)
+            self.assertEqual(errors, [], snippet)
+
+    def test_viewer_xmlns_allowed(self):
+        namespaced = ('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 4 4">'
+                      '<use xlink:href="#cover-a"/><g id="cover-a"/></svg>')
+        self.assertEqual(self.injected(namespaced), [])
+        self.assertTrue(self.injected('<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="http://www.w3.org/2000/svg#a"/></svg>'))
+
+    # ---- tags, handlers, scripts, policy
+
+    def test_viewer_forbidden_tag(self):
+        self.assertEqual(self.injected('<iframe></iframe>'), ['viewer_forbidden_tag: viewer.html: iframe'])
+        for name in ('iframe', 'frame', 'frameset', 'object', 'embed', 'portal', 'form', 'base', 'applet'):
+            for spelling in (f'<{name}>', f'<{name.upper()} src=x>', f'<{name}/>'):
+                self.assertIn(f'viewer_forbidden_tag: viewer.html: {name}', self.injected(spelling), spelling)
+        self.assertEqual(self.injected('<link rel="stylesheet" href="a.css">'), ['viewer_forbidden_tag: viewer.html: link rel=stylesheet'])
+        self.assertEqual(self.injected('<link rel="preload stylesheet" href="a.css">'), ['viewer_forbidden_tag: viewer.html: link rel=stylesheet'])
+        self.assertEqual(self.injected('<meta http-equiv="refresh" content="0">'), ['viewer_forbidden_tag: viewer.html: meta refresh'])
+        errors = self.checked(self.page + '<iframe src=x')[0]  # a tag that never closes is still a tag
+        self.assertIn('viewer_forbidden_tag: viewer.html: iframe', errors)
+        for fine in ('<p>an iframe, a form and an object are words</p>', '<p>&lt;iframe&gt; &lt;form&gt;</p>', '<frames>', '<formal>', '<link rel="icon" href="x.png">',
+                     '<section id="form-x"></section>', '<code>&lt;object&gt;</code>'):
+            self.assertEqual(self.injected(fine), [], fine)
+
+    def test_viewer_inline_handler(self):
+        for snippet in ('<button onclick="x()">b</button>', '<img src=x onerror=alert(1) alt="">', '<svg/onload=alert(1)>', '<p ONCLICK = "x">p</p>',
+                        '<p title="a"onmouseover="x">p</p>', "<p class='a' onfocus='x'>p</p>", '<p\nonclick\n=\n"x">p</p>'):
+            errors = self.injected(snippet)
+            self.assertIn('viewer_inline_handler: viewer.html: on* attribute', errors, snippet)
+        for fine in ('<p>onclick&#61;x and onerror&#61;y</p>', '<p>the on switch, once and only once</p>', '<code>on-click</code>',
+                     '<p data-x="onboard">x</p>', '<script>window.onload=function(){};</script>', '<style>a{content:" onclick=x"}</style>'):
+            self.assertEqual(self.injected(fine), [], fine)
+
+    def test_viewer_forbidden_api(self):
+        calls = {'fetch': 'fetch("a")', 'XMLHttpRequest': 'new XMLHttpRequest()', 'import(': 'import ("x")', 'eval(': 'eval ("1")',
+                 'new Function': 'new  Function("x")', 'WebSocket': 'new WebSocket("x")', 'serviceWorker': 'navigator.serviceWorker.register("s")',
+                 'EventSource': 'new EventSource("x")', 'sendBeacon': 'navigator.sendBeacon("x")', 'importScripts': 'importScripts("x")',
+                 'new Worker': 'new Worker("x")', 'window.open': 'window . open("x")', 'document.write': 'document.write("x")'}
+        for label, call in calls.items():
+            self.assertEqual(self.injected(f'<script>{call}</script>'), [f'viewer_forbidden_api: viewer.html: {label}'], call)
+        self.assertEqual(self.injected('<script>/* x */ fetch("a") </script><script>eval(1)</script>'),
+                         ['viewer_forbidden_api: viewer.html: fetch', 'viewer_forbidden_api: viewer.html: eval('])
+        self.assertIn('viewer_forbidden_api: viewer.html: fetch', self.checked(self.page + '<script>fetch(1)')[0])  # a script that never closes
+        for fine in ('<p>fetch the data, eval(x), new Function and WebSocket are words in a README</p>',
+                     '<script>var fetched=1;var evaluate=2;var importer=3;</script>', '<code>fetch("x")</code>'):
+            self.assertEqual(self.injected(fine), [], fine)
+
+    def test_viewer_missing_csp(self):
+        meta = re.search(r'<meta http-equiv="Content-Security-Policy"[^>]*>', self.page)[0]
+        for changed in (self.page.replace(meta, ''), self.page.replace(meta, meta.replace('default-src \'none\'', 'default-src *')),
+                        self.page.replace(meta, meta.replace('http-equiv', 'name')), self.page.replace(meta, meta.replace('Content-Security-Policy', 'x-policy')),
+                        self.page.replace(meta, '<!-- ' + meta.replace('<', '&lt;') + ' -->'), self.page.replace(meta, '<!-- ' + meta + ' -->')):
+            self.assertEqual(self.checked(changed)[0], ['viewer_missing_csp: viewer.html'])
+        self.assertIn('viewer_missing_csp: viewer.html', self.checked(self.page.replace(meta, '<!-- ' + meta))[0])  # a comment that never ends
+        for inert in ('<!-- <iframe src=x> -->', '<!-- <p onclick=x> -->', '<!---->', '<!-->', '<!--->', '<!-- a --!>'):
+            self.assertEqual(self.injected(inert), [], inert)
+        self.assertEqual(self.injected('<!--x--><iframe>'), ['viewer_forbidden_tag: viewer.html: iframe'])
+        self.assertEqual(self.injected('<!-->--><iframe>'), ['viewer_forbidden_tag: viewer.html: iframe'])
+        reordered = '<meta content="default-src \'none\'; img-src data:" HTTP-EQUIV=\'content-security-policy\'>'
+        self.assertEqual(self.checked(self.page.replace(meta, reordered))[0], [])
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            (package / 'viewer.html').write_bytes(self.page.replace(meta, '').encode('utf-8'))
+            self.assertEqual(v3.verify_package(package)[0], ['viewer_missing_csp: viewer.html', 'viewer_stale: viewer.html'])
+
+    def test_viewer_a11y(self):
+        self.assertEqual(self.injected('<h1>second</h1>'), ['viewer_a11y: viewer.html: h1 count 2'])
+        self.assertEqual(self.injected('<H1 class=x>second</H1><h1>third</h1>'), ['viewer_a11y: viewer.html: h1 count 3'])
+        self.assertEqual(self.checked(re.sub(r'<h1>.*?</h1>', '', self.page, count=1))[0], ['viewer_a11y: viewer.html: h1 count 0'])
+        self.assertEqual(self.checked(self.page.replace('<html lang="en">', '<html>', 1))[0], ['viewer_a11y: viewer.html: lang missing'])
+        self.assertEqual(self.checked(self.page.replace('<html lang="en">', '<html lang="">', 1))[0], ['viewer_a11y: viewer.html: lang missing'])
+        self.assertEqual(self.checked(self.page.replace('<html lang="en">', "<html data-lang='en'>", 1))[0], ['viewer_a11y: viewer.html: lang missing'])
+        self.assertEqual(self.checked(re.sub(r'<title>.*?</title>', '<title></title>', self.page, count=1))[0], ['viewer_a11y: viewer.html: title missing'])
+        self.assertEqual(self.checked(re.sub(r'<title>.*?</title>', '<title>  </title>', self.page, count=1))[0], ['viewer_a11y: viewer.html: title missing'])
+        self.assertEqual(self.checked(re.sub(r'<title>.*?</title>', '', self.page, count=1))[0], ['viewer_a11y: viewer.html: title missing'])
+        for snippet in ('<img src="a.png">', '<img data-alt="x" src="a.png">', '<img src="x alt=y">', '<IMG SRC=a.png>'):
+            self.assertEqual(self.injected(snippet), ['viewer_a11y: viewer.html: img alt missing'], snippet)
+        for snippet in ('<img src="a.png" alt="">', '<img alt src="a.png">', '<img SRC="a.png" ALT="x">', "<img src='a.png' alt='x'>"):
+            self.assertEqual(self.injected(snippet), [], snippet)
+
+    def test_viewer_coverage(self):
+        counts = {'data-token': self.build.count_tokens(self.data['tokens']), 'data-component': len(self.data['components']),
+                  'data-asset': len(self.data['assets'])}
+        for name, expected in counts.items():
+            self.assertEqual(len(re.findall(r'(?<![\w-])' + name + r'=', self.page)), expected, name)
+        self.assertGreater(counts['data-token'], 0)
+        for name, expected in counts.items():
+            if not expected:
+                continue
+            cut = re.sub(r'(?<![\w-])' + name + r'="[^"]*"', '', self.page, count=1)
+            self.assertEqual(self.checked(cut)[0], [f'viewer_coverage: viewer.html: {name} {expected - 1} != {expected}'], name)
+            more = self.page.replace('</main>', f'<p {name}="extra"></p></main>')
+            self.assertEqual(self.checked(more)[0], [f'viewer_coverage: viewer.html: {name} {expected + 1} != {expected}'], name)
+        one = re.sub(r'(?<![\w-])data-token="[^"]*"', '', self.page, count=1)
+        self.assertEqual(self.checked(one)[0], [f'viewer_coverage: viewer.html: data-token {counts["data-token"] - 1} != {counts["data-token"]}'])
+        self.assertEqual(self.injected('<p>data-token&#61;"x" and data-asset&#61;y</p><p data-tokens="x" data-asset-x="y" mydata-token="z"></p>'), [])
+
+    def test_viewer_coverage_follows_the_generator_rule(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = Path(directory) / 'design-system'
+            make(package)
+            put(directory, 'src/Button.js', 'export {}')
+            edit_json(package, 'canonical-map.json', lambda d: d.update(components={'Button': {'source': 'src/Button.js'}}), derived=False)
+            put(package, 'components/Button/README.md', 'A button.\n')
+            put(package, 'components/Button/preview.html', '<!-- @dsCard height=120 -->\n<p>x</p>\n')
+            put(package, 'components/lib/util.js', 'x')
+            put(package, 'components/src/Button.js', 'x')
+            put(package, 'assets/Logos/README.md', 'a.png, sub/b.png, sub/README.md\n')
+            put(package, 'assets/Logos/a.png', PNG)
+            put(package, 'assets/Logos/sub/b.png', PNG)
+            put(package, 'assets/Logos/sub/README.md', 'a deeper readme counts as an asset\n')
+            put(package, 'assets/Loose.png', PNG)
+            put_d(package, 'components/Button/Button.d.ts', 'x')
+            text = (package / 'viewer.html').read_text(encoding='utf-8')
+            self.assertEqual((text.count('data-component='), text.count('data-asset=')), (1, 4))  # Cover, lib and src are not components
+            errors, warnings = v3.verify_package(package)
+            self.assertEqual((errors, warnings), ([], []))
+
+    # ---- leaks
+
+    def test_viewer_leak(self):
+        profile = 'C:' + chr(92) + 'Users' + chr(92) + 'someone'
+        urls = 'file:' + '//' + '/etc/passwd'
+        folder = '.' + 'opcos'
+        for snippet, label in ((profile, 'user profile path'), (profile.lower(), 'user profile path'), ('/home/someone/x', 'home path'),
+                               (urls, 'file URL'), ('http&#58;//localhost:8000/', 'local host name'), ('LOCALHOST', 'local host name'),
+                               ('127.0.0.1', 'loopback address'), (f'~/{folder}/plugins', 'workstation folder')):
+            errors = self.injected(f'<p>{snippet}</p>')
+            self.assertEqual(errors, [f'viewer_leak: viewer.html: {label}'], snippet)
+        self.assertEqual(self.injected('<p>127x0x0x1 and 1270.0.1 and /homes/ and local host and file:/ and C:/Windows</p>'), [])
+        with tempfile.TemporaryDirectory() as directory:  # a README that carries a machine path is reported, not hidden by the build
+            make(directory)
+            put(directory, 'components/Button/README.md', f'Button.\n\nSee {profile}.\n')
+            put_d(directory, 'components/Button/preview.html', '<!-- @dsCard height=120 -->\n<p>x</p>\n')
+            errors, _warnings = v3.verify_package(Path(directory))
+        self.assertIn('viewer_leak: viewer.html: user profile path', errors)
+        self.assertNotIn('Users', ''.join(errors))  # the line names the kind of trace, never its text
+
+    # ---- bounded work
+
+    def test_viewer_checks_run_in_linear_time(self):
+        limit = 512_000
+        hostile = {
+            'open tags': '<a ' * (limit // 3), 'open scripts': '<script ' * (limit // 8), 'script bodies': '<script>' + 'x<y' * (limit // 3),
+            'meta starts': '<meta ' * (limit // 6), 'quotes': '<a href="' * (limit // 9), 'single quotes': "<a href='" * (limit // 9),
+            'handlers': ' on' * (limit // 3), 'long handler name': ' o' + 'n' * (limit - 3), 'spaces': '<a href' + ' ' * (limit - 20),
+            'url calls': '<style>' + 'url(' * (limit // 4), 'url in value': '<p style="' + 'url(' * (limit // 4) + '">', 'entities': '<a href="' + '&#' * (limit // 2),
+            'many attributes': '<p ' + 'a=1 ' * (limit // 4) + '>', 'many tags': '<a href=x>' * (limit // 10), 'long tag name': '<' + 'a' * (limit - 2),
+            'title starts': '<title>' + ' ' * (limit - 10), 'close tags': '</script ' * (limit // 9), 'data tokens': 'data-token=' * (limit // 11),
+            'style bodies': '<style>' + '<style>' * (limit // 7), 'comments': '<!--' * (limit // 4), 'nested quantifier bait': '<a ' + 'a=' * (limit // 4),
+        }
+        for name, text in hostile.items():
+            self.assertLessEqual(len(text), limit + 20, name)
+            start = time.perf_counter()
+            for data in ({}, self.data):
+                v3.validate_viewer(text, len(text.encode('utf-8')), data)
+            elapsed = time.perf_counter() - start
+            self.assertLess(elapsed, 3.0, f'{name}: {elapsed:.2f} s')
+
+    def test_viewer_read_is_bounded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            (package / 'viewer.html').write_bytes(self.page.encode('utf-8') + b'<!--' + b'x' * 5_000_000 + b'-->')
+            (errors, _warnings), reads = BoundedInputTests.read_sizes(self, package)
+        self.assertTrue(reads)
+        self.assertTrue(all(0 < size <= 512001 for size in reads), sorted(set(reads)))
+        self.assertTrue(any(e.startswith('viewer_too_large: viewer.html: 50') for e in errors), errors)
+
+    def test_viewer_is_read_through_the_path_checks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_of(directory)
+            seen = []
+            real = v3.safe_path
+
+            def watching(root, relative):
+                seen.append(relative)
+                return real(root, relative)
+
+            with patch.object(v3, 'safe_path', watching):
+                v3.verify_package(package)
+            self.assertIn('viewer.html', seen)
+            with patch.object(v3, 'safe_path', side_effect=ValueError('refused')):
+                errors, _warnings = v3.verify_package(package)
+            self.assertIn('refused_sensitive_path: viewer.html', errors)
+
+
+class ViewerGuardTests(unittest.TestCase):
+    """Guards of the generator that the TK7 review (NS-5) found without a test that fails when they are removed."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.build = importlib.import_module('design_system_build')
+        path = Path(__file__).with_name('build-design-system.py')
+        loader_spec = importlib.util.spec_from_file_location('design_system_builder_guard', path)
+        cls.cli_module = importlib.util.module_from_spec(loader_spec)
+        loader_spec.loader.exec_module(cls.cli_module)
+
+    def run_cli(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = self.cli_module.main(list(argv))
+        return code, out.getvalue(), err.getvalue()
+
+    def test_asset_group_readme_read_budget_is_total(self):
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory)
+            body = ('word ' * 12700)[:63500]
+            for n in range(400):
+                put(directory, f'assets/G{n:03d}/README.md', body)
+            reads = []
+            real = self.build._text_of
+
+            def counting(root, rel, cap):
+                reads.append(rel)
+                return real(root, rel, cap)
+
+            start = time.perf_counter()
+            with patch.object(self.build, '_text_of', counting):
+                code, out, err = self.run_cli('--package', directory, '--viewer')
+            elapsed = time.perf_counter() - start
+        self.assertEqual((code, out), (1, ''))
+        self.assertRegex(err, r'^viewer_too_large: viewer\.html: \d+ > 512000\n$')
+        self.assertLess(elapsed, 5.0, f'{elapsed:.2f} s')
+        self.assertLess(len([r for r in reads if r.startswith('assets/') and r.endswith('/README.md')]), 40, len(reads))
+
+    def test_cover_svg_aria_id_lists_get_the_prefix(self):
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><g id="colors" aria-labelledby="colors  overview h-colors" '
+               "aria-describedby='overview' aria-controls=\"colors\"><text id=\"overview\">Title</text><text id=\"h-colors\">Tagline</text></g></svg>")
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + svg + '\n')
+            data = self.build.collect_package(Path(directory))
+            text = self.build.render_viewer(data)
+        self.assertEqual(data['cover_svg'], svg)
+        inside = text.split('<figure aria-label="Cover">')[1].split('</figure>')[0]
+        self.assertIn('aria-labelledby="cover-colors  cover-overview cover-h-colors"', inside)
+        self.assertIn("aria-describedby='cover-overview'", inside)
+        self.assertIn('aria-controls="cover-colors"', inside)
+        self.assertNotRegex(inside, r'aria-[a-z]+=["\'](?!cover-)')
+        self.assertEqual(text.count('<section id="colors"'), 1)
+
+    def test_safe_href_refuses_parts_made_of_dots_and_spaces(self):
+        safe = self.build._safe_href
+        for target in ('a/.../b.md', 'a/..../b.md', 'a/%20./b.md', 'a/.%20/b.md', 'a/%20%20/b.md', 'a/%20.%20/b.md', 'a/%2e%2e%2e/b.md',
+                       'a/%20%2e/b.md', '.../x.md', 'a/...'):
+            self.assertIsNone(safe(target), target)
+            self.assertEqual(self.build.render_markdown(f'[up]({target})'), '<p>up</p>', target)
+        for target in ('a/.x/b.md', 'a/x./b.md', 'a/..x/b.md', 'a/x.y.z/b.md', 'a/%20x/b.md'):
+            self.assertEqual(safe(target), target, target)
 
 
 ROOT = Path(__file__).resolve().parents[1]
