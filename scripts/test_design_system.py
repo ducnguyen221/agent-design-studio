@@ -4878,6 +4878,45 @@ class DtcgExportTests(unittest.TestCase):
                 else:
                     os.unlink(link)
 
+    def test_export_out_hard_link_never_rewrites_the_package(self):
+        """A hard link outside the package that shares an inode with a package file is replaced, never written through (NS-A)."""
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            alias = Path(directory) / 'alias.json'
+            try:
+                os.link(package / 'tokens.json', alias)
+            except (OSError, NotImplementedError, AttributeError):
+                self.skipTest('this machine cannot make a hard link')
+            before = (package / 'tokens.json').read_bytes()
+            code, stdout, stderr = self.run_cli('--package', package, '--out', alias)
+            self.assertEqual(code, 0, stderr)
+            self.assertEqual((package / 'tokens.json').read_bytes(), before)
+            self.assertEqual(json.loads(alias.read_text(encoding='utf-8')), v3.to_dtcg(self.tokens)[0])
+            self.assertEqual(sorted(p.name for p in Path(directory).iterdir() if p.name.startswith('.export')), [])  # no temp file left
+            self.assertEqual(v3.verify_package(package, 'full'), ([], []))
+
+    def test_export_write_failure_leaves_no_temp_file_and_keeps_the_old_export(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = self.copy_package(directory)
+            out = Path(directory) / 'x.json'
+            out.write_text('keep\n', encoding='utf-8', newline='\n')
+            module = self.cli_module
+            with patch.object(module.os, 'replace', side_effect=PermissionError('denied')):
+                code, stdout, stderr = self.run_cli('--package', package, '--out', out, module=module)
+            self.assertEqual(code, 1)
+            self.assertEqual(stderr, 'input_error: --out not written: PermissionError\n')
+            self.assertEqual(out.read_text(encoding='utf-8'), 'keep\n')
+            self.assertEqual(sorted(p.name for p in Path(directory).iterdir() if p.name.startswith('.export')), [])
+
+    def test_ci_workflow_token_is_read_only_and_keeps_the_planned_steps(self):
+        text = (ROOT / '.github/workflows/verify-skills.yml').read_text(encoding='utf-8')
+        self.assertRegex(text, r'(?m)^permissions:\n  contents: read$')
+        self.assertIn("branches: [main, 'sprint/**']", text)
+        runs = [line.split('run: ', 1)[1].strip() for line in text.splitlines() if line.strip().startswith('run: ')]
+        self.assertEqual(len(runs), 6)
+        self.assertEqual(runs[0], 'python scripts/verify-motion-pack.py')
+        self.assertEqual(runs[2], 'python scripts/verify-design-system.py --self-test')
+
     def test_cli_argument_errors_are_one_line_and_write_nothing(self):
         with tempfile.TemporaryDirectory() as directory:
             package = self.copy_package(directory)
@@ -4949,7 +4988,7 @@ class DtcgExportTests(unittest.TestCase):
             code, stdout, stderr = self.run_cli('--package', package, '--out', out)
             self.assertEqual(code, 1)
             self.assertIn('SKIP color/x: unsupported_color_space', stdout)
-            self.assertIn('invalid_structure', stderr)
+            self.assertEqual(stderr, 'input_error: nothing to export: every token was skipped (see the SKIP lines)\n')
             self.assertFalse(out.exists())
 
     def test_cli_names_are_escaped_in_skip_lines(self):

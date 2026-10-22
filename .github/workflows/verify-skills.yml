@@ -7,6 +7,10 @@ on:
     branches: [main, 'sprint/**']
   pull_request:
 
+# The job needs no token beyond reading the checkout.
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest

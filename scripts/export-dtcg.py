@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -59,6 +60,23 @@ def _count(node: object) -> int:
     return sum(_count(child) for key, child in node.items() if not key.startswith('$'))
 
 
+def _write(out: Path, data: bytes) -> None:
+    """Write ``data`` to a temporary file in the folder of ``out`` and move it over ``out``: the directory entry is replaced, so a hard
+    link to a package file is never written through and a failed write leaves the old file whole."""
+    handle, name = tempfile.mkstemp(dir=out.parent, prefix='.export-dtcg-', suffix='.tmp')
+    try:
+        with os.fdopen(handle, 'wb') as stream:
+            stream.write(data)
+        os.chmod(name, 0o644)  # mkstemp makes the file private; an export is an ordinary file
+        os.replace(name, out)
+    except OSError as exc:
+        try:
+            os.unlink(name)
+        except OSError:
+            pass
+        raise Refused(f'input_error: --out not written: {type(exc).__name__}') from None
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--package', type=Path, help='design-system package folder (format v3)')
@@ -80,13 +98,12 @@ def main(argv: list[str] | None = None) -> int:
         document, skipped = v3.to_dtcg(_tokens(args.package))
         for line in skipped:
             print(f'SKIP {line}')
+        if not document:
+            raise Refused('input_error: nothing to export: every token was skipped (see the SKIP lines)')
         problems = verifier.validate_tokens(document)  # never write what the DTCG check refuses
         if problems:
             raise Refused('\n'.join(problems))
-        try:
-            args.out.write_bytes((json.dumps(document, indent=2, ensure_ascii=False) + '\n').encode('utf-8'))
-        except OSError as exc:
-            raise Refused(f'input_error: --out not written: {type(exc).__name__}') from None
+        _write(args.out, (json.dumps(document, indent=2, ensure_ascii=False) + '\n').encode('utf-8'))
     except Refused as exc:
         print(exc, file=sys.stderr)
         return 1
