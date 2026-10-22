@@ -39,7 +39,7 @@ If the request is to distill a supplied image, URL or sample content into Markdo
 building a new interface, load `references/reference-distill.md` and
 `templates/reference-design.md`. Produce one reference design Markdown file. This does not
 start the seven-step build or its gates. If implementation is requested later, carry the
-chosen constraints into Step 1–4. If the sample accompanies a build request, distill it
+chosen constraints into Step 1–4. If the sample comes with a build request, distill it
 as an input during intake, then continue the seven steps and normal rendered gate. If
 the user asks for a reusable Design System, include the conditional handoff and route
 to the Design System skill.
