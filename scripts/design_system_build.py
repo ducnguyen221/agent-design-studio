@@ -1386,10 +1386,11 @@ def _cover_svg(data: dict) -> str | None:
 
 
 def _overview_lead(title: object, tagline: object) -> str:
-    """The Overview lead line: the title plus a muted summary; a summary that already opens with the title stands alone."""
+    """The Overview lead line: the title plus a muted summary; a summary that already opens with the title (the whole word,
+    any case: "Sample Studio is..." for "Sample", not "Samples are...") stands alone."""
     name = _line(title)
     summary = _line(tagline) if tagline else ''
-    if summary and name and summary.lower().startswith(name.lower()):
+    if summary and name and re.match(re.escape(name) + r'(?!\w)', summary, re.IGNORECASE):
         return f'<p class="lead">{_esc(summary)}</p>'
     return f'<p class="lead">{_esc(name)}' + (f' <span class="mut">{_esc(summary)}</span>' if summary else '') + '</p>'
 
@@ -1451,7 +1452,7 @@ _STYLE = (
     'pre{padding:10px;overflow:auto}.sw{display:inline-block;width:1.1rem;height:1.1rem;border:1px solid var(--line);'
     'vertical-align:middle;margin-right:6px}.card{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:12px 0;'
     'background:var(--card)}.bar{height:10px;background:var(--acc);max-width:100%}.box{width:56px;height:36px;background:var(--card);'
-    'border:1px solid var(--line)}img,svg{max-width:100%;height:auto}figure{margin:0 0 16px}.cover svg{height:240px;width:auto}'
+    'border:1px solid var(--line)}img,svg{max-width:100%;height:auto}figure{margin:0 0 16px}.cover{contain:paint;overflow:hidden}.cover svg{height:240px;width:auto}'
     '.mut{color:var(--mut)}.lead{font-size:1.1rem}'
     '.plain{list-style:none;padding-left:18px}.plain .plain{padding-left:14px}dt{font-weight:600}dd{margin:0 0 6px}'
     '@supports selector(:has(a)){main:has(section:target) section:not(:target){display:none}'

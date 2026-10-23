@@ -206,7 +206,7 @@ Files the page generates itself are `generated_file_present: <path>`: `manifest.
 
 Sensitive or escaping paths (`.env*`, `*.pem`, `credentials`, a path leaving the package, a link) are refused with `refused_sensitive_path` and never opened. The refused-path check runs right after that one and before any read.
 
-A link or junction at `viewer.html` or `DESIGN.md` is `refused_sensitive_path`; a folder with either name makes the build print `input_error: PermissionError`. The build writes in place, not atomically, and follows hard links, so run it on a package you own.
+A link or junction at `viewer.html` or `DESIGN.md` is `refused_sensitive_path`; a folder with either name makes the build print `input_error: PermissionError`. The build writes `DESIGN.md` and `viewer.html` through a temporary file in the package folder and a rename, so a hard link that joins either name to a file outside the package is replaced, never written through; a failed write leaves the old file whole and removes the temporary file (`input_error: <file> not written: <OSError name>`).
 
 ## Code index
 

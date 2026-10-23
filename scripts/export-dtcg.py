@@ -6,7 +6,6 @@ import importlib.util
 import json
 import os
 import sys
-import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -61,19 +60,11 @@ def _count(node: object) -> int:
 
 
 def _write(out: Path, data: bytes) -> None:
-    """Write ``data`` to a temporary file in the folder of ``out`` and move it over ``out``: the directory entry is replaced, so a hard
-    link to a package file is never written through and a failed write leaves the old file whole."""
-    handle, name = tempfile.mkstemp(dir=out.parent, prefix='.export-dtcg-', suffix='.tmp')
+    """Write ``data`` through a temporary file in the folder of ``out`` and a rename (``v3.replace_file``): a hard link to a package
+    file is never written through and a failed write leaves the old file whole."""
     try:
-        with os.fdopen(handle, 'wb') as stream:
-            stream.write(data)
-        os.chmod(name, 0o644)  # mkstemp makes the file private; an export is an ordinary file
-        os.replace(name, out)
+        v3.replace_file(out, data, '.export-dtcg-')
     except OSError as exc:
-        try:
-            os.unlink(name)
-        except OSError:
-            pass
         raise Refused(f'input_error: --out not written: {type(exc).__name__}') from None
 
 

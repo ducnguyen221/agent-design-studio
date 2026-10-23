@@ -14,6 +14,7 @@ import json
 import math
 import os
 import re
+import tempfile
 from datetime import datetime
 from pathlib import Path, PureWindowsPath
 from urllib.parse import urlsplit
@@ -45,6 +46,27 @@ CAP_README, CAP_TOKENS, CAP_PREVIEW, CAP_COMPONENT_README = 200_000, 512_000, 25
 CAP_FONT_STORED, CAP_ASSET_STORED, CAP_SVG_RAW, CAP_PACKAGE_STORED = 1_000_000, 12_000_000, 2_000_000, 14_000_000
 CAP_JSON = CAP_KEPT = 512_000  # design-system.json and canonical-map.json; DESIGN.md and other kept text files
 MAX_SECTIONS, MAX_FILES, MAX_DEPTH = 24, 1000, 16
+
+
+def replace_file(path: Path, data: bytes, prefix: str) -> None:
+    """Write ``data`` to a temporary file in the folder of ``path`` and move it over ``path``.
+
+    The directory entry is replaced, so a hard link that shares the old file's inode with a file elsewhere is never written
+    through, and a write that fails leaves the old file whole. The temporary file (``prefix`` + random + ``.tmp``, hidden by its
+    leading dot from every package listing) is removed when anything fails; the OSError is raised again for the caller to name.
+    """
+    handle, name = tempfile.mkstemp(dir=path.parent, prefix=prefix, suffix='.tmp')
+    try:
+        with os.fdopen(handle, 'wb') as stream:
+            stream.write(data)
+        os.chmod(name, 0o644)  # mkstemp makes the file private; a generated file is an ordinary file
+        os.replace(name, path)
+    except OSError:
+        try:
+            os.unlink(name)
+        except OSError:
+            pass
+        raise
 
 
 def safe_path(root: Path, relative: str) -> Path:

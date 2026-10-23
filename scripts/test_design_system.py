@@ -1612,6 +1612,46 @@ class DesignMdBuildTests(unittest.TestCase):
     def front(self, tokens, index=INDEX):
         return self.build.render_front_matter(tokens, index)
 
+    def test_build_replaces_a_hard_linked_generated_file_instead_of_writing_through_it(self):
+        """DESIGN.md or viewer.html hard-linked to a file outside the package: the build swaps the directory entry (temporary file
+        in the package folder, then rename), so the outside file keeps its bytes and no temporary file stays behind (S-RF1)."""
+        with tempfile.TemporaryDirectory() as directory:
+            package = make(Path(directory) / 'pkg')
+            outside = Path(directory) / 'outside'
+            outside.mkdir()
+            before = {}
+            for name in ('DESIGN.md', 'viewer.html'):
+                victim = outside / name
+                shutil.copy(package / name, victim)
+                before[name] = victim.read_bytes()
+                (package / name).unlink()
+                try:
+                    os.link(victim, package / name)
+                except (OSError, NotImplementedError, AttributeError):
+                    self.skipTest('this machine cannot make a hard link')
+            edit_plain(package, 'tokens.json', lambda d: d['color']['tokens'][0].update(value='#123456'))
+            code, out, err = self.run_cli('--package', str(package), '--design-md', '--viewer')
+            self.assertEqual((code, err), (0, ''), out)
+            self.assertIn('BUILT: design-md=written viewer=written', out)
+            for name in ('DESIGN.md', 'viewer.html'):
+                self.assertEqual((outside / name).read_bytes(), before[name], name)  # never written through
+                self.assertNotEqual((package / name).read_bytes(), before[name], name)
+                self.assertEqual(os.stat(package / name).st_nlink, 1, name)
+            self.assertEqual([p.name for p in package.iterdir() if p.name.startswith('.')], [])
+
+    def test_build_write_failure_leaves_no_temp_file_and_keeps_the_old_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = make(directory)
+            before = {name: (package / name).read_bytes() for name in ('DESIGN.md', 'viewer.html')}
+            edit_plain(package, 'tokens.json', lambda d: d['color']['tokens'][0].update(value='#123456'))
+            with patch.object(os, 'replace', side_effect=PermissionError('denied')):
+                code, out, err = self.run_cli('--package', str(package), '--design-md', '--viewer')
+            self.assertEqual((code, out), (1, ''))
+            self.assertEqual(err, 'input_error: DESIGN.md not written: PermissionError\n')
+            for name, data in before.items():
+                self.assertEqual((package / name).read_bytes(), data, name)
+            self.assertEqual([p.name for p in package.iterdir() if p.name.startswith('.')], [])
+
     def test_front_matter_first_theme_only(self):
         tokens = two_themes(color('bg', {'light': '#ffffff', 'dark': '#000000'}), color('late', {'dark': '#123456'}),
                             color('plain', '#ABC'))
@@ -2605,6 +2645,34 @@ class ViewerBuildTests(unittest.TestCase):
         self.assertIn('<p class="lead">Sample Studio is a plain starter.</p>', text)
         self.assertNotIn('Sample Studio <span class="mut">Sample Studio', text)
 
+    def test_overview_lead_keeps_the_title_when_the_summary_only_shares_its_letters(self):
+        """'Samples are...' does not open with the name 'Sample': the whole first word has to match, not a prefix of it."""
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory, README__md='Samples are plain starters.\n',
+                       components__Cover__preview__html='<!-- @dsCard height=300 -->\n<svg><text>Only one</text></svg>\n')
+            edit_plain(directory, 'design-system.json', lambda d: d.update(title='Sample'))
+            text, _data = self.page(directory)
+        self.assertIn('<p class="lead">Sample <span class="mut">Samples are plain starters.</span></p>', text)
+        lead = self.build._overview_lead
+        self.assertEqual(lead('Sample', 'Sample: a starter'), '<p class="lead">Sample: a starter</p>')
+        self.assertEqual(lead('Sample', 'sample studio is small'), '<p class="lead">sample studio is small</p>')
+        self.assertEqual(lead('Sample', 'Sample'), '<p class="lead">Sample</p>')
+        self.assertEqual(lead('Sample', 'Sampler kit'), '<p class="lead">Sample <span class="mut">Sampler kit</span></p>')
+
+    def test_cover_figure_contains_its_svg(self):
+        """The attribute filter lets a cover carry style="position:fixed"; the figure is a paint container that clips, so the cover
+        can never lie over the rest of the page (S-RF2)."""
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" style="position:fixed;top:0;left:0;width:100vw;height:100vh">'
+               '<rect width="4" height="4"/><text>Title</text></svg>')
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + svg + '\n')
+            text, _ = self.page(directory)
+        head = text.split('</head>')[0]
+        self.assertIn('<figure class="cover" aria-label="Cover">', text)
+        self.assertIn('.cover{contain:paint;overflow:hidden}', head)
+        for package in (TEMPLATE.parent, FIXTURE.parent):
+            self.assertIn('.cover{contain:paint;overflow:hidden}', self.page(package)[0].split('</head>')[0], package.name)
+
     def test_overview_and_agents_come_from_the_package(self):
         with tempfile.TemporaryDirectory() as directory:
             make_plain(directory, components__Cover__preview__html=COVER,
@@ -2883,14 +2951,18 @@ class ViewerBuildTests(unittest.TestCase):
         # fill-/stroke- take a colour token (alias followed, first theme wins); a radius token name sets rx; everything else is
         # left out: no token, a value the page cannot write as hex or a plain length, or a class name that could not stand in a selector.
         svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">'
-               '<rect class="fill-link stroke-text radius-sm fill-nobody fill-a{b} radius-odd other fill-lab1" width="4" height="4"/>'
+               '<rect class="fill-link stroke-text radius-sm fill-nobody fill-a{b} radius-odd other fill-lab1 fill-x}body{display:none;y" width="4" height="4"/>'
                "<circle CLASS='  fill-bg  stroke-accent ' r='1'/><text>Title</text><text>Tagline</text></svg>")
         with tempfile.TemporaryDirectory() as directory:
             make_plain(directory, components__Cover__preview__html='<!-- @dsCard height=300 -->\n' + svg + '\n')
             edit_plain(directory, 'tokens.json', lambda d: d['radius']['tokens'].append({'name': 'radius-odd', 'value': 'url(x)', 'usage': 'u'}))
             edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('lab1', 'lab(50% 0 0)')))
+            # a token named with braces exists, so only the class-name filter stands between it and a rule outside .cover
+            edit_plain(directory, 'tokens.json', lambda d: d['color']['tokens'].append(color('x}body{display:none;y', '#123456')))
             text, _ = self.page(directory)
         head = text.split('</head>')[0]
+        self.assertNotIn('body{display:none', head)
+        self.assertNotIn('#123456', head)
         self.assertEqual(re.findall(r'\.cover \.[^{]*\{[^}]*\}', head),
                          ['.cover .fill-bg{fill:#ffffff}', '.cover .fill-link{fill:#0057b8}', '.cover .radius-sm{rx:2px}',
                           '.cover .stroke-accent{stroke:#0057b8}', '.cover .stroke-text{stroke:#111111}'])
@@ -4172,8 +4244,11 @@ class AdapterTests(unittest.TestCase):
             self.assertIn('design-system/DESIGN.md', texts['AGENTS.md'])
             self.assertIn('design-system/DESIGN.md', texts['GEMINI.md'])
             self.assertEqual(texts['CLAUDE.md'], '@AGENTS.md\n')
-            self.assertIn('python scripts/build-design-system.py --package design-system --design-md --viewer', texts['AGENTS.md'])
-            self.assertIn('python scripts/verify-design-system.py --package design-system', texts['AGENTS.md'])
+            self.assertIn('python <plugin>/scripts/build-design-system.py --package design-system --design-md --viewer', texts['AGENTS.md'])
+            self.assertIn('python <plugin>/scripts/verify-design-system.py --package design-system', texts['AGENTS.md'])
+            self.assertNotIn('python scripts/', texts['AGENTS.md'])  # the project has no scripts/ folder; a same-named file there must not run
+            self.assertIn('`<plugin>` is the folder', texts['AGENTS.md'])
+            self.assertIn('ask the user', texts['AGENTS.md'])
             for name, text in texts.items():
                 self.assertNotIn('{package}', text, name)
                 self.assertNotIn('\r', text, name)
@@ -4976,9 +5051,15 @@ class DtcgExportTests(unittest.TestCase):
         self.assertRegex(text, r'(?m)^permissions:\n  contents: read$')
         self.assertIn("branches: [main, 'sprint/**']", text)
         runs = [line.split('run: ', 1)[1].strip() for line in text.splitlines() if line.strip().startswith('run: ')]
-        self.assertEqual(len(runs), 6)
+        self.assertEqual(len(runs), 7)
         self.assertEqual(runs[0], 'python scripts/verify-motion-pack.py')
         self.assertEqual(runs[2], 'python scripts/verify-design-system.py --self-test')
+        self.assertIn('python scripts/verify-design-system.py --package skills/design-system/templates/brand-v3 --profile minimal', runs)
+        uses = [line.strip() for line in text.splitlines() if line.strip().startswith('- uses: ')]
+        self.assertEqual(len(uses), 2)
+        for line in uses:  # every action pinned to a full commit, the tag kept as a comment (S-RF4)
+            self.assertRegex(line, r'^- uses: actions/[a-z-]+@[0-9a-f]{40}  # v\d+$')
+        self.assertIn('persist-credentials: false', text)
 
     def test_cli_argument_errors_are_one_line_and_write_nothing(self):
         with tempfile.TemporaryDirectory() as directory:

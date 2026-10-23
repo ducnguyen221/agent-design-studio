@@ -60,6 +60,16 @@ def _inputs(package: Path) -> tuple[dict, dict]:
     return loaded['tokens.json'], loaded['design-system.json']
 
 
+def _write(package: Path, rel: str, data: bytes) -> None:
+    """Replace a generated file through a temporary file in the package folder and a rename (``v3.replace_file``): a hard link
+    that joins it to a file outside the package is never written through, and a failed write leaves the old file whole and no
+    temporary file behind."""
+    try:
+        v3.replace_file(v3.safe_path(package, rel), data, f'.{Path(rel).stem.lower()}-')
+    except OSError as exc:
+        raise Refused(f'input_error: {rel} not written: {type(exc).__name__}') from None
+
+
 def _design_md(package: Path, tokens: dict, index: dict, check: bool) -> tuple[str, list[str]]:
     """Write (or, with check, only diff) DESIGN.md; return (state, warnings). Raises Refused on stale or unusable input."""
     raw = _read(package, 'DESIGN.md', v3.CAP_KEPT)
@@ -85,7 +95,7 @@ def _design_md(package: Path, tokens: dict, index: dict, check: bool) -> tuple[s
         raise Refused(f'limit_exceeded: DESIGN.md: file size: {size} > {v3.CAP_KEPT}')
     if check:
         raise Refused('design_md_missing: DESIGN.md' if raw is None else 'design_md_stale: DESIGN.md')
-    v3.safe_path(package, 'DESIGN.md').write_bytes(text.encode('utf-8'))
+    _write(package, 'DESIGN.md', text.encode('utf-8'))
     return 'written', warnings
 
 
@@ -106,7 +116,7 @@ def _viewer(package: Path, check: bool) -> tuple[str, list[str]]:
         return 'unchanged', warnings
     if check:
         raise Refused('viewer_missing: viewer.html' if raw is None else 'viewer_stale: viewer.html')
-    v3.safe_path(package, 'viewer.html').write_bytes(text)
+    _write(package, 'viewer.html', text)
     return 'written', warnings
 
 
