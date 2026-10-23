@@ -95,7 +95,12 @@ codex plugin add agent-design-studio@agent-design-studio
 git clone https://github.com/ducnguyen221/agent-design-studio
 cp -r agent-design-studio/skills/design-routing ~/.agents/skills/
 cp -r agent-design-studio/skills/design-system ~/.agents/skills/
+cp -r agent-design-studio/scripts ~/.agents/scripts
 ```
+
+Lệnh build và verify của skill Design System chạy từ `scripts/`, thư mục này phải nằm cao hơn
+thư mục skill hai cấp (ở đây là `~/.agents/scripts`); hãy chép cả nó, hoặc làm việc từ bản
+clone đầy đủ.
 
 Không phụ thuộc gói thư viện nào, không cần bước build. Trình duyệt mới là thứ biến bản
 dựng thành bản đã được kiểm chứng — không có nó, các mục kiểm tra thị giác nằm ở
@@ -206,7 +211,7 @@ skills/design-system/
 │   ├── agent-adapters/         mẫu AGENTS.md / CLAUDE.md / GEMINI.md (.tmpl)
 │   ├── audit-report.md         evidence, coverage và drift theo lượt chạy
 │   └── extend-proposal.md      delta, migration và bản ghi promotion
-└── tests/fixture/              gói hồ sơ full vô danh để verifier dùng
+└── tests/fixture/              gói hồ sơ full hư cấu để verifier dùng
 ```
 
 `design-routing` giữ nguyên mười sáu tài liệu tham chiếu và phạm vi dựng UI/phân tích
@@ -256,7 +261,7 @@ import (định dạng gói v3, đọc ngày 22/10/2026, bản research preview)
 
 ```
 design-system/
-├── DESIGN.md            file vào cho mọi agent: front matter sinh từ tokens.json + 8 mục
+├── DESIGN.md            file đọc đầu: front matter sinh từ tokens.json + 8 mục
 ├── README.md            brand book mà Claude Design đọc đầu tiên
 ├── tokens.json          mọi giá trị token, gốc dữ liệu
 ├── design-system.json   chỉ mục, ghi sau cùng
@@ -266,7 +271,7 @@ design-system/
 └── assets/              mỗi nhóm một thư mục, kèm README ghi nguồn và quyền dùng
 ```
 
-DESIGN.md là file vào cho mọi agent; README.md là brand book mà Claude Design đọc đầu tiên;
+DESIGN.md là file đọc đầu; README.md là brand book mà Claude Design đọc đầu tiên;
 tokens.json giữ mọi giá trị. Front matter của `DESIGN.md` và `viewer.html` là bản dẫn xuất
 từ các file bên cạnh, nên hãy sửa `tokens.json`, sinh lại, rồi kiểm:
 
@@ -288,7 +293,7 @@ python scripts/build-design-system.py --package design-system --adapters <projec
 ```
 
 Để bắt đầu, chép `skills/design-system/templates/brand-v3/` thành `design-system/` rồi thay
-mọi chỗ giữ chỗ. `python scripts/export-dtcg.py --package design-system --out tokens.dtcg.json`
+mọi giá trị giữ chỗ (placeholder). `python scripts/export-dtcg.py --package design-system --out tokens.dtcg.json`
 sinh file DTCG khi một công cụ khác cần; lệnh liệt kê mọi token phải bỏ qua.
 
 ## Dùng cùng design:design-system
@@ -301,11 +306,14 @@ cần biết:
    đợi: ba yêu cầu về hệ thống (audit khi đã cho sẵn đường dẫn thư mục, viết tài liệu
    component, biến một ghi chú thương hiệu thành thư mục) nạp `agent-design-studio:design-system`
    ngay ở lần gọi công cụ đầu tiên; một yêu cầu chỉ chọn bảng màu và một yêu cầu chỉ tạo
-   ảnh brand kit thì không. Skill của Anthropic không lần nào được gọi. Mỗi prompt chạy một
-   lần là một mẫu, không phải một tỷ lệ.
+   ảnh brand kit thì không. Skill của Anthropic không lần nào được gọi. Đây là lần chạy thứ hai trên cùng sáu
+   prompt: lần đầu được 4/6, sau đó phần mô tả được sửa một lần, nhắm vào ca audit đã trượt,
+   nên 5/6 là kết quả đo trên chính các prompt đã dùng để sửa. Mỗi prompt chạy một lần là một mẫu, không phải một tỷ lệ. Lần đo
+   sau nên thêm ít nhất một prompt diễn đạt khác cho mỗi loại (audit khi đã cho đường dẫn,
+   brief nguyên trang) và chạy nhiều hơn một lần.
 2. **Nguyên trang có thể cần gọi đích danh.** Lần trượt duy nhất là brief trơn "làm landing
    page cho tiệm bánh": host đưa nó sang công cụ artifact có sẵn trước khi cân nhắc bất kỳ
-   skill nào, và không câu chữ nào trong file skill đổi được điều đó. Ở host như vậy hãy gọi
+   skill nào, và trong các lần chạy của chúng tôi, câu chữ trong file skill không chạm tới bước đó. Ở host như vậy hãy gọi
    `/agent-design-studio:design-routing` hoặc nói "dùng design-routing" cho việc làm nguyên
    trang; không bảo đảm tự kích hoạt với một brief trang trơn.
 3. **Gọi bằng tên đầy đủ.** `/design-system` trơn sẽ mơ hồ khi cả hai plugin cùng cài. Dùng

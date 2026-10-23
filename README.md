@@ -95,7 +95,12 @@ codex plugin add agent-design-studio@agent-design-studio
 git clone https://github.com/ducnguyen221/agent-design-studio
 cp -r agent-design-studio/skills/design-routing ~/.agents/skills/
 cp -r agent-design-studio/skills/design-system ~/.agents/skills/
+cp -r agent-design-studio/scripts ~/.agents/scripts
 ```
+
+The build and verify commands of the Design System skill run from `scripts/`, which must sit
+two folders above the skill folder (here `~/.agents/scripts`); copy it too, or work from a
+full clone.
 
 No package dependencies and no build step. A browser is what turns renders into verified
 renders — without one, visual checks stay `unverified` and the gates stay `pending`. The
@@ -304,10 +309,15 @@ installed. Four things to know:
    for system work (an audit with the folder path given, component documentation, a brand
    note turned into a folder) loaded `agent-design-studio:design-system` as the first tool
    call, and a palette-only ask and a brand-kit image ask did not. The Anthropic skill was
-   never called. One run per prompt is a sample, not a rate.
+   never called. This is the second run on the same six prompts: the first run scored 4/6,
+   and the description was then revised once, aimed at the audit case that had missed, so
+   the 5/6 is measured on the prompts the revision was fitted to. One run per prompt is a
+   sample, not a rate. The next measurement should add at least one differently worded
+   prompt for each class (an audit with the path given, a whole-page brief) and more than
+   one run each.
 2. **Whole pages may need the skill named.** The one miss was a plain "build a landing page
    for a bakery" brief: the host sent it to its built-in artifact tool before any skill
-   was considered, and no wording in a skill file can change that. In such a host call
+   was considered, and in our runs a skill's wording did not reach that step. In such a host call
    `/agent-design-studio:design-routing` or say "use design-routing" for whole-page work;
    automatic activation on a bare page brief is not guaranteed there.
 3. **Call by full name.** A bare `/design-system` is ambiguous when both plugins are

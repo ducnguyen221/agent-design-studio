@@ -2596,6 +2596,15 @@ class ViewerBuildTests(unittest.TestCase):
         self.assertIn('Not measured', text)
         self.assertIn('<th scope="row">text on bg</th><td>dark</td>', text)
 
+    def test_overview_lead_does_not_repeat_the_title(self):
+        """A README whose first sentence opens with the system name must not print the name twice in the lead line."""
+        with tempfile.TemporaryDirectory() as directory:
+            make_plain(directory, README__md='Sample Studio is a plain starter.\n',
+                       components__Cover__preview__html='<!-- @dsCard height=300 -->\n<svg><text>Only one</text></svg>\n')
+            text, _data = self.page(directory)
+        self.assertIn('<p class="lead">Sample Studio is a plain starter.</p>', text)
+        self.assertNotIn('Sample Studio <span class="mut">Sample Studio', text)
+
     def test_overview_and_agents_come_from_the_package(self):
         with tempfile.TemporaryDirectory() as directory:
             make_plain(directory, components__Cover__preview__html=COVER,

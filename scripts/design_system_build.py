@@ -1385,6 +1385,15 @@ def _cover_svg(data: dict) -> str | None:
     return sanitize_svg(cover) if isinstance(cover, str) and cover else None
 
 
+def _overview_lead(title: object, tagline: object) -> str:
+    """The Overview lead line: the title plus a muted summary; a summary that already opens with the title stands alone."""
+    name = _line(title)
+    summary = _line(tagline) if tagline else ''
+    if summary and name and summary.lower().startswith(name.lower()):
+        return f'<p class="lead">{_esc(summary)}</p>'
+    return f'<p class="lead">{_esc(name)}' + (f' <span class="mut">{_esc(summary)}</span>' if summary else '') + '</p>'
+
+
 def _overview(data: dict) -> str:
     index = data.get('index') if isinstance(data.get('index'), dict) else {}
     system = data.get('canonical', {}).get('system') if isinstance(data.get('canonical'), dict) else None
@@ -1400,8 +1409,7 @@ def _overview(data: dict) -> str:
     entries = [(f['path'], f['size']) for f in data.get('files') or []]
     return '\n'.join((
         f'<figure class="{COVER_SCOPE}" aria-label="Cover">{isolate_svg_ids(cover)}</figure>' if cover else '<p class="empty">No cover image</p>',
-        f'<p class="lead">{_esc(_line(index.get("title", "")))}'
-        + (f' <span class="mut">{_esc(_line(tagline))}</span>' if tagline else '') + '</p>',
+        _overview_lead(index.get('title', ''), tagline),
         f'<dl>{rows}</dl>' if rows else '',
         '<h3>From DESIGN.md</h3>' + (render_markdown(body, 4) if body else '<p class="empty">DESIGN.md has no Overview section</p>'),
         '<h3>Package tree</h3>' + _tree(entries, False)))

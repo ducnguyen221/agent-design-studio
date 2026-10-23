@@ -273,3 +273,10 @@ Every code the package verifier can print, with its level. `tokens.json` codes a
 | `adapter_exists` | warning (build) | `<name>` |
 | `adapter_not_file` | warning (build) | `<name>` |
 | `adapter_write_failed` | error (build) | `<name>: <ExceptionName> (written: ...; not written: ...)` |
+| `invalid_structure`, `invalid_name` | error | `--dtcg <file>` only, a loose DTCG file and not a package `tokens.json`: `<dotted token path>`, or `token document must be nonempty object`, `no tokens`, `root token`, `token/group collision <path>` |
+| `unsupported_type`, `unsupported_reference`, `type_mismatch` | error | `--dtcg <file>` only: `<dotted token path>` (a type outside the DTCG subset, an alias not written as `{a.b.c}`, an alias whose type differs from its target) |
+| `invalid_legacy` | error | `--legacy-tokens <file>`: `expected nonempty map` |
+| `deprecated_flag` | warning | `--manifest`: the flag still works as an alias of `--canonical-map` |
+| `missing_skill_file`, `invalid_skill_path` | error | resource-pack mode (no `--package`): `<file under skills/design-system>` |
+| `cannot_read_skill` | error | resource-pack mode: `SKILL.md` |
+| `missing_skill_route` | error | resource-pack mode: `<mode or file that SKILL.md does not name>` |
