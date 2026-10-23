@@ -75,7 +75,16 @@ không ai phải hỏi tiến độ.
 
 ## Cài đặt
 
-**Claude Code**
+Các script của `design-system` (build, verify, export) cần Python 3.12 trở lên và không cần
+gì khác; tài liệu tham chiếu và mẫu không cần runtime.
+
+**Claude Code** (2.1.275 trở lên, một bước)
+
+```
+/plugin install agent-design-studio --marketplace ducnguyen221/agent-design-studio
+```
+
+Bản cũ hơn thêm marketplace trước:
 
 ```
 /plugin marketplace add ducnguyen221/agent-design-studio
@@ -271,9 +280,13 @@ design-system/
 └── assets/              mỗi nhóm một thư mục, kèm README ghi nguồn và quyền dùng
 ```
 
+Thư mục theo đúng định dạng gói đã công bố; việc import thật vào Claude Design chưa được
+chạy, nên dòng PASS của verifier liệt kê `real-import` là chưa kiểm.
+
 DESIGN.md là file đọc đầu; README.md là brand book mà Claude Design đọc đầu tiên;
 tokens.json giữ mọi giá trị. Front matter của `DESIGN.md` và `viewer.html` là bản dẫn xuất
-từ các file bên cạnh, nên hãy sửa `tokens.json`, sinh lại, rồi kiểm:
+từ các file bên cạnh, nên hãy sửa `tokens.json`, sinh lại, rồi kiểm (đường dẫn dưới đây tính
+từ bản clone của repo này; plugin đã cài có cùng thư mục `scripts/`):
 
 ```bash
 python scripts/build-design-system.py --package design-system --design-md --viewer

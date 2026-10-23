@@ -75,7 +75,16 @@ than the one doing it, so nobody has to ask where things stand.
 
 ## Install
 
-**Claude Code**
+The `design-system` scripts (build, verify, export) need Python 3.12 or later and nothing
+else; the references and templates need no runtime.
+
+**Claude Code** (2.1.275 or later, one step)
+
+```
+/plugin install agent-design-studio --marketplace ducnguyen221/agent-design-studio
+```
+
+Older versions add the marketplace first:
 
 ```
 /plugin marketplace add ducnguyen221/agent-design-studio
@@ -273,9 +282,13 @@ design-system/
 └── assets/              one folder per group, each with a README of sources and rights
 ```
 
+The folder follows the published package format; an import into Claude Design itself has
+not been run yet, which is why the verifier's PASS line lists `real-import` as unchecked.
+
 DESIGN.md is the entry file for any agent; README.md is the brand book Claude Design reads
 first; tokens.json holds every value. The `DESIGN.md` front matter and `viewer.html` are
-derived from the files next to them, so edit `tokens.json`, regenerate, then verify:
+derived from the files next to them, so edit `tokens.json`, regenerate, then verify (paths
+below start at a clone of this repository; an installed plugin has the same `scripts/` folder):
 
 ```bash
 python scripts/build-design-system.py --package design-system --design-md --viewer
