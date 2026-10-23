@@ -112,7 +112,7 @@ decoration?** If the answer is content — or if you cannot tell — load
 `image-sourcing.md` **then, right after Step 2**, and source the real set *before* Step 4,
 because all three directions must consume the same images or the gate compares
 photographs instead of designs. Step 5 does not start this work; it closes it, folding the
-sourced assets into `04-design-system/assets-manifest.md`. If the answer is decoration,
+sourced assets into the v3 package delta, where each `assets/<Group>/README.md` records source and usage right. If the answer is decoration,
 the file is never loaded at all.
 
 Step 5 may load `library-selection.md` for a non-motion dependency in

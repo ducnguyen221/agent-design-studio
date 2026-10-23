@@ -3,7 +3,8 @@
 Step 5, first half. Runs whenever the design will show a real, recognizable brand or
 product — the client's own, or any third party named or compared inside the design.
 
-Output: `04-design-system/assets-manifest.md`.
+Output: one `assets/<Group>/README.md` per asset group, inside the run's v3 package delta under `04-design-system/`
+(source and usage right for every file; the system contract of `agent-design-studio:design-system` defines it).
 
 ## The premise: assets outrank specifications
 
@@ -100,7 +101,7 @@ begins with an SVG tag rather than an HTML error page.
 is to be the *real* mark. They say nothing about the right to reuse it — an official press
 page settles authenticity and may still restrict redistribution, modification, or
 commercial use. When reuse rights are unclear, do not embed the asset: use a clearly
-marked placeholder in its place, and record the gap in `assets-manifest.md` under
+marked placeholder in its place, and record the gap in that group's `README.md` under
 *Missing, and how it is handled*, naming what was found and what is unresolved. This
 pack's MIT license covers the pack itself, never third-party brand assets that end up in
 an output — those carry whatever terms their owner sets.
@@ -133,10 +134,10 @@ Two traps:
 - **Multiple faces.** A brand's marketing site and its product interface frequently use
   different palettes. Both are genuine. Choose the face that matches this deliverable.
 
-Then write `assets-manifest.md`:
+Then write each group's `assets/<Group>/README.md` with these sections (leave out the ones that do not apply):
 
 ```markdown
-# 04 — Assets manifest
+# <Group> — assets
 Collected: YYYY-MM-DD · Completeness: complete | partial | inferred
 
 ## Logos
@@ -160,7 +161,7 @@ Display: <…> · Body: <…> · Source: <…>
 official reference, disclosed to user>
 ```
 
-Then enforce it structurally: HTML references the manifest's file paths, logos are
+Then enforce it structurally: HTML references the file paths those READMEs list, logos are
 `<img>` elements pointing at real files, and CSS custom properties are injected from the
 spec so no step can quietly introduce a near-miss color. Brand consistency should hold
 because of the structure, not because everyone remembered.

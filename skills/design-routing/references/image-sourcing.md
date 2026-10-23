@@ -3,7 +3,7 @@
 Loaded right after Step 2, whenever the checkpoint below answers *content*. The brand
 asset protocol covers the marks and material of named brands; this file covers everything
 else the design shows — the subject itself. Both feed
-`04-design-system/assets-manifest.md`, which is written at Step 5 — but the sourcing
+the `assets/<Group>/README.md` files of the v3 package delta, which are written at Step 5 — but the sourcing
 happens well before it, and that gap is the whole point of the timing note below.
 
 ## The checkpoint
@@ -22,7 +22,7 @@ image costs an hour; a missing one costs the design.
 that answer is what loads this file. Gather **before Step 4**, because all three
 directions consume the same real content: swapping imagery between them turns the gate
 into a comparison of photographs instead of a comparison of designs. Step 5 closes the
-manifest; it is not where sourcing starts.
+asset READMEs; it is not where sourcing starts.
 
 ## The removal test
 
@@ -65,7 +65,7 @@ plainly at handoff that clearance is the user's call. We record; we do not rule.
 
 ## Per-asset provenance
 
-Every image entering the deliverable carries five fields — same manifest the brand asset
+Every image entering the deliverable carries five fields — same asset README the brand asset
 protocol defines, one more section:
 
 ```markdown
@@ -92,7 +92,7 @@ found and what is unresolved under *Missing, and how it is handled*.
 Not finding an image is a **degradation, not a stop**. Re-phrase the search — another
 language, the subject's formal name, the creator's name rather than the subject's. Then
 try another category above. Then generate one, only where the user has confirmed that
-capability and only labeled in the manifest as generated rather than photographed.
+capability and only labeled in the asset README as generated rather than photographed.
 Failing all of that, ship a labeled placeholder and say in one sentence at handoff which
 images are standing in.
 
@@ -113,7 +113,7 @@ show anything has traded one visible failure for another.
 **Decide per asset, not per project.** Small marks are cheap to embed and expensive to
 lose — which is why the brand asset protocol requires it for logos in a single-file
 deliverable. Full-bleed photographs are the opposite trade, and a mixed answer, stated in
-the manifest, is frequently the correct one.
+the asset README, is frequently the correct one.
 
 ## Self-check before leaving the asset work
 
@@ -123,5 +123,5 @@ the manifest, is frequently the correct one.
 - [ ] Every image has passed the removal test.
 - [ ] No content-essential subject is drawn in CSS or SVG.
 - [ ] Any trademarked mark carries its intended use, flagged for the user.
-- [ ] Anything unresolved is a labeled placeholder plus a manifest line, said out loud at
+- [ ] Anything unresolved is a labeled placeholder plus a README line, said out loud at
       handoff rather than left to be discovered.
