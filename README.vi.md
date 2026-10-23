@@ -4,9 +4,12 @@
 
 **Agent của bạn đã biết viết UI. Đây là thứ dạy nó thiết kế.**
 
-Quy trình bảy bước để một AI coding agent chạy từ đầu đến cuối — tiếp nhận, chọn mức hoàn
-thiện, wireframe, ba hướng thiết kế thật, hệ token, chuyển động, rà soát. Mỗi bước để lại
-một hiện vật trên đĩa. Hai bước dừng lại chờ con người.
+Quy trình thiết kế UI bảy bước để một AI coding agent chạy từ đầu đến cuối — tiếp nhận,
+chọn mức hoàn thiện, wireframe, ba hướng thiết kế thật, hệ token, chuyển động, rà soát.
+Một skill Design System riêng tạo, trích xuất, audit, viết tài liệu và mở rộng hệ thống do
+sản phẩm sở hữu, dưới dạng một thư mục file import được vào Claude Design và mọi agent đều
+đọc được. Cả hai đều để lại hiện vật có đường lần ngược; quy trình UI giữ hai cổng quyết
+định của con người.
 
 🔗 **[ducnguyen221.github.io/agent-design-studio](https://ducnguyen221.github.io/agent-design-studio)** ·
 🇬🇧 **[English](README.md)**
@@ -20,13 +23,15 @@ kiểu nó làm cho tất cả mọi người. Không phải vì mô hình thi�
 yêu cầu buộc nó phải *chọn*. Không brief, không phương án để loại bỏ, không sàn chất lượng
 để vượt, và không ai rà soát.
 
-Bộ này cung cấp cả bốn. Nó gồm một skill và mười bốn tài liệu tham chiếu: một router quyết
-định bước kế tiếp, và các playbook mang phần nghề thật sự — thứ tự ra quyết định, các
-ngưỡng cụ thể, giá trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại và
-đừng làm gì cả.
+Bộ này cung cấp cả bốn qua hai skill. `design-routing` là quy trình UI; mười sáu tài liệu
+tham chiếu của nó mang phần nghề thật sự — thứ tự ra quyết định, các ngưỡng cụ thể, giá
+trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại. `design-system` phụ
+trách công việc hệ thống có thể dùng lại giữa các sản phẩm và codebase, có bốn tài liệu
+tham chiếu riêng, nên cả bộ có hai mươi.
 
 **Mỗi năng lực là một "slot".** Nếu máy bạn đã có công cụ mạnh hơn cho một bước, router sẽ
-dùng nó; nếu không, playbook có sẵn sẽ chạy. Không cần bộ thứ hai để có đủ quy trình.
+dùng nó; nếu không, playbook có sẵn sẽ chạy. Hai skill có phạm vi riêng: router xử lý việc
+dựng UI hoặc chỉ phân tích reference; skill Design System xử lý hệ thống dùng lâu dài.
 
 ## Bảy bước
 
@@ -70,7 +75,16 @@ không ai phải hỏi tiến độ.
 
 ## Cài đặt
 
-**Claude Code**
+Các script của `design-system` (build, verify, export) cần Python 3.12 trở lên và không cần
+gì khác; tài liệu tham chiếu và mẫu không cần runtime.
+
+**Claude Code** (2.1.275 trở lên, một bước)
+
+```
+/plugin install agent-design-studio --marketplace ducnguyen221/agent-design-studio
+```
+
+Bản cũ hơn thêm marketplace trước:
 
 ```
 /plugin marketplace add ducnguyen221/agent-design-studio
@@ -89,7 +103,13 @@ codex plugin add agent-design-studio@agent-design-studio
 ```bash
 git clone https://github.com/ducnguyen221/agent-design-studio
 cp -r agent-design-studio/skills/design-routing ~/.agents/skills/
+cp -r agent-design-studio/skills/design-system ~/.agents/skills/
+cp -r agent-design-studio/scripts ~/.agents/scripts
 ```
+
+Lệnh build và verify của skill Design System chạy từ `scripts/`, thư mục này phải nằm cao hơn
+thư mục skill hai cấp (ở đây là `~/.agents/scripts`); hãy chép cả nó, hoặc làm việc từ bản
+clone đầy đủ.
 
 Không phụ thuộc gói thư viện nào, không cần bước build. Trình duyệt mới là thứ biến bản
 dựng thành bản đã được kiểm chứng — không có nó, các mục kiểm tra thị giác nằm ở
@@ -107,15 +127,49 @@ Khi chọn chữ cho giao diện Anh–Việt, xem
 [tài liệu typography](skills/design-routing/references/typography-en-vi.md):
 font theo từng việc, cỡ chữ khởi đầu và cách kiểm dấu, tải font, tăng cỡ chữ.
 
+Khi cần mẫu UI/UX bên ngoài, xem link trong brief trước rồi mở
+[chỉ mục nguồn](skills/design-routing/references/resource-index.md). Chỉ mục trỏ đến
+[catalog JSON 75 nguồn](skills/design-routing/resources/uiux-catalog.json); lọc theo việc,
+đưa hai hoặc ba nguồn phù hợp, chỉ mở mẫu cụ thể khi cần, rồi cùng người dùng chốt hướng
+ở Bước 4. Catalog chỉ để mở link: trang đầu không chứng minh demo đã quan sát, runtime
+đã chạy hay quyền dùng lại mã và asset. Có thể lọc local bằng
+`python scripts/verify-resource-pack.py --query "loading" --stack React`; `--self-test`
+kiểm pack mà không truy cập website.
+
+Nếu chỉ cần phân tích ảnh UI, link hoặc nội dung mẫu trước khi dựng giao diện, dùng
+[hướng dẫn distill reference](skills/design-routing/references/reference-distill.md)
+và [mẫu Markdown](skills/design-routing/templates/reference-design.md). File kết quả
+tách điều đã quan sát, suy luận và phần chưa biết; lựa chọn của bạn trở thành đầu vào
+cho quy trình thiết kế. Phân tích riêng không khởi động cổng duyệt bản render.
+
+Khi cần Design System dùng lại cho một sản phẩm, gọi thẳng `design-system`. Skill có năm
+mode: `create` từ reference hoặc tài liệu thương hiệu đã chọn, `extract` từ codebase,
+`audit` hệ thống hiện có so với implementation, `document` một component, và `extend` hệ
+thống đã được duyệt. Kết quả ban đầu là proposal/report trong thư mục của lượt chạy; nguồn
+canonical hiện hữu giữ nguyên thẩm quyền cho tới khi owner xác nhận promotion và reviewer
+kiểm tra. Thư mục nó tạo ra được mô tả ở mục [Thư mục Design System](#thư-mục-design-system).
+
+Luồng nối reference với hệ thống: cùng người dùng chọn mẫu trước, distill bằng hướng dẫn
+và [template reference](skills/design-routing/templates/reference-design.md), rồi chuyển
+source ID, nhận định observed/inferred/unknown, trạng thái quyền và câu hỏi cho owner sang
+`design-system`. Shortlist hoặc bản distill không tự duyệt nhận diện thương hiệu. Xem
+[system contract](skills/design-system/references/system-contract.md) để biết cấu trúc hệ
+thống do sản phẩm sở hữu; bắt đầu với [DESIGN.md](skills/design-system/templates/DESIGN.md),
+rồi dùng [mẫu README component](skills/design-system/templates/component-v3/README.md) và
+[audit report](skills/design-system/templates/audit-report.md) khi phù hợp.
+
 Với yêu cầu làm nguyên một giao diện, nó thường tự kích hoạt:
 
 > "Làm cho tôi một trang landing cho công cụ đặt lịch."
 > "Thiết kế lại cổng khách hàng — trông cũ quá rồi."
 > "Thiết kế màn hình onboarding trong app React của bọn mình, brief đây."
 
-Khi trong máy có nhiều skill thiết kế, gọi thẳng `design-routing` là đường chắc chắn nhất.
+Khi trong máy có nhiều skill thiết kế, gọi thẳng `design-routing` là đường chắc chắn nhất
+(`/agent-design-studio:design-routing`). Một số host đưa yêu cầu "làm cho tôi một trang" sang
+công cụ artifact có sẵn trước khi cân nhắc bất kỳ skill nào; xem
+[Dùng cùng design:design-system](#dùng-cùng-designdesign-system).
 
-Nó cố ý đứng ngoài các việc lẻ một bước — phê bình một trang có sẵn, chuyển một thiết kế đã
+Nó cố ý đứng ngoài các việc lẻ một bước khác — phê bình một trang có sẵn, chuyển một thiết kế đã
 duyệt thành HTML, chọn bảng màu, vẽ biểu đồ, hay chỉnh bố cục một bộ slide đã có. Những
 việc đó có công cụ phù hợp hơn, và quy trình này sẽ là quá nặng. Thiết kế mới một bộ slide,
 một báo cáo hay một infographic như nguyên một sản phẩm thì lại khác: việc đó nằm trong
@@ -139,15 +193,52 @@ skills/design-routing/
     ├── typography-en-vi.md     chọn font theo việc, thang chữ và kiểm tra EN/VI
     ├── motion-playbook.md      trọn vòng đời chuyển động, và những gì phải từ chối
     ├── motion-patterns.md      sáu recipe theo mục đích, có fallback và reduced motion
+    ├── resource-index.md       shortlist nguồn theo việc; catalog chỉ nạp khi cần
+    ├── reference-distill.md    chắt mẫu được cung cấp thành Markdown thiết kế
     ├── library-selection.md    chọn thư viện, hoặc không thêm thư viện nào
     └── uat-report-schema.md    bản rà soát có chấm điểm và sàn cứng
 └── templates/
     ├── 06-motion-spec.md        mẫu quyết định motion có đường lần ngược
     ├── static-motion-demo.html  ví dụ CSS/WAAPI tự viết
-    └── react-motion-demo.tsx    ví dụ React tự viết, không thêm gói motion
+    ├── react-motion-demo.tsx    ví dụ React tự viết, không thêm gói motion
+    └── reference-design.md      mẫu một file để phân tích reference
 ```
 
-Router chỉ nạp tài liệu của bước đang chạy, nên context luôn gọn.
+```
+skills/design-system/
+├── SKILL.md                    router cho create / extract / audit / document / extend
+├── agents/openai.yaml          adapter Codex; cho phép kích hoạt ngầm
+├── references/
+│   ├── system-contract.md      cây gói, file bắt buộc, thứ tự đọc, mã lỗi
+│   ├── token-contract.md       ngữ pháp token v3, DTCG dẫn xuất, map legacy
+│   ├── design-md-spec.md       DESIGN.md: khoá front matter và tám mục
+│   └── source-code-audit.md    bằng chứng và coverage khi đọc source
+├── templates/
+│   ├── brand-v3/               gói khởi đầu (hồ sơ minimal), thương hiệu hư cấu
+│   ├── DESIGN.md               mẫu DESIGN.md: tám mục
+│   ├── component-v3/           README và preview mẫu cho component
+│   ├── agent-adapters/         mẫu AGENTS.md / CLAUDE.md / GEMINI.md (.tmpl)
+│   ├── audit-report.md         evidence, coverage và drift theo lượt chạy
+│   └── extend-proposal.md      delta, migration và bản ghi promotion
+└── tests/fixture/              gói hồ sơ full hư cấu để verifier dùng
+```
+
+`design-routing` giữ nguyên mười sáu tài liệu tham chiếu và phạm vi dựng UI/phân tích
+reference. `design-system` là điểm vào riêng cho hệ thống tái dùng do sản phẩm sở hữu, có
+bốn tài liệu tham chiếu: cả bộ có hai mươi. Mỗi skill chỉ nạp tài liệu cần cho việc hiện
+tại để context luôn gọn.
+
+## Kiểm hợp đồng Design System
+
+Từ repo này, chạy `python scripts/verify-design-system.py --self-test` để kiểm các
+case hợp đồng, hoặc `python scripts/verify-design-system.py` để kiểm skill pack.
+Để kiểm một thư mục gói, dùng `--package <dir>` (`--profile full|minimal`). Từng file có
+cờ riêng, đường dẫn tính từ `--root`: `--tokens` (ngữ pháp danh sách v3), `--canonical-map`,
+`--dtcg` (DTCG subset) và `--legacy-tokens` (chỉ kiểm map legacy); `--manifest` vẫn còn như
+bí danh cũ của `--canonical-map`. Các check không fetch con trỏ bên ngoài, không chạy mã
+trong gói và không tạo CSS. Kết quả cấu trúc đạt chưa chứng minh render, coverage source,
+accessibility hoặc quyền tài sản. CI (`.github/workflows/verify-skills.yml`) chạy cùng các
+check này ở mỗi lần push lên `main` và `sprint/**`.
 
 ## Trang web này do chính quy trình thiết kế ra
 
@@ -172,6 +263,78 @@ Hoan nghênh issue và pull request. Luật duy nhất đáng nhớ: **mỗi tà
 playbook mà agent thi hành được** — thứ tự ra quyết định, checklist, ngưỡng, bảng biểu. Nếu
 một thay đổi đọc như bài luận, chỗ của nó ở nơi khác.
 
+## Thư mục Design System
+
+`design-system` giữ một hệ thống thành một thư mục duy nhất, đúng thư mục mà Claude Design
+import (định dạng gói v3, đọc ngày 22/10/2026, bản research preview):
+
+```
+design-system/
+├── DESIGN.md            file đọc đầu: front matter sinh từ tokens.json + 8 mục
+├── README.md            brand book mà Claude Design đọc đầu tiên
+├── tokens.json          mọi giá trị token, gốc dữ liệu
+├── design-system.json   chỉ mục, ghi sau cùng
+├── canonical-map.json   mỗi miền một owner, cặp tương phản, quyết định
+├── viewer.html          trang xem offline, được sinh tự động
+├── components/          Cover/ và mỗi component một thư mục (README.md, preview.html)
+└── assets/              mỗi nhóm một thư mục, kèm README ghi nguồn và quyền dùng
+```
+
+Thư mục theo đúng định dạng gói đã công bố; việc import thật vào Claude Design chưa được
+chạy, nên dòng PASS của verifier liệt kê `real-import` là chưa kiểm.
+
+DESIGN.md là file đọc đầu; README.md là brand book mà Claude Design đọc đầu tiên;
+tokens.json giữ mọi giá trị. Front matter của `DESIGN.md` và `viewer.html` là bản dẫn xuất
+từ các file bên cạnh, nên hãy sửa `tokens.json`, sinh lại, rồi kiểm (đường dẫn dưới đây tính
+từ bản clone của repo này; plugin đã cài có cùng thư mục `scripts/`):
+
+```bash
+python scripts/build-design-system.py --package design-system --design-md --viewer
+python scripts/verify-design-system.py --package design-system
+```
+
+`viewer.html` là trang tĩnh, không phải bản render của Claude Design. Nó hiện token, tóm tắt
+component và asset dưới dạng chữ và ảnh nhúng, chạy offline và không chạy mã trong gói; mở
+`preview.html` của component để xem nó được vẽ ra.
+
+Claude Design từ chối `AGENTS.md`, `CLAUDE.md` và `GEMINI.md` nằm trong gói, nên các file
+bọc này đặt ở thư mục cha, trong dự án dùng hệ thống. Truyền vào thư mục chứa
+`design-system/`; file đã có không bao giờ bị ghi đè (lệnh in một đề xuất và tính là bỏ qua):
+
+```bash
+python scripts/build-design-system.py --package design-system --adapters <project-root>
+```
+
+Để bắt đầu, chép `skills/design-system/templates/brand-v3/` thành `design-system/` rồi thay
+mọi giá trị giữ chỗ (placeholder). `python scripts/export-dtcg.py --package design-system --out tokens.dtcg.json`
+sinh file DTCG khi một công cụ khác cần; lệnh liệt kê mọi token phải bỏ qua.
+
+## Dùng cùng design:design-system
+
+Plugin `design` của Anthropic cũng có một skill tên `design-system`. Cài cả hai được. Bốn điều
+cần biết:
+
+1. **Kích hoạt đã đo.** Sáu prompt chạy headless trên Claude Code 2.1.309 với
+   claude-sonnet-5-5, mỗi prompt một lần (22-23/10/2026). Năm prompt cho kết quả như mong
+   đợi: ba yêu cầu về hệ thống (audit khi đã cho sẵn đường dẫn thư mục, viết tài liệu
+   component, biến một ghi chú thương hiệu thành thư mục) nạp `agent-design-studio:design-system`
+   ngay ở lần gọi công cụ đầu tiên; một yêu cầu chỉ chọn bảng màu và một yêu cầu chỉ tạo
+   ảnh brand kit thì không. Skill của Anthropic không lần nào được gọi. Đây là lần chạy thứ hai trên cùng sáu
+   prompt: lần đầu được 4/6, sau đó phần mô tả được sửa một lần, nhắm vào ca audit đã trượt,
+   nên 5/6 là kết quả đo trên chính các prompt đã dùng để sửa. Mỗi prompt chạy một lần là một mẫu, không phải một tỷ lệ. Lần đo
+   sau nên thêm ít nhất một prompt diễn đạt khác cho mỗi loại (audit khi đã cho đường dẫn,
+   brief nguyên trang) và chạy nhiều hơn một lần.
+2. **Nguyên trang có thể cần gọi đích danh.** Lần trượt duy nhất là brief trơn "làm landing
+   page cho tiệm bánh": host đưa nó sang công cụ artifact có sẵn trước khi cân nhắc bất kỳ
+   skill nào, và trong các lần chạy của chúng tôi, câu chữ trong file skill không chạm tới bước đó. Ở host như vậy hãy gọi
+   `/agent-design-studio:design-routing` hoặc nói "dùng design-routing" cho việc làm nguyên
+   trang; không bảo đảm tự kích hoạt với một brief trang trơn.
+3. **Gọi bằng tên đầy đủ.** `/design-system` trơn sẽ mơ hồ khi cả hai plugin cùng cài. Dùng
+   `/agent-design-studio:design-system` (trong văn xuôi: `agent-design-studio:design-system`),
+   hoặc tắt một trong hai plugin trong `/plugin`.
+4. **Chữ kích hoạt nằm ở đâu.** Phần mô tả mà agent đối chiếu là 947 ký tự trong front matter
+   của `skills/design-system/SKILL.md`; muốn đổi lúc skill kích hoạt thì sửa ở đó.
+
 ## Ghi nhận
 
 Quy trình này chắt lọc ý tưởng từ bốn dự án mở. Phần lập luận đã được diễn đạt lại bằng
@@ -191,6 +354,11 @@ khác với MIT của [skill GSAP chính thức](https://github.com/greensock/gs
 | [anthropics/skills → `skills/frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) | Apache-2.0 | Hiệu chỉnh chống rập khuôn, phương pháp hai lượt lập-kế-hoạch-rồi-tự-phản-biện, sự tiết chế, và chữ nghĩa được coi là vật liệu thiết kế |
 | [plannotator/effective-html](https://github.com/plannotator/effective-html) | MIT | Chọn mức hoàn thiện trước tiên, wireframe cố ý để dở, prototype mô hình hoá trạng thái thật, và kiến trúc một-cửa-vào |
 | [alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design) | MIT | Cổng ba hướng, giao thức tài sản thương hiệu, phương pháp suy ra màu, và bản phê bình có chấm điểm |
+
+Skill Design System còn theo hai khuôn đã công bố, diễn đạt lại bằng lời của mình và không
+chép chữ nào: [Design Markdown](https://github.com/google-labs-code/design.md) của Google Labs
+(Apache-2.0, spec `alpha`, đọc ngày 22/10/2026) cho tên mục và tên khoá của `DESIGN.md`, và skill
+`design:design-system` của Anthropic cho ý tưởng các mode audit, document và extend.
 
 Cảm ơn các tác giả.
 

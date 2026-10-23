@@ -1,0 +1,22 @@
+{
+  "v": 3,
+  "layout": "files",
+  "title": "Fixture Studio",
+  "namespace": "FixtureStudio",
+  "docs": {
+    "readme": "README.md",
+    "sections": []
+  },
+  "groups": [],
+  "assetGroups": {},
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-22T00:00:00Z"
+  },
+  "lastChange": {
+    "by": "agent-design-studio fixture",
+    "at": "2026-10-22T00:00:00Z",
+    "via": "manual",
+    "note": "fixture baseline"
+  }
+}

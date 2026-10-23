@@ -4,8 +4,8 @@ interface:
   default_prompt: "Use design-routing to take this brief through the full design process."
 
 policy:
-  # Implicit invocation is intentionally ENABLED. This is the pack's single entrance:
-  # there is exactly one skill, and it routes to its own references per step. The
-  # eleven references are deliberately not exposed as skills, so there is no second
-  # door to guard and no trigger surface to shrink.
+  # Implicit invocation is intentionally ENABLED. This skill is the entrance for
+  # whole-interface design; the pack's second skill, design-system, has its own adapter
+  # and its own triggers. The sixteen references of this skill (twenty in the pack) are
+  # loaded per step and deliberately not exposed as skills, so no third door needs a guard.
   allow_implicit_invocation: true

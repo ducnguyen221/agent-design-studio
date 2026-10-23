@@ -14,6 +14,7 @@ npm-debug.log*
 
 # Scratch / local working files — never commit these
 .tmp/
+/.worktrees/
 tmp/
 *.local.*
 

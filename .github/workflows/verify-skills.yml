@@ -1,0 +1,37 @@
+name: verify skills
+
+# Runs the three verifiers and the generated-file checks. Stdlib only: the
+# only network use is checkout and setup-python.
+on:
+  push:
+    branches: [main, 'sprint/**']
+  pull_request:
+
+# The job needs no token beyond reading the checkout.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: '3.12'
+      - name: Verify motion pack
+        run: python scripts/verify-motion-pack.py
+      - name: Verify resource pack
+        run: python scripts/verify-resource-pack.py
+      - name: Design system self-test
+        run: python scripts/verify-design-system.py --self-test
+      - name: Verify design system skill
+        run: python scripts/verify-design-system.py
+      - name: Verify fixture package (full profile)
+        run: python scripts/verify-design-system.py --package skills/design-system/tests/fixture/design-system --profile full
+      - name: Verify template package (minimal profile)
+        run: python scripts/verify-design-system.py --package skills/design-system/templates/brand-v3 --profile minimal
+      - name: Check generated files (fixture and template)
+        run: python scripts/build-design-system.py --package skills/design-system/tests/fixture/design-system --design-md --viewer --check && python scripts/build-design-system.py --package skills/design-system/templates/brand-v3 --design-md --viewer --check

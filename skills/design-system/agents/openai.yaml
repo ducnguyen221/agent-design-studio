@@ -1,0 +1,9 @@
+interface:
+  display_name: "Design System"
+  short_description: "Create, audit, document and extend a design system kept as files"
+  default_prompt: "Use design-system to audit or extend this project's design system."
+
+policy:
+  # Implicit invocation is on: the skill description names its own triggers, and the
+  # boundary with design-routing is written in SKILL.md.
+  allow_implicit_invocation: true

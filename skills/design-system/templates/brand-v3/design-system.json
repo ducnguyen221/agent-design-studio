@@ -1,0 +1,22 @@
+{
+  "v": 3,
+  "layout": "files",
+  "title": "Sample Studio",
+  "namespace": "SampleStudio",
+  "docs": {
+    "readme": "README.md",
+    "sections": []
+  },
+  "groups": [],
+  "assetGroups": {},
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-22T00:00:00Z"
+  },
+  "lastChange": {
+    "by": "agent-design-studio template",
+    "at": "2026-10-22T00:00:00Z",
+    "via": "template",
+    "note": "initial template"
+  }
+}

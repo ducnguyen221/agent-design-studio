@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anonymous source fixture</title><link rel="icon" href="data:,"><link rel="stylesheet" href="src/tokens.css">
+<style>
+body { margin: 0; color: var(--text); background: var(--surface); font: 16px/1.6 system-ui; }
+main { max-width: 60ch; margin: auto; padding: 24px; }
+.primary { background: var(--accent); color: white; padding: 12px; border: 0; border-radius: 4px; }
+button:focus-visible, input:focus-visible { outline: 3px solid #996600; outline-offset: 3px; }
+input { display: block; max-width: 100%; box-sizing: border-box; padding: 8px; }
+#actions { margin-top: calc(var(--gap) * 4); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style></head><body><main><h1>Source contract fixture</h1>
+<p>This original fixture is for trace and browser checks. Its declarations are not verified runtime evidence.</p>
+<label for="value">Value</label><input id="value"><div id="actions"></div>
+<p id="feedback" role="status" aria-live="polite">Empty: no result yet.</p>
+<script type="module" src="src/page.js"></script></main></body></html>

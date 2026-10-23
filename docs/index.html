@@ -625,7 +625,7 @@ footer .lbl{color:var(--mark)}
     <li class="step"><div class="wrap steprow"><span class="stepn rv num">05</span>
       <div class="rv"><h3 data-i18n="t5">Build it properly</h3><p data-i18n="s5">Your choice, built for real. First the page's rulebook — the colours, sizes and spacing everything has to follow, so nothing drifts — then the page itself. Colours come from something that actually exists, with the reason written beside each one.</p></div>
       <i class="ldr drawline" aria-hidden="true"></i>
-      <div class="stepart rv"><b>04-design-system/</b><span>tokens.json</span><b>05-implementation.md</b></div></div></li>
+      <div class="stepart rv"><b>04-design-system/</b><span>DESIGN.md · tokens.json</span><b>05-implementation.md</b></div></div></li>
     <li class="step"><div class="wrap steprow"><span class="stepn rv num">06</span>
       <div class="rv"><h3 data-i18n="t6">Movement</h3><p data-i18n="s6">A second pass over a page that already works without it. Every piece of movement has to say what it is for, or it gets turned down in writing — and the turned-down list is handed over with everything else.</p></div>
       <i class="ldr drawline" aria-hidden="true"></i>
@@ -731,8 +731,8 @@ footer .lbl{color:var(--mark)}
           <b>03-compare.html</b><br>
           <b>03-direction-decision.md</b> <u>← gate 1</u><br>
           <b>04-design-system/</b>tokens.json<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;components.md<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;assets-manifest.md<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;DESIGN.md<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;components/ · assets/<br>
           <b>05-implementation.md</b><br><b>06-motion-spec.md</b><br>
           <b>07-uat-report.md</b> <u>← gate 2</u><br><b>STATUS.md</b>
         </p>
@@ -789,7 +789,7 @@ footer .lbl{color:var(--mark)}
         <p class="kicker lbl" data-i18n="k5">05 — install</p>
         <h2 data-i18n="h2e">Install</h2>
       </div>
-      <p class="lead" data-i18n="leade">Two ready-made ways in, or copy the folder straight into any agent that can read a <code>SKILL.md</code>. Twelve reference documents and one router. Nothing to run in the background, nothing else to install.</p>
+      <p class="lead" data-i18n="leade">Two ready-made ways in, or copy the folders straight into any agent that can read a <code>SKILL.md</code>. Two skills and twenty reference documents between them: sixteen for the router, four for the Design System builder. Nothing to run in the background, nothing else to install.</p>
     </div>
     <div class="inst">
       <div class="pane"><h3>Claude Code</h3><pre><span>/</span>plugin marketplace add ducnguyen221/agent-design-studio
@@ -893,7 +893,7 @@ const I18N={vi:{
  ev1:"02 · khung thô — chỉ có bố cục",ev2:"v1.0 · màn hình đầu tiên",ev2s:"BỊ GẠT",
  ev3:"v1.1 · bản ngay trước bản này",
  k5:"05 — cài đặt",h2e:"Cài đặt",
- leade:"Hai đường vào dựng sẵn, hoặc chép thẳng thư mục vào bất kỳ agent nào đọc được một file <code>SKILL.md</code>. Mười hai tài liệu tham chiếu và một bộ định tuyến. Không có gì chạy ngầm, không phải cài thêm gì.",
+ leade:"Hai đường vào dựng sẵn, hoặc chép thẳng các thư mục vào bất kỳ agent nào đọc được một file <code>SKILL.md</code>. Hai skill, hai mươi tài liệu tham chiếu: mười sáu cho bộ định tuyến, bốn cho bộ dựng Design System. Không có gì chạy ngầm, không phải cài thêm gì.",
  k6:"06 — dành cho ai",h2f:"Dành cho ai",
  leadf:"Mấy tài liệu viết ra mới là sản phẩm. Bảy bước là cách chúng được dùng, theo đúng thứ tự.",
  w1h:"Người đang học nghề",
