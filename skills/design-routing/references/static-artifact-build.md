@@ -82,8 +82,10 @@ regenerating, or every save doubles them.
 ## Entrance effects
 
 Follow Rule zero in [motion-playbook.md](motion-playbook.md) — content renders whether or
-not the animation plays — using its four-part contract and
-[motion-patterns.md](motion-patterns.md) MP01 as the recipe: the hidden state is added
+not the animation plays — and apply its four-part contract directly. There is no ready
+recipe for a slide's own content: [motion-patterns.md](motion-patterns.md) MP01 is meant
+for one supporting panel and rejects critical content, so do not use it as the mould.
+The contract in practice: the hidden state is added
 by script (a class on the root set by the same script that observes), a failsafe reveals
 everything after `load`, reduced motion and a missing observer reveal immediately, and
 `@media print` forces the final state. Never write the hidden state into the base
