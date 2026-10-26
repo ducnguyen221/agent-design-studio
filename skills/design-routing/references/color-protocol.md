@@ -133,9 +133,6 @@ one system. Keep it under 0.02.
   unreadable one.
 - Never carry meaning by color alone. Pair it with text, an icon, or a shape.
 - Dark and light variants are defined together, not retrofitted.
-- Both the light and the dark variant were rendered and checked in a browser, not only
-  defined. Hierarchy holds in each (a call to action that stands out in one stands out in
-  the other) and the brand color stays recognizable.
 
 ## Consistency locks and surface effects
 
@@ -151,6 +148,9 @@ Starting points, not WCAG rules. Deviate on purpose and record why.
   exception is the deliberate full switch described under *Locks* in
   [taste-calibration.md](taste-calibration.md). Respect the user's color-scheme
   preference, and add a manual toggle when either mode loses the brand's character.
+- Both the light and the dark variant were rendered and checked in a browser, not only
+  defined. Hierarchy holds in each (a call to action that stands out in one stands out in
+  the other) and the brand color stays recognizable.
 - **Glass and translucency only when the direction calls for it** (premium consumer, media
   overlays), and not on dense product screens. Blur alone reads flat: give the surface a
   thin inner edge and a faint inner highlight, and provide a solid fallback under
