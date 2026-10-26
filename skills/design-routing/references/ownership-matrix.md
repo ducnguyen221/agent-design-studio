@@ -61,6 +61,41 @@ parallel answer is the most expensive mistake available at this stage.
 
 Never generate a new design system at intake. Record what exists; decide later.
 
+### Redesigning something that already runs
+
+If the request is to redesign a live page or product, name which of three cases it is
+before anything else; mistaking one for another is the biggest source of bad redesigns.
+When the case is unclear, add one question to the batch above: *keep the existing brand,
+or start visually from scratch?*
+
+| Case | What it means |
+| --- | --- |
+| **Evolve** | Modernize without breaking the brand: audit first, extract the tokens, change gradually |
+| **Overhaul** | A new visual language; content, information architecture, and URLs are preserved |
+| **Rebrand** | The brand itself changes; treat it as a new build |
+
+**Audit before touching anything:** brand tokens (color, type, logo, radii); information
+architecture and conversion paths; which content works and which is filler; patterns to
+keep and to retire; and the **search baseline** (indexed URLs, titles, headings,
+redirects), because lost search traffic is the most common redesign casualty.
+
+**Keep stable unless asked:** the information architecture, URLs, anchor ids, navigation
+labels, and the names that analytics track; the brand color, extracted before any color
+rule is applied (a purple brand stays purple); the copy voice; and every accessibility
+gain.
+
+**Change in this order, and stop when the brief is met:** typography, spacing and rhythm,
+color recalibration, motion on existing components, recomposing the hero and key
+sections, and only last replacing a block that cannot be salvaged. When structure,
+content, and search position are sound, targeted evolution through the first four steps
+captures most of the value for a fraction of the risk. Reserve a full redesign for
+structural debt (a broken information architecture, no system, a broken mobile layout),
+and carry every piece of content through it.
+
+**Never change silently; record the approval in the brief:** URL structure and slugs,
+primary navigation labels, form field names and order (analytics and autofill depend on
+them), the logo or wordmark, and legal, consent, and cookie copy.
+
 ### Verify facts before designing them
 
 If the brief names a real product, company, version, price, or date, confirm it from a
