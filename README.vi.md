@@ -342,9 +342,11 @@ cần biết:
 
 ## Ghi nhận
 
-Quy trình này chắt lọc ý tưởng từ bốn dự án mở. Phần lập luận đã được diễn đạt lại bằng
-ngôn ngữ của chúng tôi chứ không sao chép; những ngưỡng và giá trị cụ thể học được từ họ
-thì được dùng với lòng biết ơn. Món nợ là thật và cụ thể.
+Quy trình này chắt lọc ý tưởng từ tám dự án mở: bốn dự án trong bảng dưới đây, và bốn dự án
+khác được ghi trong [NOTICE](NOTICE) kèm giấy phép và bản sửa đổi chính xác. Phần lập luận
+đã được diễn đạt lại bằng ngôn ngữ của chúng tôi; những ngưỡng và giá trị cụ thể học được từ
+họ thì được dùng với lòng biết ơn, và chỗ nào một đoạn bám nguồn sát hơn thì NOTICE ghi rõ.
+Món nợ là thật và cụ thể.
 
 Các recipe motion mới còn dùng [React Bits Animated Content](https://reactbits.dev/c/animations/animated-content)
 làm tham khảo trực quan, cùng [demo/tài liệu GSAP](https://demos.gsap.com/) và
@@ -360,8 +362,8 @@ khác với MIT của [skill GSAP chính thức](https://github.com/greensock/gs
 | [plannotator/effective-html](https://github.com/plannotator/effective-html) | MIT | Chọn mức hoàn thiện trước tiên, wireframe cố ý để dở, prototype mô hình hoá trạng thái thật, và kiến trúc một-cửa-vào |
 | [alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design) | MIT | Cổng ba hướng, giao thức tài sản thương hiệu, phương pháp suy ra màu, và bản phê bình có chấm điểm |
 
-Skill Design System còn theo hai khuôn đã công bố, diễn đạt lại bằng lời của mình và không
-chép chữ nào: [Design Markdown](https://github.com/google-labs-code/design.md) của Google Labs
+Skill Design System còn theo hai khuôn đã công bố, diễn đạt lại bằng lời của mình:
+[Design Markdown](https://github.com/google-labs-code/design.md) của Google Labs
 (Apache-2.0, spec `alpha`, đọc ngày 22/10/2026) cho tên mục và tên khoá của `DESIGN.md`, và skill
 `design:design-system` của Anthropic cho ý tưởng các mode audit, document và extend.
 

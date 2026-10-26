@@ -7,6 +7,8 @@ source files, scripts, CSV data or binaries. Four third-party works
 contributed ideas or short passages to that text. Each is listed below with
 its owner, its license, the exact revision read, what was taken, and how
 closely. The license text of each work is kept in LICENSES/.
+This file records the works distilled in sprint P3; earlier credits stay in the
+README, section Acknowledgments.
 
 Terms used on the "Derivation" line:
   concept          only the idea was taken; the wording, structure and values

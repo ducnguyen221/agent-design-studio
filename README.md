@@ -347,9 +347,11 @@ installed. Four things to know:
 
 ## Acknowledgments
 
-This process distils ideas from four open projects. The reasoning was re-expressed in our
-own words rather than copied; the specific thresholds and values we learned from them are
-used with gratitude. The debt is real and specific.
+This process distils ideas from eight open projects: the four in the table below, and
+four more recorded in [NOTICE](NOTICE) with their licenses and exact revisions. The
+reasoning was re-expressed in our own words; the specific thresholds and values we learned
+from them are used with gratitude, and where a passage follows a source more closely,
+NOTICE says so. The debt is real and specific.
 
 The new motion recipes also use [React Bits Animated Content](https://reactbits.dev/c/animations/animated-content)
 as a live visual reference and [GSAP's demo/docs](https://demos.gsap.com/) and
@@ -366,8 +368,8 @@ is separate from the MIT license of its [official agent skills](https://github.c
 | [plannotator/effective-html](https://github.com/plannotator/effective-html) | MIT | Choosing fidelity first, wireframes kept deliberately unfinished, prototypes that model real states, and the one-entrance routing shape |
 | [alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design) | MIT | The three-direction gate, the brand asset protocol, the colour derivation method, and the scored critique |
 
-The Design System skill also follows two published shapes, re-expressed in our own words with
-no text copied: Google Labs' [Design Markdown](https://github.com/google-labs-code/design.md)
+The Design System skill also follows two published shapes, re-expressed in our own words:
+Google Labs' [Design Markdown](https://github.com/google-labs-code/design.md)
 (Apache-2.0, spec `alpha`, read 22 Oct 2026) for the section and key names of `DESIGN.md`, and
 Anthropic's `design:design-system` skill for the idea of audit, document and extend modes.
 
