@@ -16,6 +16,12 @@ one real aesthetic risk you can defend.
 Not taking a risk is itself a risk. A design that offends nobody is usually remembered
 by nobody.
 
+The rules under [Layout discipline](#layout-discipline) govern marketing surfaces:
+landing pages, portfolios, event and product sites. A dashboard, admin screen, or other
+dense product UI is still in this pack's scope, but it takes the quality floor and the
+product's own system, not the hero, eyebrow, and section-count rules written for
+persuasion pages.
+
 ## Ground everything in the subject
 
 If the brief does not pin down the subject, pin it yourself and say so: one concrete
@@ -25,6 +31,11 @@ Distinctive choices come from the subject's own world — its materials, instrum
 artifacts, vocabulary. A page about maritime logistics has a different set of available
 gestures than one about early-childhood education, and the difference should be visible
 before you read a word.
+
+**Quiet constraints outrank taste.** Read the brief for the constraints that are easy to
+miss: accessibility first, a public-sector or regulated service, trust-critical commerce,
+children as the audience. They override aesthetic preference, and so does the audience:
+the people who will use the page set the register, not the designer's own appetite.
 
 **The hero is a thesis.** Open with the most characteristic thing in the subject's world,
 in whatever form suits it: a headline, an image, an animation, a live demo, an interactive
@@ -70,6 +81,11 @@ Also on sight: aggressive purple gradients as shorthand for "technology"; an emo
 the job of an icon; a gradient on every background; an icon beside every heading;
 decorative numbers that count nothing; hand-drawn SVG people, whose faces are always
 subtly wrong.
+
+Four more habits cluster the same way: three equal feature cards in a row; frosted glass
+on every surface; small looping animations on content that is not live or changing; and a
+centered hero over a dark mesh gradient. Each is fine when the brief or the subject asks
+for it, and a default when nothing does.
 
 **Where the brief specifies a direction, follow it exactly — the brief's words always
 win, including when it asks for one of these looks.** Where the brief leaves an axis
@@ -233,6 +249,16 @@ navigating this.
   to brand and audience.
 - **One job per element.** A label labels, an example demonstrates, nothing does double
   duty.
+- **Audit every visible string before shipping.** Re-read the whole page as a stranger
+  would. Rewrite anything grammatically broken, with an unclear referent, or clever at the
+  reader's expense; plain and functional beats cute. Invented people and companies get
+  realistic, locale-appropriate names, not the stock placeholders every template uses.
+  Figures that look too exact or too round come from real data, are labeled as sample
+  values, or are cut. Inflated marketing verbs are filler.
+- **One label per intent, page-wide.** Two calls to action that mean the same thing under
+  different names (in the nav, the hero, the footer) read as two different actions. Pick
+  one label and use it everywhere. Keep one copy register per page unless the brand voice
+  calls for a mix.
 
 Placeholder copy makes a design feel as templated as placeholder layout does. When the
 brief has no real content, writing the copy is part of the design work.
