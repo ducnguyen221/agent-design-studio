@@ -150,6 +150,26 @@ System lives at the product's declared canonical location, normally
 `<project>/design-system/` for a new product. The run holds proposals and pointers;
 it never silently replaces the canonical source.
 
+## Questions mid-pipeline — where the rule lives
+
+When a question comes up between steps, or a user asks one while a design is in
+progress, open the file named here at that moment. It is an index, not a second copy of
+the rules.
+
+| Question | Where the rule lives |
+| --- | --- |
+| What counts as generic; the anti-generic canon; the words on the page | `references/taste-calibration.md` |
+| Type, once a page is being built: fonts, scale, English and Vietnamese marks | `references/typography-en-vi.md` |
+| Colour, light and dark | `references/color-protocol.md`; checked at review in `references/uat-report-schema.md` |
+| Layout, composition, hero, density | `references/taste-calibration.md`, section "Layout discipline" |
+| Motion and scroll effects | `references/motion-playbook.md`, then `references/motion-patterns.md` |
+| Forms, touch targets, z-index, calls to action | `references/uat-report-schema.md`, section "Interaction, structure and forms — checked, not a floor" |
+| Which direction fits; cautions for a regulated or sensitive field | `references/direction-gate.md`, section "Shared rules for all three" |
+| Icon, UI or motion libraries | `references/library-selection.md` |
+| Redesigning something already live | `references/ownership-matrix.md`, section "Redesigning something that already runs" |
+| HTML deck or microsite: build, or render QA | `references/static-artifact-build.md`, `references/static-artifact-qa.md` |
+| Images, brand logos | `references/image-sourcing.md`, `references/brand-asset-protocol.md` |
+
 ## The two gates
 
 Gate 1 closes Step 4 (which direction). Gate 2 closes Step 7 (ship or iterate).
