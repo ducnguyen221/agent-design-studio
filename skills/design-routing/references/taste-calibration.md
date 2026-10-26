@@ -278,11 +278,11 @@ does not use this section (see *Posture*).
   to a centered hero and centered headings: use a split, a left-weighted layout, or
   deliberate empty space. Centering stays right for a manifesto, an editorial piece, or a
   launch where the message is the design.
-- **Do not repeat a layout family.** A family (a row of image cards, a full-width quote, a
-  text-and-image split) appears once per page; a page of eight sections wants at least
-  four distinct families. Two text-and-image splits in a row is the limit. The next
-  section breaks the pattern with a full-width block, a vertical stack, a bento, or
-  another family.
+- **Do not repeat a layout family back to back.** A family (a row of image cards, a
+  full-width quote, a text-and-image split) may return later on the page but not in the
+  next section; as a starting point, a page of eight sections draws on at least four
+  distinct families. The section after a family breaks the pattern with a full-width
+  block, a vertical stack, a bento, or another family.
 - **Stack section headers by default.** A big headline on the left with a small explainer
   paragraph floating on the right is a template tell. Put the body under the headline at a
   readable measure, and split only when the second column carries a real visual or
