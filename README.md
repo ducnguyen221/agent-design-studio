@@ -171,10 +171,11 @@ artifact tool before any skill is considered; see
 [Using with design:design-system](#using-with-designdesign-system).
 
 It deliberately stays out of other narrow single-step work — critiquing an existing page,
-converting an approved design to HTML, picking a palette, drawing charts, or tuning the
-layout of an existing deck. Those have better-suited tools, and this process would be
-overkill. Designing a new deck, report, or infographic as a whole surface is a different
-matter: that is in scope, and runs in static-artifact mode.
+converting an approved design to HTML, picking a palette, drawing charts, or editing a
+PowerPoint or other non-HTML deck. Those have better-suited tools, and this process would
+be overkill. Designing a new deck, report, or infographic as a whole surface is a different
+matter: that is in scope, and runs in static-artifact mode, as is the render check and fix
+loop for an HTML deck or microsite that lane built.
 
 ## What's inside
 

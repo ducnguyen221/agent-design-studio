@@ -170,10 +170,11 @@ công cụ artifact có sẵn trước khi cân nhắc bất kỳ skill nào; xe
 [Dùng cùng design:design-system](#dùng-cùng-designdesign-system).
 
 Nó cố ý đứng ngoài các việc lẻ một bước khác — phê bình một trang có sẵn, chuyển một thiết kế đã
-duyệt thành HTML, chọn bảng màu, vẽ biểu đồ, hay chỉnh bố cục một bộ slide đã có. Những
-việc đó có công cụ phù hợp hơn, và quy trình này sẽ là quá nặng. Thiết kế mới một bộ slide,
-một báo cáo hay một infographic như nguyên một sản phẩm thì lại khác: việc đó nằm trong
-phạm vi, và chạy ở chế độ static-artifact.
+duyệt thành HTML, chọn bảng màu, vẽ biểu đồ, hay sửa một bộ slide PowerPoint (hoặc bộ slide
+không phải HTML) đã có. Những việc đó có công cụ phù hợp hơn, và quy trình này sẽ là quá
+nặng. Thiết kế mới một bộ slide, một báo cáo hay một infographic như nguyên một sản phẩm thì
+lại khác: việc đó nằm trong phạm vi, và chạy ở chế độ static-artifact; vòng chụp-nhìn-sửa cho
+một bộ slide HTML hay microsite do chế độ đó dựng cũng vậy.
 
 ## Bên trong có gì
 
