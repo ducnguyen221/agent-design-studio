@@ -48,6 +48,15 @@ Declared at Step 3, verified here. Every row is checked at all three viewports.
 - [ ] No dead controls. Anything the real system would own is labeled as a boundary.
 - [ ] Every named brand's real logo is present; no product drawn as a CSS silhouette.
 - [ ] Meaning never carried by color alone.
+- [ ] Full-height sections use `100dvh` (or a `min-height` on it), not `100vh`, so a
+      mobile browser's changing toolbar does not clip or jump the layout.
+- [ ] Rendered and checked in **both** light and dark when the product supports both, not
+      only the one the author looked at.
+- [ ] Every imported package, font, and asset resolves: each import exists in the project
+      manifest or is bundled, and no request fails.
+- [ ] Forms and calls to action: every input has a visible label, helper text is in the
+      markup, and an error shows beside its field; one label per intent across the page;
+      ghost or outline buttons over imagery keep their contrast.
 
 ### Perceived finish — public and marketing deliverables only
 
@@ -76,6 +85,14 @@ after doing something else, describe out loud what it *is* before what it *says*
 write the answer into the report verbatim — including when the answer is unflattering.
 
 A failure here blocks Gate 2 regardless of how well the design scores below.
+
+### Load and stability — public pages (recommended, not a floor)
+
+Public pages also get a measured pass, with the tool and the conditions recorded, or the
+check marked unverified. The commonly cited thresholds for a "good" result are a starting
+point, not a pack rule: main content painted within about 2.5 s, response to input within
+about 200 ms, and layout shift of about 0.1 or less. The cheapest fixes are layout-side:
+reserve space for images, embeds, and late-loading fonts, and preload the hero image.
 
 ## Six dimensions, scored 0–10
 
@@ -207,3 +224,58 @@ Policy-auto-selected: <criteria, decision, and the grant that permitted it>
   them.
 - If a checker skill disagrees with the owner's decision, record both positions here
   rather than editing over the top of each other.
+
+## Appendix — tells to scan for
+
+A fast manual pass before scoring, alongside any static linter. Each hit becomes a Fix
+item rated blocking, important, or polish. Items marked *advisory* are judgment calls
+about density or context, never a blocker alone; the rest are defects when they appear.
+
+**Hierarchy and type**
+- Flat hierarchy: sizes too close together, one family carrying everything with no weight
+  or size contrast.
+- A rounded icon tile stacked above every feature heading.
+- A tiny tracked label or pill chip above the hero headline that adds nothing the
+  headline lacks.
+- A full-sentence headline at display size that eats the whole first screenful.
+- Letter-spacing tightened until the glyphs lose their shape.
+- An italic serif display as the unexamined hero choice *(advisory; an editorial register
+  can earn it)*.
+
+**Color and effects**
+- Gradient text on headings or metrics.
+- Glowing colored shadows, chromatic halos, or a decorative radial spotlight behind a
+  section.
+- A thick accent border on one side of a card, or on a rounded card.
+- A hairline border and a wide soft shadow on the same element *(advisory: commit to one)*.
+- Stripe or grid-line background decoration with no job to do *(advisory)*.
+
+**Layout and space**
+- Cards nested inside cards.
+- One spacing value everywhere, so the page has no rhythm.
+- Numeric index labels on sections that are not a sequence *(advisory)*.
+- A heading sitting as close to the block above as to its own content; body text flush
+  against the viewport edge; cramped padding inside bordered containers.
+- Body line length beyond roughly 80 characters; justified text without hyphenation; a
+  skipped heading level.
+
+**Motion**
+- Bounce or elastic easing on interface elements.
+- A pulsing status dot with no live data behind it.
+- A decorative blinking caret *(advisory)*; scale or rotate on every image hover
+  *(advisory)*.
+- An auto-scrolling marquee used as filler.
+
+**Copy and imagery**
+- Stacked marketing buzzwords where a specific verb and noun would do.
+- Aphoristic cadence, or any single punctuation mark saturating the copy *(advisory: the
+  density is the tell, a few are fine)*.
+- A hero illustration assembled from primitive shapes *(advisory)*.
+- A broken or placeholder image still in the build.
+
+**Errors to clear first**
+- An uncaught script error on load, which can silently kill reveals and interactions.
+- Content invisible at rest after every reveal handler ran (see *Rule zero* in the motion
+  playbook).
+- Text painted under an opaque layer, a positioned popover clipped by an overflow
+  container, or cards cut off at a scroller's edge.
