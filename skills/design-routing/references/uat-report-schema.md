@@ -48,30 +48,6 @@ Declared at Step 3, verified here. Every row is checked at all three viewports.
 - [ ] No dead controls. Anything the real system would own is labeled as a boundary.
 - [ ] Every named brand's real logo is present; no product drawn as a CSS silhouette.
 - [ ] Meaning never carried by color alone.
-- [ ] Full-height sections use `100dvh` (or a `min-height` on it), not `100vh`, so a
-      mobile browser's changing toolbar does not clip or jump the layout.
-- [ ] Rendered and checked in **both** light and dark when the product supports both, not
-      only the one the author looked at.
-- [ ] Every imported package, font, and asset resolves: each import exists in the project
-      manifest or is bundled, and no request fails.
-- [ ] Forms and calls to action: every input has a visible label, helper text is in the
-      markup, and an error shows beside its field; one label per intent across the page;
-      ghost or outline buttons over imagery keep their contrast.
-- [ ] Touch targets on touch layouts are at least 44×44 px with clear space between
-      neighbours; a smaller icon gets a larger hit area.
-- [ ] Layers follow one declared z-index scale of named tiers; no ad-hoc values.
-- [ ] Hover and press states change no layout dimensions, so neighbours never shift.
-- [ ] An async action disables its control or shows progress while it runs, and a second
-      click cannot submit twice.
-- [ ] Space is reserved for late content (image dimensions, skeletons), so nothing jumps
-      when it arrives.
-- [ ] Meaningful images have descriptive alt text, decorative ones an empty alt, and
-      icon-only buttons an accessible name.
-- [ ] The document declares a viewport meta tag and does not block zoom.
-- [ ] Images are sized near their display size with explicit dimensions, and those below
-      the first screen load lazily.
-- [ ] A fixed or floating bar never covers content; the content carries a matching offset.
-- [ ] Destructive or irreversible actions ask for confirmation or offer undo.
 
 ### Perceived finish — public and marketing deliverables only
 
@@ -108,6 +84,39 @@ check marked unverified. The commonly cited thresholds for a "good" result are a
 point, not a pack rule: main content painted within about 2.5 s, response to input within
 about 200 ms, and layout shift of about 0.1 or less. The cheapest fixes are layout-side:
 reserve space for images, embeds, and late-loading fonts, and preload the hero image.
+
+### Interaction, structure and forms — checked, not a floor
+
+These rows are not declared at Step 3 and are not part of the floor above. Check each one
+where it applies, at the viewports it affects. A miss is a finding rated blocking,
+important, or polish; it does not turn the floor red by itself. Sizes here are starting
+points, not pack rules.
+
+- [ ] Full-height sections use `100dvh` (or a `min-height` on it), not `100vh`, so a
+      mobile browser's changing toolbar does not clip or jump the layout.
+- [ ] Rendered and checked in **both** light and dark when the product supports both, not
+      only the one the author looked at.
+- [ ] Every imported package, font, and asset resolves: each import exists in the project
+      manifest or is bundled, and no request fails.
+- [ ] Forms and calls to action: every input has a visible label, helper text is in the
+      markup, and an error shows beside its field; one label per intent across the page;
+      ghost or outline buttons over imagery keep their contrast.
+- [ ] Touch targets on touch layouts are about 44×44 px or larger as a starting point
+      (WCAG 2.2 AA asks for 24 px at minimum), with clear space between neighbours; a
+      smaller icon gets a larger hit area.
+- [ ] Layers follow one declared z-index scale of named tiers; no ad-hoc values.
+- [ ] Hover and press states change no layout dimensions, so neighbours never shift.
+- [ ] An async action disables its control or shows progress while it runs, and a second
+      click cannot submit twice.
+- [ ] Space is reserved for late content (image dimensions, skeletons), so nothing jumps
+      when it arrives.
+- [ ] Meaningful images have descriptive alt text, decorative ones an empty alt, and
+      icon-only buttons an accessible name.
+- [ ] The document declares a viewport meta tag and does not block zoom.
+- [ ] Images are sized near their display size with explicit dimensions, and those below
+      the first screen load lazily.
+- [ ] A fixed or floating bar never covers content; the content carries a matching offset.
+- [ ] Destructive or irreversible actions ask for confirmation or offer undo.
 
 ## Six dimensions, scored 0–10
 
