@@ -15,8 +15,8 @@ HTML, where text is text: selectable, searchable, resizable, printable.
 
 Fold these into the single Step 1 batch ([ownership-matrix.md](ownership-matrix.md)); do
 not open a second round. What is the deck for (pitch, teaching, report-out, talk)? How
-long (5–10, 10–20, 20+ slides)? Is the content written, or only ideas? Editing an HTML
-deck this lane built earlier does not rerun the seven steps — go straight to
+long (5–10, 10–20, 20+ slides)? Is the content written, or only ideas? Checking or fixing
+an existing HTML deck, whoever built it, does not rerun the seven steps — go straight to
 [static-artifact-qa.md](static-artifact-qa.md).
 
 ## When the user does not know the taste
@@ -27,7 +27,7 @@ deck styles to render — pick them from Partition 2 of
 [direction-gate.md](direction-gate.md) — and go to the normal Step 4 gate with real
 renders. This is a funnel into the gate, never a catalog of presets: no fixed font and
 colour pairings are carried in from anywhere, and every colour still comes through
-[color-protocol.md](color-protocol.md). A user who names a style and says to skip
+[color-protocol.md](color-protocol.md). A user who skips the
 options is exempt from the gate, as direction-gate already records.
 
 ## One slide, one viewport
@@ -88,8 +88,10 @@ not the animation plays — using its four-part contract and
 by script (a class on the root set by the same script that observes), a failsafe reveals
 everything after `load`, reduced motion and a missing observer reveal immediately, and
 `@media print` forces the final state. Never write the hidden state into the base
-stylesheet. A deck is seen once by its audience, so the showcase branch of the playbook
-can apply; staggers still default to the 30–80 ms range and anything longer must be
+stylesheet. Changing slides by key or swipe is a response to an interaction: it stays
+under 300 ms and never delays navigation, and a further key press jumps straight to the
+final state. The showcase branch of the playbook applies only to content that appears
+inside a slide; staggers still default to the 30–80 ms range and anything longer must be
 justified in `06-motion-spec.md`. Atmosphere (background texture, glow, grain) is a
 product of the chosen direction, not of a list of effects; tilt, particles and custom
 cursors are decorative motion that pass the playbook's gates before they exist.
