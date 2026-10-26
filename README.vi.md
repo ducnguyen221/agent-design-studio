@@ -174,7 +174,8 @@ duyệt thành HTML, chọn bảng màu, vẽ biểu đồ, hay sửa một bộ
 không phải HTML) đã có. Những việc đó có công cụ phù hợp hơn, và quy trình này sẽ là quá
 nặng. Thiết kế mới một bộ slide, một báo cáo hay một infographic như nguyên một sản phẩm thì
 lại khác: việc đó nằm trong phạm vi, và chạy ở chế độ static-artifact; vòng chụp-nhìn-sửa cho
-bất kỳ bộ slide HTML hay microsite nào cũng vậy.
+bất kỳ bộ slide HTML hay microsite nào cũng vậy. Chỉ phê bình một trang có sẵn mà không sửa
+thì vẫn nằm ngoài.
 
 ## Bên trong có gì
 
