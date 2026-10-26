@@ -23,6 +23,7 @@ generate color, or both rewrite the same component. The rule:
 | Implementation | The host's `codegen`, or direct authorship (decks and microsites: `static-artifact-build.md`); in `existing-product` mode the product's own codebase | A library-selection reference | Two agents writing the same component in one pass |
 | Motion | `motion-playbook.md` | — | Motion added during implementation without the motion step |
 | Review and fixes | `uat-report-schema.md`, or the host's `visual-reviewer` | A static linter; a motion-only reviewer | A second reviewer editing files in parallel |
+| Charts and React render performance | Outside this pack: a chart skill such as `dataviz`; the `react` skill of `agent-agile-team` for render and bundle rules | `library-selection.md`, for the dependency choice only | Writing chart or React-performance rules into the design pass |
 
 **Checker etiquette.** A checker reports `file:line`, the problem, and the fix. It does
 not commit. If a checker and the owner disagree, the owner's call stands and the
