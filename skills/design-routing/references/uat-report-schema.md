@@ -77,6 +77,10 @@ write the answer into the report verbatim — including when the answer is unfla
 
 A failure here blocks Gate 2 regardless of how well the design scores below.
 
+## Checked, not a floor
+
+The two groups below sit outside the hard floor: a miss is a finding, never a red floor.
+
 ### Load and stability — public pages (recommended, not a floor)
 
 Public pages also get a measured pass, with the tool and the conditions recorded, or the
