@@ -1,0 +1,127 @@
+agent-design-studio
+Copyright (c) 2026 Nguyễn Quang Đức
+Licensed under the MIT License (see LICENSE).
+
+This pack contains text written for it. It does not redistribute third-party
+source files, scripts, CSV data or binaries. Four third-party works
+contributed ideas or short passages to that text. Each is listed below with
+its owner, its license, the exact revision read, what was taken, and how
+closely. The license text of each work is kept in LICENSES/.
+
+Terms used on the "Derivation" line:
+  concept          only the idea was taken; the wording, structure and values
+                   are the pack's own, and no run of eight or more consecutive
+                   words matches the source.
+  adapted summary  facts, rules or data rows were condensed, reordered and
+                   reworded; short phrases may coincide with the source.
+  adapted excerpt  a short passage, heading or list structure follows the
+                   source closely enough that attribution is a license duty.
+
+------------------------------------------------------------------------------
+1. taste-skill
+------------------------------------------------------------------------------
+Owner:        Leonxlnx (https://github.com/Leonxlnx/taste-skill)
+Copyright:    Copyright (c) 2026 Leonxlnx
+License:      MIT. Full text: LICENSES/MIT-taste-skill.txt
+Revision:     72e299530e2eb31ed8da06181bc19f6c18a00821 (2026-08-22)
+              https://github.com/Leonxlnx/taste-skill/commit/72e299530e2eb31ed8da06181bc19f6c18a00821
+              License file read at that revision on 2026-10-26.
+Taken:        Anti-generic-interface judgment: quiet constraints before taste,
+              default-avoidance, layout and composition discipline, type and
+              colour consistency locks, motion cautions, form and state
+              checks, and a list of generic-interface tells.
+Where:        skills/design-routing/references/: taste-calibration.md,
+              typography-en-vi.md, color-protocol.md, library-selection.md,
+              motion-playbook.md (Part 5), prototype-playbook.md,
+              direction-gate.md, uat-report-schema.md, ownership-matrix.md.
+Derivation:   concept for all files above, except library-selection.md: the
+              section on choosing an official design system versus an
+              aesthetic follows the source's structure and keeps a few short
+              phrases (adapted excerpt). Values, thresholds and presets of
+              the source were not carried over.
+Decision:     KEEP the idea content; KEEP this notice and the license text.
+              Not carried: dial presets, colour tables, the em-dash rule,
+              framework-specific rules.
+
+------------------------------------------------------------------------------
+2. impeccable
+------------------------------------------------------------------------------
+Owner:        pbakaus (https://github.com/pbakaus/impeccable)
+Copyright:    Copyright 2025 Paul Bakaus
+License:      Apache License 2.0. Full text: LICENSES/Apache-2.0-impeccable.txt
+Revision:     56f44523f76efdcec813e67b38ee550e49b16f48 (2026-08-21)
+              https://github.com/pbakaus/impeccable/commit/56f44523f76efdcec813e67b38ee550e49b16f48
+              License file read at that revision on 2026-10-26.
+Taken:        The idea of an advisory checklist of generic-interface tells
+              for a final review, grouped by theme.
+Where:        skills/design-routing/references/uat-report-schema.md (the
+              advisory checklist of tells).
+Derivation:   concept. About 27 items were rewritten in the pack's own words
+              and grouped into six themes. No rule names, numeric thresholds,
+              command lines or detector code were carried over.
+Changes:      This pack modifies the idea: it drops the source's tooling,
+              rule identifiers and thresholds, and marks every item as
+              advisory. No file of the work is redistributed. The source's
+              own NOTICE.md concerns platform reference files that this
+              pack does not use.
+Decision:     KEEP the idea content; KEEP this notice and the Apache-2.0
+              text (the copyright line and the statement of changes above
+              serve section 4 of the license). Not carried: the detector
+              command and the rule list as a numbered catalogue.
+
+------------------------------------------------------------------------------
+3. ui-ux-pro-max-skill
+------------------------------------------------------------------------------
+Owner:        Next Level Builder (https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+Copyright:    Copyright (c) 2024 Next Level Builder
+License:      MIT. Full text: LICENSES/MIT-ui-ux-pro-max-skill.txt
+Revision:     (a) v2.2.1 = bedc435a81008ec24d1ef170e35154c927023067
+                  (2026-01-26): the revision the rules were condensed from.
+              (b) v2.15.0 = a38d04c3d5c298c851dbe5e6ee1965ee3de42cb5: the
+                  tag pinned by catalog source 76 (link only), the latest
+                  release when read on 2026-10-26 (published 2026-08-13).
+              https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/releases/tag/v2.15.0
+              License file read at v2.15.0 and at (a) on 2026-10-26; the
+              two texts are identical.
+Taken:        From its reasoning data: 24 sector cautions (what a sector
+              needs and what it avoids). From its guidelines: ten
+              interaction and structure checks.
+Where:        direction-gate.md (section "Industry cautions"),
+              uat-report-schema.md (ten checks added to the hard floor),
+              resources/uiux-catalog.json (record 76, link only).
+Derivation:   adapted summary. Rows were shortened, reworded and stripped of
+              colour, type and effect columns; one six-word phrase in one row
+              coincides with the data. The styles, palettes, font pairings,
+              CSV files and search script are not carried over.
+Decision:     KEEP the 24 cautions and the ten checks with this notice and
+              the license text; KEEP source 76 as a link to the full library.
+              DROP the data files and the script (not redistributed).
+
+------------------------------------------------------------------------------
+4. everything-claude-code (ECC), skill "frontend-slides"
+------------------------------------------------------------------------------
+Owner:        Affaan Mustafa (https://github.com/affaan-m/ECC, formerly
+              affaan-m/everything-claude-code)
+Copyright:    Copyright (c) 2026 Affaan Mustafa
+License:      MIT. Full text: LICENSES/MIT-everything-claude-code.txt
+Revision:     c70874fae9eb0e5ad0365beb7e2955899fd1d30f (2026-09-30), path
+              skills/frontend-slides/. The text was first condensed from
+              d8409a4b0813771235555e32e3d8046a73988bfa (2026-08-19).
+              https://github.com/affaan-m/ECC/commit/c70874fae9eb0e5ad0365beb7e2955899fd1d30f
+              License file read at c70874f on 2026-10-26.
+Taken:        Rules for building a self-contained HTML slide deck:
+              viewport fitting, density limits, type floor, breakpoints,
+              reveal motion, presenter controls, image handling, export
+              cautions. The source skill also credits zarazhangrui for the
+              visual-exploration approach; that is an idea credit only, no
+              code of that work is used, and its license was not checked
+              (unverified).
+Where:        skills/design-routing/references/static-artifact-build.md and
+              static-artifact-qa.md.
+Derivation:   concept. Rewritten in the pack's own words; no run of eight
+              words matches. The measurement script in the QA file is the
+              pack's own. No script, stylesheet, template or preset of the
+              source is carried over; its PDF export script and package
+              install step are deliberately left out.
+Decision:     KEEP the idea content with this notice and the license text.
+              DROP the style presets, the template and all scripts.

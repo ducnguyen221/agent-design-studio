@@ -381,6 +381,8 @@ Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducn
 
 [MIT](LICENSE) © 2026 Nguyễn Quang Đức
 
+Third-party credits and license texts: [NOTICE](NOTICE) and [LICENSES/](LICENSES/).
+
 ## 🤝 ACD Ecosystem Integration
 
 Khai báo vai của repo trong hệ thống nhiều repo ACD (Role, Upstream, Downstream, Bundles, Handoff) tại [ECOSYSTEM.md](ECOSYSTEM.md).

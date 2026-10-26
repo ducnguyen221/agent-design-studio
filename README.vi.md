@@ -374,3 +374,5 @@ Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducn
 ## Giấy phép
 
 [MIT](LICENSE) © 2026 Nguyễn Quang Đức
+
+Ghi công bên thứ ba và văn bản giấy phép: [NOTICE](NOTICE) và [LICENSES/](LICENSES/).
