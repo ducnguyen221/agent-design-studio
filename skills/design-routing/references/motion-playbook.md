@@ -362,6 +362,12 @@ regression.
 | Missing reduced-motion handling | Reduce or remove non-essential motion; preserve state feedback |
 | Symmetric timing on press-and-hold | Slow the deliberate phase, snap the response |
 | Everything entering at once | 30–80ms stagger |
+| A scroll listener, or scroll position held in component state, driving an animation | `IntersectionObserver`, CSS scroll-driven animation (`animation-timeline`) where supported, or the animation library's own scroll hook |
+| `will-change` left on many or idle elements | Set it only on the element about to animate, and clear it afterwards |
+| Grain or noise texture on a scrolling container | A fixed layer with `pointer-events: none`; a filter on scrolling content repaints and drops frames on phones |
+| A scroll-pinned section that starts pinning mid-scroll | Start the pin when the section's top meets the top of the viewport |
+| Motion promised by the brief or the chosen direction but not built | Ship the static version and say so; never a half-built effect |
+| More than one marquee or ticker on a page | At most one |
 
 **Prefer earlier fixes over later ones:** delete it → reduce it → fix the easing → fix
 origin and physicality → make it interruptible → move it to the GPU → make the timing
