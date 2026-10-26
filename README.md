@@ -174,8 +174,9 @@ It deliberately stays out of other narrow single-step work — critiquing an exi
 converting an approved design to HTML, picking a palette, drawing charts, or editing a
 PowerPoint or other non-HTML deck. Those have better-suited tools, and this process would
 be overkill. Designing a new deck, report, or infographic as a whole surface is a different
-matter: that is in scope, and runs in static-artifact mode, as is the render check and fix
-loop for any HTML deck or microsite. A critique-only pass over an existing page, with no
+matter: that is in scope, and runs in static-artifact mode, as is the visual layout check and
+fix loop (render, look, fix) for any HTML deck or microsite, which is not functional or
+browser-flow testing. A critique-only pass over an existing page, with no
 fixing, stays out.
 
 ## What's inside

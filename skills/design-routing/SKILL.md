@@ -1,6 +1,6 @@
 ---
 name: design-routing
-description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Also use to distill a user-supplied UI image, URL, or sample content into a reusable Markdown design reference before building. Also use to run a render, look and fix QA loop (the pass fixes what it finds) on any HTML deck or microsite. Not for other narrow single-step asks: only critiquing an existing page without fixing it, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, editing a PowerPoint or other non-HTML deck, decks made of generated slide images, or generating standalone images."
+description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Also use to distill a user-supplied UI image, URL, or sample content into a reusable Markdown design reference before building. Also use to run a visual layout QA loop (render, look, fix what it finds) on any HTML deck or microsite. Not for other narrow single-step asks: only critiquing an existing page without fixing it, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, functional or browser-flow testing, editing a PowerPoint or other non-HTML deck, decks made of generated slide images, or generating standalone images."
 ---
 
 # Design Routing
@@ -240,8 +240,9 @@ Mode: static-artifact | existing-product · Updated: YYYY-MM-DD
 ## Scope
 
 Designing a new deck, report, or infographic as a whole surface is in scope — it runs in
-`static-artifact` mode like any other one-off artifact, and so is the render check and fix
-loop for any HTML deck or microsite, whoever built it (`references/static-artifact-qa.md`).
+`static-artifact` mode like any other one-off artifact, and so is the visual layout check and
+fix loop (render, look, fix) for any HTML deck or microsite, whoever built it
+(`references/static-artifact-qa.md`). Functional and browser-flow testing is not.
 Restyling a deck that is not HTML, such as a PowerPoint file, is not, and neither is a
 critique-only pass over an existing page, with no fixing.
 
