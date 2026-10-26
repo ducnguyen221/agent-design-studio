@@ -31,7 +31,7 @@ REQUIRED = {
     "limitations", "summary", "search_terms", "search_hint", "follow_up",
 }
 PRIVATE = re.compile(r"(?i)(?:[a-z]:[/\\]users[/\\]|/users/[^/]+/|/home/[^/]+/|onedrive|desktop[/\\]|brain[/\\]|\.opcos[/\\]|\.secret[/\\])")
-ID = re.compile(r"\b(?:0[1-9]|[1-6][0-9]|7[0-5])\b")
+ID = re.compile(r"\b(?:0[1-9]|[1-6][0-9]|7[0-6])\b")
 
 
 def _sensitive_segment(part: str) -> bool:
@@ -143,8 +143,8 @@ def verify(root: Path) -> list[str]:
     records = _records(root, errors)
     if records is None:
         return errors
-    if len(records) != 75:
-        errors.append(f"source count must be 75, found {len(records)}")
+    if len(records) != 76:
+        errors.append(f"source count must be 76, found {len(records)}")
     seen: set[str] = set()
     pairs: set[tuple[int, int]] = set()
     for position, row in enumerate(records, 1):
@@ -265,15 +265,15 @@ def verify(root: Path) -> list[str]:
             errors.append("reference template missing Design System handoff")
     for readme in (Path("README.md"), Path("README.vi.md")):
         text = _read(root, readme, errors)
-        if text is not None and ("sixteen references" if readme.name == "README.md" else "mười sáu tài liệu tham chiếu") not in text:
+        if text is not None and ("eighteen references" if readme.name == "README.md" else "mười tám tài liệu tham chiếu") not in text:
             errors.append(f"{readme}: reference count not updated")
         if text is not None:
             for link in (INDEX.as_posix(), CATALOG.as_posix(), DISTILL.as_posix(), DISTILL_TEMPLATE.as_posix(), "scripts/verify-resource-pack.py"):
                 if link not in text:
                     errors.append(f"{readme}: missing resource link {link}")
     reference_dir = _safe_target(root, SKILL / "references", errors)
-    if reference_dir is not None and len(list(reference_dir.glob("*.md"))) != 16:
-        errors.append("reference count must be 16")
+    if reference_dir is not None and len(list(reference_dir.glob("*.md"))) != 18:
+        errors.append("reference count must be 18")
     return errors
 
 
@@ -380,7 +380,7 @@ def self_test(root: Path) -> list[str]:
             catalog_file.write_text(json.dumps(original, ensure_ascii=False), encoding="utf-8")
 
         expect("duplicate ID", lambda rows: rows[1].update(id="01"), "duplicate ID")
-        expect("missing ID", lambda rows: rows.pop(), "source count must be 75")
+        expect("missing ID", lambda rows: rows.pop(), "source count must be 76")
         expect("card slot", lambda rows: rows[1].update(slot=1), "duplicate card/slot")
         expect("boolean card", lambda rows: rows[0].update(card=True), "card/slot must be")
         expect("bad URL", lambda rows: rows[0].update(canonical_url="https://[bad"), "invalid canonical_url")

@@ -23,11 +23,11 @@ kiểu nó làm cho tất cả mọi người. Không phải vì mô hình thi�
 yêu cầu buộc nó phải *chọn*. Không brief, không phương án để loại bỏ, không sàn chất lượng
 để vượt, và không ai rà soát.
 
-Bộ này cung cấp cả bốn qua hai skill. `design-routing` là quy trình UI; mười sáu tài liệu
+Bộ này cung cấp cả bốn qua hai skill. `design-routing` là quy trình UI; mười tám tài liệu
 tham chiếu của nó mang phần nghề thật sự — thứ tự ra quyết định, các ngưỡng cụ thể, giá
 trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại. `design-system` phụ
 trách công việc hệ thống có thể dùng lại giữa các sản phẩm và codebase, có bốn tài liệu
-tham chiếu riêng, nên cả bộ có hai mươi.
+tham chiếu riêng, nên cả bộ có hai mươi hai.
 
 **Mỗi năng lực là một "slot".** Nếu máy bạn đã có công cụ mạnh hơn cho một bước, router sẽ
 dùng nó; nếu không, playbook có sẵn sẽ chạy. Hai skill có phạm vi riêng: router xử lý việc
@@ -129,7 +129,7 @@ font theo từng việc, cỡ chữ khởi đầu và cách kiểm dấu, tải 
 
 Khi cần mẫu UI/UX bên ngoài, xem link trong brief trước rồi mở
 [chỉ mục nguồn](skills/design-routing/references/resource-index.md). Chỉ mục trỏ đến
-[catalog JSON 75 nguồn](skills/design-routing/resources/uiux-catalog.json); lọc theo việc,
+[catalog JSON 76 nguồn](skills/design-routing/resources/uiux-catalog.json); lọc theo việc,
 đưa hai hoặc ba nguồn phù hợp, chỉ mở mẫu cụ thể khi cần, rồi cùng người dùng chốt hướng
 ở Bước 4. Catalog chỉ để mở link: trang đầu không chứng minh demo đã quan sát, runtime
 đã chạy hay quyền dùng lại mã và asset. Có thể lọc local bằng
@@ -197,6 +197,8 @@ skills/design-routing/
     ├── resource-index.md       shortlist nguồn theo việc; catalog chỉ nạp khi cần
     ├── reference-distill.md    chắt mẫu được cung cấp thành Markdown thiết kế
     ├── library-selection.md    chọn thư viện, hoặc không thêm thư viện nào
+    ├── static-artifact-build.md dựng deck và microsite thành một file tự chứa
+    ├── static-artifact-qa.md   vòng chụp-nhìn-sửa cho mọi deck HTML hoặc microsite
     └── uat-report-schema.md    bản rà soát có chấm điểm và sàn cứng
 └── templates/
     ├── 06-motion-spec.md        mẫu quyết định motion có đường lần ngược
@@ -224,9 +226,9 @@ skills/design-system/
 └── tests/fixture/              gói hồ sơ full hư cấu để verifier dùng
 ```
 
-`design-routing` giữ nguyên mười sáu tài liệu tham chiếu và phạm vi dựng UI/phân tích
+`design-routing` giữ nguyên mười tám tài liệu tham chiếu và phạm vi dựng UI/phân tích
 reference. `design-system` là điểm vào riêng cho hệ thống tái dùng do sản phẩm sở hữu, có
-bốn tài liệu tham chiếu: cả bộ có hai mươi. Mỗi skill chỉ nạp tài liệu cần cho việc hiện
+bốn tài liệu tham chiếu: cả bộ có hai mươi hai. Mỗi skill chỉ nạp tài liệu cần cho việc hiện
 tại để context luôn gọn.
 
 ## Kiểm hợp đồng Design System

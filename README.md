@@ -23,10 +23,10 @@ in the request forced a choice. There was no brief, no alternative to reject, no
 clear, and no reviewer.
 
 This pack supplies all four through two skills. `design-routing` is the UI workflow and its
-sixteen references carry the craft — decision orders, thresholds, curve values, colour
+eighteen references carry the craft — decision orders, thresholds, curve values, colour
 maths, and the parts that tell the agent to stop and build nothing. `design-system` owns
 reusable system work across products and codebases and has four references of its own,
-so the pack holds twenty.
+so the pack holds twenty-two.
 
 **Every capability is a slot.** If your setup has a stronger specialist for a step, the
 router uses it; if not, the built-in playbook runs. The two skills have separate jobs:
@@ -128,7 +128,7 @@ font shortlists, starting sizes and checks for real glyphs, loading and text res
 
 For outside UI/UX examples, start with links in your brief and then use the
 [resource index](skills/design-routing/references/resource-index.md). It routes to a
-75-source [JSON catalog](skills/design-routing/resources/uiux-catalog.json). Shortlist
+76-source [JSON catalog](skills/design-routing/resources/uiux-catalog.json). Shortlist
 two or three fitting sources, inspect relevant samples when needed, and choose a
 direction together at Step 4. The catalog is link-only: entry pages do not establish
 observed demos, runtime results, or permission to reuse code and assets. Optional local
@@ -198,6 +198,8 @@ skills/design-routing/
     ├── resource-index.md       source shortlist by task; catalog loads only on demand
     ├── reference-distill.md    supplied sample to Markdown design reference
     ├── library-selection.md    choosing a dependency, or not adding one
+    ├── static-artifact-build.md building decks and microsites as one self-contained file
+    ├── static-artifact-qa.md   render, look and fix loop for any HTML deck or microsite
     └── uat-report-schema.md    the scored review and the hard floor
 └── templates/
     ├── 06-motion-spec.md        traceable motion decision template
@@ -225,9 +227,9 @@ skills/design-system/
 └── tests/fixture/              anonymous full-profile package used by the verifier
 ```
 
-`design-routing` keeps its sixteen references and its UI build/reference-only scope.
+`design-routing` keeps its eighteen references and its UI build/reference-only scope.
 `design-system` is a separate entrypoint for product-owned, reusable system work, with four
-references: twenty in the pack. Each skill loads only the references for its current task,
+references: twenty-two in the pack. Each skill loads only the references for its current task,
 so context stays lean.
 
 ## Verify a Design System contract
