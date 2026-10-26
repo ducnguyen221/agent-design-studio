@@ -4,7 +4,7 @@ Use this index only when a brief needs an outside source. Start with links and e
 
 | Need | First | Alternative / switch when | Pack guide |
 | --- | --- | --- | --- |
-| Landing layout | 13 Land-book | 14 Lapa Ninja for a closer sector | direction-gate |
+| Landing layout | 13 Land-book | 14 Lapa Ninja for a closer sector; 76 Next Level Builder library for sector rules | direction-gate |
 | App flow | 18 Mobbin | 72 GOV.UK for a fitting service/form flow or limited access | prototype-playbook |
 | React component | 10 shadcn/ui | 71 PatternFly for a matching complex B2B system | library-selection |
 | EN/VI font | 22 Google Fonts | 23 Fontshare after glyph, file and rights checks | typography-en-vi |

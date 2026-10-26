@@ -5037,6 +5037,80 @@
         ],
         "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
       }
+    },
+    {
+      "id": "76",
+      "card": 26,
+      "slot": 1,
+      "original_label": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "original_domain": "github.com",
+      "original_url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/tree/v2.15.0",
+      "canonical_label": "Next Level Builder UI/UX rule library",
+      "canonical_url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/tree/v2.15.0",
+      "aliases": [],
+      "category": "rule_library_repository",
+      "use_cases": [
+        "industry_rules",
+        "style_lookup",
+        "design_reasoning"
+      ],
+      "source_role": "rule_library_repository",
+      "authority": "vendor_or_project_documentation",
+      "access_status": "official_repository_tag",
+      "checked_at": "2026-10-26",
+      "overview_verified": true,
+      "evidence_url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/releases/tag/v2.15.0",
+      "evidence": [
+        {
+          "status": "identity_verified",
+          "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/releases/tag/v2.15.0",
+          "checked_at": "2026-10-26",
+          "surface": "github_release_tag"
+        },
+        {
+          "status": "content_reviewed",
+          "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/blob/v2.15.0/LICENSE",
+          "checked_at": "2026-10-26",
+          "surface": "license_file"
+        }
+      ],
+      "license_status": "verified_scope_limited",
+      "license_verified": true,
+      "license_url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/blob/v2.15.0/LICENSE",
+      "allowed_use_scope": "**L✓** [repo MIT](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/blob/v2.15.0/LICENSE); chỉ dẫn link ở bản này, không nhúng dữ liệu hay mã; nếu chép đoạn nào thì lưu thông báo bản quyền.",
+      "planned_use": "link_only",
+      "redistribution_status": "unknown",
+      "cost_access_note": "Research summary may describe plans; recheck current item, terms and access before use",
+      "stack": [
+        "stack_neutral"
+      ],
+      "decision": "candidate_for_later_guidance; link_only in this pack",
+      "target_reference": "references/direction-gate.md",
+      "confidence": "identity_verified; rights_scope_as_recorded",
+      "limitations": "No sample, runtime, accessibility or redistribution claim follows from the catalog entry",
+      "summary": "Thư viện luật chọn theo ngành, phong cách, màu, chữ và biểu đồ; tra khi cần, không nhúng dữ liệu vào gói.",
+      "research_tags": [
+        "RULE"
+      ],
+      "research_action": "Liên kết",
+      "search_terms": [
+        "industry_rules",
+        "style_lookup",
+        "design_reasoning",
+        "sector rules",
+        "luật theo ngành",
+        "Next Level Builder UI/UX rule library"
+      ],
+      "search_hint": "At github.com/nextlevelbuilder/ui-ux-pro-max-skill, open the tagged release v2.15.0 and look for sector reasoning rules in the data files; inspect the exact file and terms. This is a lookup hint, not an observed sample.",
+      "follow_up": {
+        "status": "pending",
+        "candidates": [
+          "docs_or_markdown",
+          "skill_or_recipe",
+          "layout_or_demo"
+        ],
+        "note": "Docs/Markdown, skills and concrete layout/demo material have not been distilled for this item"
+      }
     }
   ]
 }
