@@ -1,8 +1,8 @@
 # Static-artifact QA — render, look, fix
 
-Step 7 for an HTML deck, report or microsite that the `static-artifact` lane built, and the
-entry point when such a file is edited later. It is the host's `visual-reviewer` slot
-for these artifacts; the report format, the hard floor and the six-dimension critique
+Step 7 for an HTML deck, report or microsite, whether the `static-artifact` lane built it
+or it arrived already made, and the entry point when such a file is edited later. It fills
+the `visual-reviewer` slot for these artifacts when the host has none; the report format, the hard floor and the six-dimension critique
 stay in [uat-report-schema.md](uat-report-schema.md). This file adds the checks and the
 rendering method that slide-shaped pages need. Build rules are in
 [static-artifact-build.md](static-artifact-build.md).
@@ -43,7 +43,7 @@ accessibility rules.
 | No collisions | No text over an image, an icon, or other text unless the design layers it on purpose |
 | Legible | Body text at or above 14px and labels at or above 12px at every size, as in the UAT hard floor |
 | Emptiness is intended | Empty areas read as composition. A slide that is deliberately one sentence in a vast field passes; a half-blank slide with no reason for the gap fails (see "Quiet is not bare" in [taste-calibration.md](taste-calibration.md)) |
-| Content is there without help | With the entrance observer never firing, and again with reduced motion, no text is hidden (the count of still-hidden reveal elements is 0) |
+| Content is there without help | With reduced motion on, with the entrance observer missing, and with it present but never firing, no text stays hidden once the deck's own failsafe delay has passed (still-hidden reveal elements: 0) |
 
 Also fail the slide on any of these: a circle or card visibly larger than its siblings,
 controls crowded to one side, a heading touching the top edge.
@@ -57,7 +57,8 @@ that runs past the **top** edge is cut off but does not add to the scroll height
 scroll-height test alone passes a slide that has lost its title.
 
 ```python
-"""Render every .slide at several sizes, measure overflow, close only our own browser.
+"""Render every .slide at several sizes, measure overflow, and check that content shows
+without the entrance animation. Closes only the browser it started.
 Usage: python -I render_slides.py deck.html out-dir   (keep it in .tmp/, delete afterwards)"""
 import json, pathlib, sys
 from playwright.sync_api import sync_playwright
@@ -65,6 +66,15 @@ from playwright.sync_api import sync_playwright
 deck, out = pathlib.Path(sys.argv[1]).resolve(), pathlib.Path(sys.argv[2]).resolve()
 out.mkdir(parents=True, exist_ok=True)
 SIZES = [(1920, 1080), (1280, 720), (768, 1024), (375, 667), (667, 375)]
+WAIT_MS = 2500   # must be longer than the deck's own failsafe delay (1500 ms in the sample)
+# mode -> (page options, script injected before the page runs). Only "normal" is shot at
+# every size; the other modes are measured once, at the second size.
+MODES = {
+    "normal": ({}, ""),
+    "reduced-motion": ({"reduced_motion": "reduce"}, ""),
+    "observer-absent": ({}, "delete window.IntersectionObserver;"),
+    "observer-silent": ({}, "window.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };"),
+}
 MEASURE = """() => [...document.querySelectorAll('.slide')].map((s, i) => ({
   slide: i + 1,
   clipped: s.scrollHeight > s.clientHeight + 1 || s.scrollWidth > s.clientWidth + 1,
@@ -75,28 +85,35 @@ MEASURE = """() => [...document.querySelectorAll('.slide')].map((s, i) => ({
 
 report = []
 with sync_playwright() as p:
-    browser = p.chromium.launch()              # a browser process of our own
+    browser = p.chromium.launch()                  # a browser process of our own
     try:
-        for w, h in SIZES:
-            page = browser.new_page(viewport={"width": w, "height": h})
-            try:
-                page.goto(deck.as_uri())       # file URL, no server needed
-                page.wait_for_timeout(1800)    # longer than the entrance failsafe
-                for i, el in enumerate(page.query_selector_all(".slide"), 1):
-                    el.scroll_into_view_if_needed()
-                    page.wait_for_timeout(100)
-                    page.screenshot(path=str(out / f"slide{i}-{w}x{h}.png"))
-                report.append({"size": f"{w}x{h}", "slides": page.evaluate(MEASURE)})
-            finally:
-                page.close()
+        for mode, (options, init) in MODES.items():
+            for w, h in (SIZES if mode == "normal" else SIZES[1:2]):
+                page = browser.new_page(viewport={"width": w, "height": h}, **options)
+                try:
+                    if init:
+                        page.add_init_script(init)
+                    page.goto(deck.as_uri())       # file URL, no server needed
+                    page.wait_for_timeout(WAIT_MS)
+                    if mode == "normal":
+                        for i, el in enumerate(page.query_selector_all(".slide"), 1):
+                            el.scroll_into_view_if_needed()
+                            page.wait_for_timeout(100)
+                            page.screenshot(path=str(out / f"slide{i}-{w}x{h}.png"))
+                    report.append({"mode": mode, "size": f"{w}x{h}", "slides": page.evaluate(MEASURE)})
+                finally:
+                    page.close()
     finally:
-        browser.close()                        # ends exactly the process we started
+        browser.close()                            # ends exactly the process we started
 print(json.dumps(report, indent=1))
 ```
 
 Adapt the `.slide` and `.reveal` selectors to the deck. A `clipped` or `outOfBox` of
 `true`, or any `hiddenReveals` above 0, is a finding; the screenshot shows what the user
-would see. Run it with the Python that already has Playwright and a Chromium in its
+would see. Set the wait longer than the failsafe delay the deck itself declares: a wait
+that is too short reports content as hidden when it would have appeared. `outOfBox`
+looks at direct children of the slide only, so a deeply nested or absolutely positioned
+element can still escape it; look at the image as well. Run it with the Python that already has Playwright and a Chromium in its
 cache; if either is missing, report "blocked" and mark every render check `unverified`
 (the `browser` slot in `SKILL.md`). Do not install packages to make the render work.
 
