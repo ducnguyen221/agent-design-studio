@@ -54,7 +54,7 @@ These are starting ranges, not WCAG minimum sizes or experimentally optimal valu
 Two craft details the table does not show:
 
 - **Emphasis stays in the family.** Emphasize a word in a headline with the weight or the italic of the same family; swapping in a different family for one word reads as an accident.
-- **Italic display needs room below the baseline.** Descenders, and stacked Vietnamese marks, clip when a display line is set tight. Keep the line height of italic display words at the upper end of the table's range (about 1.25 or more), add a little bottom padding on the wrapper, and inspect every italic display word in the rendered page.
+- **Italic display needs room below the baseline.** Descenders, and stacked Vietnamese marks, clip when a display line is set tight. Keep the line height of italic display words at the upper end of the table's range for the role (about 1.2 for Hero display, 1.25 for H1, 1.3 for H2), add a little bottom padding on the wrapper, and inspect every italic display word in the rendered page.
 
 The pack's [quality floor](../SKILL.md#the-quality-floor) still applies: body at least 14px and labels/captions at least 12px, with text contrast at least 4.5:1. Those are **pack rules**, not a WCAG minimum-font-size claim. Test actual computed sizes and contrast; a chosen size does not excuse poor contrast. For unusually dense interfaces, preserve the floor and test the token in context.
 
