@@ -57,6 +57,21 @@ Declared at Step 3, verified here. Every row is checked at all three viewports.
 - [ ] Forms and calls to action: every input has a visible label, helper text is in the
       markup, and an error shows beside its field; one label per intent across the page;
       ghost or outline buttons over imagery keep their contrast.
+- [ ] Touch targets on touch layouts are at least 44×44 px with clear space between
+      neighbours; a smaller icon gets a larger hit area.
+- [ ] Layers follow one declared z-index scale of named tiers; no ad-hoc values.
+- [ ] Hover and press states change no layout dimensions, so neighbours never shift.
+- [ ] An async action disables its control or shows progress while it runs, and a second
+      click cannot submit twice.
+- [ ] Space is reserved for late content (image dimensions, skeletons), so nothing jumps
+      when it arrives.
+- [ ] Meaningful images have descriptive alt text, decorative ones an empty alt, and
+      icon-only buttons an accessible name.
+- [ ] The document declares a viewport meta tag and does not block zoom.
+- [ ] Images are sized near their display size with explicit dimensions, and those below
+      the first screen load lazily.
+- [ ] A fixed or floating bar never covers content; the content carries a matching offset.
+- [ ] Destructive or irreversible actions ask for confirmation or offer undo.
 
 ### Perceived finish — public and marketing deliverables only
 
