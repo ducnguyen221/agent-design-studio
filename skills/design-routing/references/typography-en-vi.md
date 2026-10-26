@@ -13,6 +13,8 @@ Use at Step 4 to test a direction's type hypothesis, at Step 5 to make the token
 
 Ranks order *fit for the named scenario after hard gates*, not universal quality. The system stack is a valid no-download comparator in every scenario. These are design judgments based on intended roles and the cited upstream metadata, not measured legibility outcomes.
 
+**No family is the default.** Inter heads the first row because it is a sound, restrained UI starting point, not because it is exempt: it clears the same hard gates as any other family, and a face reused on every project is a habit rather than a decision. Whatever you choose, you should be able to say in one sentence why it fits this brief. A serif display face needs the same sentence (the brief names one, or the subject is genuinely editorial or heritage); "creative" or "premium" alone is not a reason.
+
 | Scenario | Editorial order to try | Reason and trade-off |
 | --- | --- | --- |
 | UI or technical landing page | 1. Inter; 2. Source Sans 3; 3. Be Vietnam Pro | Inter offers a restrained UI voice and variable weights; Source Sans 3 suits denser explanatory copy; Be Vietnam Pro changes the voice toward Vietnamese identity. Test Vietnamese accents at display sizes before committing. |
@@ -48,6 +50,11 @@ These are starting ranges, not WCAG minimum sizes or experimentally optimal valu
 | Label | 0.875–0.9375rem (14–15px) | 1.3–1.5 | 500–600 | Avoid wide all-caps tracking for VI; let controls grow and wrap. |
 | Caption | 0.875–0.9375rem (14–15px) | 1.35–1.55 | 400–500 | Keep contrast and surrounding space; do not hide meaning in tiny print. |
 | Code | 0.875–1rem (14–16px) | 1.4–1.6 | 400–500 | Use mono for code only; allow code blocks to scroll when two-dimensional layout requires it. |
+
+Two craft details the table does not show:
+
+- **Emphasis stays in the family.** Emphasize a word in a headline with the weight or the italic of the same family; swapping in a different family for one word reads as an accident.
+- **Italic display needs room below the baseline.** Descenders, and stacked Vietnamese marks, clip when a display line is set tight. Keep the line height of italic display words at about 1.1 or more even when the roman scale starts lower, add a little bottom padding on the wrapper, and inspect every italic display word in the rendered page.
 
 The pack's [quality floor](../SKILL.md#the-quality-floor) still applies: body at least 14px and labels/captions at least 12px, with text contrast at least 4.5:1. Those are **pack rules**, not a WCAG minimum-font-size claim. Test actual computed sizes and contrast; a chosen size does not excuse poor contrast. For unusually dense interfaces, preserve the floor and test the token in context.
 
