@@ -58,8 +58,9 @@ scroll-height test alone passes a slide that has lost its title.
 
 ```python
 """Render every .slide at several sizes, measure overflow, and check that content shows
-without the entrance animation. Closes only the browser it started.
-Usage: python -I render_slides.py deck.html out-dir   (keep it in .tmp/, delete afterwards)"""
+without the entrance animation. Closes only the browser it started. Blocks every
+request that is not a local file (set ALLOW_NETWORK = True on purpose, and say so in the
+report). Usage: python -I render_slides.py deck.html out-dir   (keep it in .tmp/, delete afterwards)"""
 import json, pathlib, sys
 from playwright.sync_api import sync_playwright
 
@@ -67,6 +68,19 @@ deck, out = pathlib.Path(sys.argv[1]).resolve(), pathlib.Path(sys.argv[2]).resol
 out.mkdir(parents=True, exist_ok=True)
 SIZES = [(1920, 1080), (1280, 720), (768, 1024), (375, 667), (667, 375)]
 WAIT_MS = 2500   # must be longer than the deck's own failsafe delay (1500 ms in the sample)
+ALLOW_NETWORK = False   # default: only file:, data:, blob: and about: requests are served
+blocked = []
+LOCAL = ("file:", "data:", "blob:", "about:")
+
+
+def guard(route):
+    url = route.request.url
+    if ALLOW_NETWORK or url.startswith(LOCAL):
+        route.continue_()
+    else:
+        blocked.append(url)
+        route.abort()
+
 # mode -> (page options, script injected before the page runs). Only "normal" is shot at
 # every size; the other modes are measured once, at the second size.
 MODES = {
@@ -91,6 +105,7 @@ with sync_playwright() as p:
             for w, h in (SIZES if mode == "normal" else SIZES[1:2]):
                 page = browser.new_page(viewport={"width": w, "height": h}, **options)
                 try:
+                    page.route("**/*", guard)
                     if init:
                         page.add_init_script(init)
                     page.goto(deck.as_uri())       # file URL, no server needed
@@ -105,7 +120,7 @@ with sync_playwright() as p:
                     page.close()
     finally:
         browser.close()                            # ends exactly the process we started
-print(json.dumps(report, indent=1))
+print(json.dumps({"blocked": sorted(set(blocked)), "runs": report}, indent=1))
 ```
 
 Adapt the `.slide` and `.reveal` selectors to the deck. A `clipped` or `outOfBox` of
@@ -117,10 +132,17 @@ element can still escape it; look at the image as well. Run it with the Python t
 cache; if either is missing, report "blocked" and mark every render check `unverified`
 (the `browser` slot in `SKILL.md`). Do not install packages to make the render work.
 
+A deck that needs something from outside (a web font, a remote image) shows up under
+`blocked`. Those requests are refused on purpose; to render with them, turn the network on
+deliberately and record in `07-uat-report.md` that you did and what was fetched.
+
 ## Rendering safely
 
 - **Start a browser of your own and close the one you started.** Use the context manager
   and the `finally` close above, so the process ends even when a step fails.
+- **Do not render an unfamiliar deck with the network open and unguarded.** A page can
+  fetch from anywhere, which exposes the machine's address and makes the result depend on
+  the connection. The script above refuses every request that is not a local file.
 - **Never end a browser by name or sweep every browser process.** That also closes the
   user's own windows and the sessions of other tools. A private browser process per
   checker makes it unnecessary, and it also makes parallel rendering safe.
