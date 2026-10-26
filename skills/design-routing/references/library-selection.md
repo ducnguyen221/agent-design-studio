@@ -114,18 +114,18 @@ install.
 | Accessible React foundation | `@radix-ui/themes` | MIT | Check its release cadence before committing |
 | Owned components on a utility-CSS base | `shadcn` CLI with `tailwindcss` v4 | MIT | Never ship the generated defaults: set radius, color, shadow, and type to the project |
 
-- Use the **official package**. Do not recreate its CSS by hand, and do not import its
-  tokens and then override most of them. If the brief only echoes a system's look, treat
-  it as an aesthetic (below), not as a system.
+- Take the **official package** as shipped. Rebuilding its styles by hand is wrong, and so
+  is pulling in its tokens only to overwrite most of them. If the brief merely echoes a
+  system's look, treat it as a look to build natively (below), not as a system to adopt.
 - **One system per project.** No second system next to the one the repository already
   uses, and no owned-component kit inside another system's theme.
 - Use the project's own framework and styling toolchain from the manifest. A
   server-component framework or a utility-CSS toolchain is the project's choice, not a
   default to bring along.
-- Before importing any third-party package, confirm it is in the manifest. If it is not,
-  name the install command first; never assume a library exists.
+- Before any third-party import, look for the package in the manifest. When it is absent,
+  write down the install command first; a library is never presumed to be there.
 
-### When the brief is an aesthetic, not a system
+### When the brief names a look, not a system
 
 Build it natively and say so in a comment. No package is needed.
 
@@ -136,7 +136,7 @@ Build it natively and say so in a comment. No package is needed.
 | Brutalism | Native CSS, monospace type, raw borders |
 | Editorial or magazine | An asymmetric grid and generous space; a serif display only if the brief earns it (see [taste-calibration.md](taste-calibration.md)) |
 | Kinetic type | Native CSS with scroll-driven animation; a specialist engine only if the evaluation above chooses one |
-| Native "liquid glass" | No official web package exists: approximate it as the glass rules in [color-protocol.md](color-protocol.md) describe, and label it as an approximation |
+| Native "liquid glass" | There is no official web package for it. Imitate it with the glass rules in [color-protocol.md](color-protocol.md) and say in a comment that it is an imitation |
 
 ## Record it
 

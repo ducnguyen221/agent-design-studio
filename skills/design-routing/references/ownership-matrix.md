@@ -66,7 +66,7 @@ Never generate a new design system at intake. Record what exists; decide later.
 
 A redesign of a live page or product starts by naming the case, because treating one case
 as another derails the whole job. If the case is unclear, add one question to the batch
-above: *keep the existing brand, or start visually from scratch?*
+above: *keep the current brand and evolve it, or redo the look from nothing?*
 
 | Case | What it means |
 | --- | --- |

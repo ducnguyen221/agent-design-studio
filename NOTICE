@@ -34,11 +34,10 @@ Where:        skills/design-routing/references/: taste-calibration.md,
               typography-en-vi.md, color-protocol.md, library-selection.md,
               motion-playbook.md (Part 5), prototype-playbook.md,
               direction-gate.md, uat-report-schema.md, ownership-matrix.md.
-Derivation:   concept for all files above, except library-selection.md: the
-              section on choosing an official design system versus an
-              aesthetic follows the source's structure and keeps a few short
-              phrases (adapted excerpt). Values, thresholds and presets of
-              the source were not carried over.
+Derivation:   concept for all files above, including library-selection.md:
+              the ideas were rewritten in this pack's own words and no run of
+              eight or more words coincides with the source. Values,
+              thresholds and presets of the source were not carried over.
 Decision:     KEEP the idea content; KEEP this notice and the license text.
               Not carried: dial presets, colour tables, the em-dash rule,
               framework-specific rules.
@@ -87,7 +86,8 @@ Taken:        From its reasoning data: 24 sector cautions (what a sector
               needs and what it avoids). From its guidelines: ten
               interaction and structure checks.
 Where:        direction-gate.md (section "Industry cautions"),
-              uat-report-schema.md (ten checks added to the hard floor),
+              uat-report-schema.md (ten checks in a separate section,
+              not part of the hard floor),
               resources/uiux-catalog.json (record 76, link only).
 Derivation:   adapted summary. Rows were shortened, reworded and stripped of
               colour, type and effect columns; one six-word phrase in one row
