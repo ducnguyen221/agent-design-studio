@@ -11,6 +11,8 @@ step's references. The substance lives in `references/`.
 
 **Core rule: no step starts before the one before it produced its artifact.** Skipping
 forward is how interfaces end up beautiful and wrong, or correct and forgettable.
+The one exception is an artifact the user hands over already made: an HTML deck or
+microsite to check is a valid starting artifact for Step 7 (see the QA row below).
 
 ## Choose the output before the seven steps
 
@@ -29,6 +31,7 @@ is not approval and does not authorize invented brand rules.
 | Design System from source code | Declare repo/commit/dirty baseline, allowed scope and a run output directory; use `agent-design-studio:design-system` `extract`. Keep source and approved DS unchanged. No screen directions or build. |
 | Audit or extend an existing Design System | Use `agent-design-studio:design-system` `audit` or `extend` according to the requested change. |
 | New screen or flow | Continue Step 0 and the seven steps below. |
+| Render QA of an existing HTML deck or microsite, whoever built it | Skip Steps 1–6 and Gate 1. Go straight to Step 7: load `references/static-artifact-qa.md` and `references/uat-report-schema.md`, fix what the render shows, write `07-uat-report.md`. Gate 2 rules still apply. |
 
 The Design System skill owns its long-lived contract and canonical map. This router
 owns the timing and gates of a UI build; it does not write a second canonical system.

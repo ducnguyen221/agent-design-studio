@@ -15,9 +15,8 @@ HTML, where text is text: selectable, searchable, resizable, printable.
 
 Fold these into the single Step 1 batch ([ownership-matrix.md](ownership-matrix.md)); do
 not open a second round. What is the deck for (pitch, teaching, report-out, talk)? How
-long (5–10, 10–20, 20+ slides)? Is the content written, or only ideas? Checking or fixing
-an existing HTML deck, whoever built it, does not rerun the seven steps — go straight to
-[static-artifact-qa.md](static-artifact-qa.md).
+long (5–10, 10–20, 20+ slides)? Is the content written, or only ideas? Checking an
+existing deck is not a build: see the QA row in `SKILL.md`.
 
 ## When the user does not know the taste
 
