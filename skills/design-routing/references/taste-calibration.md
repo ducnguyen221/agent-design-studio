@@ -361,7 +361,10 @@ unless a written rule allows it.
 - **One theme per page.** A dark page is dark in every section; a warm-paper band in the
   middle of a dark scroll looks broken. Tints within one family are fine. One deliberate
   full switch is allowed only when the brief calls for it.
-- **One accent color**, applied across the whole page.
+- **One accent color**, applied across the whole page, from the first section to the
+  footer; a stray second accent in a late section is a defect. Size its chroma with the
+  surface-area table in [color-protocol.md](color-protocol.md), and go beyond it only for a
+  deliberately electric direction.
 - **One corner-radius scale:** all sharp, all softly rounded, or all pill. A mixed set is
   acceptable only with a stated rule (for example, buttons pill, cards one radius, inputs
   a smaller one) that is followed everywhere.

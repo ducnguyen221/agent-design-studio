@@ -141,16 +141,16 @@ one system. Keep it under 0.02.
 
 Starting points, not WCAG rules. Deviate on purpose and record why.
 
-- **One accent, used on the whole page.** Once chosen it appears on every surface, from
-  the first section to the footer; a stray second accent in a late section is a defect.
-  Keep it below roughly 80% saturation unless the direction is deliberately electric (see
-  the chroma table above).
+- **One accent, held across the page:** the rule lives in *Locks* in
+  [taste-calibration.md](taste-calibration.md). Size its chroma with the surface-area
+  table above.
 - **Avoid pure black on pure white.** Use an off-black for text and an off-white ground
   from the neutral ramp; the pure extremes flatten depth.
 - **Set the theme once, at the root, with one token strategy** (class variants or
-  semantic custom properties, not both). Sections do not override the theme. Respect the
-  user's color-scheme preference, and add a manual toggle when either mode loses the
-  brand's character.
+  semantic custom properties, not both). Sections do not override it; the single
+  exception is the deliberate full switch described under *Locks* in
+  [taste-calibration.md](taste-calibration.md). Respect the user's color-scheme
+  preference, and add a manual toggle when either mode loses the brand's character.
 - **Glass and translucency only when the direction calls for it** (premium consumer, media
   overlays), and not on dense product screens. Blur alone reads flat: give the surface a
   thin inner edge and a faint inner highlight, and provide a solid fallback under
