@@ -34,10 +34,17 @@ Where:        skills/design-routing/references/: taste-calibration.md,
               typography-en-vi.md, color-protocol.md, library-selection.md,
               motion-playbook.md (Part 5), prototype-playbook.md,
               direction-gate.md, uat-report-schema.md, ownership-matrix.md.
-Derivation:   concept for all files above, including library-selection.md:
-              the ideas were rewritten in this pack's own words and no run of
-              eight or more words coincides with the source. Values,
-              thresholds and presets of the source were not carried over.
+Derivation:   adapted summary for taste-calibration.md, sections "Layout
+              discipline" (composition, hero, content density, quotes):
+              the structure and the starting-point thresholds of the source
+              were retained (layout families per page, headline and
+              supporting-line lengths, navigation height, quote length, hero
+              top padding) and the wording was rewritten; no run of eight or
+              more words coincides with the source.
+              concept for every other file above, including
+              library-selection.md: the ideas were rewritten in this pack's
+              own words and no run of eight or more words coincides with the
+              source; dial presets and colour tables were not carried over.
 Decision:     KEEP the idea content; KEEP this notice and the license text.
               Not carried: dial presets, colour tables, the em-dash rule,
               framework-specific rules.
