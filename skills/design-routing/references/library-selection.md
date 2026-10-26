@@ -111,7 +111,7 @@ install.
 | UK government service | `govuk-frontend` | MIT | For services where its patterns are expected |
 | US government service | `@uswds/uswds` (the older `uswds` package has not been updated since 2023) | GSA changes under CC0, with bundled Apache-2.0 and OFL assets | Keep the bundled asset notices when you redistribute fonts or icons |
 | Fast local-business or agency MVP | `bootstrap` 5.3 | MIT | Override the tokens; stock Bootstrap is instantly recognizable |
-| Accessible React foundation | `@radix-ui/themes` | MIT | Slower release cadence than the others (latest read: January 2026) |
+| Accessible React foundation | `@radix-ui/themes` | MIT | Check its release cadence before committing |
 | Owned components on a utility-CSS base | `shadcn` CLI with `tailwindcss` v4 | MIT | Never ship the generated defaults: set radius, color, shadow, and type to the project |
 
 - Use the **official package**. Do not recreate its CSS by hand, and do not import its
@@ -131,12 +131,12 @@ Build it natively and say so in a comment. No package is needed.
 
 | Aesthetic | Honest implementation |
 | --- | --- |
-| Frosted glass | `backdrop-filter` with a layered border and highlight, and a solid fallback for `prefers-reduced-transparency` |
+| Frosted glass | `backdrop-filter`, following the glass rules in [color-protocol.md](color-protocol.md) |
 | Bento tiles | CSS Grid with mixed cell sizes |
 | Brutalism | Native CSS, monospace type, raw borders |
 | Editorial or magazine | An asymmetric grid and generous space; a serif display only if the brief earns it (see [taste-calibration.md](taste-calibration.md)) |
 | Kinetic type | Native CSS with scroll-driven animation; a specialist engine only if the evaluation above chooses one |
-| Native "liquid glass" | No official web package exists: approximate it and label it as an approximation |
+| Native "liquid glass" | No official web package exists: approximate it as the glass rules in [color-protocol.md](color-protocol.md) describe, and label it as an approximation |
 
 ## Record it
 
