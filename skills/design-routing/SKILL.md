@@ -1,6 +1,6 @@
 ---
 name: design-routing
-description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Also use to distill a user-supplied UI image, URL, or sample content into a reusable Markdown design reference before building. Also use to run a render-look-fix QA loop on an HTML deck or microsite this lane builds. Not for other narrow single-step asks: critiquing an existing page, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, editing a PowerPoint or other non-HTML deck, or generating standalone images."
+description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Also use to distill a user-supplied UI image, URL, or sample content into a reusable Markdown design reference before building. Also use to run a render-look-fix QA loop on any HTML deck or microsite. Not for other narrow single-step asks: critiquing an existing page, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, editing a PowerPoint or other non-HTML deck, decks made of generated slide images, or generating standalone images."
 ---
 
 # Design Routing
@@ -51,7 +51,7 @@ steps — it changes what "done" means for all seven.
 
 | Mode | When | Deliverable |
 | --- | --- | --- |
-| `static-artifact` | Landing page, deck, report, demo, one-off microsite, and the render QA of an HTML deck or microsite this lane built | Self-contained HTML/CSS the user can open by double-clicking |
+| `static-artifact` | Landing page, deck, report, demo, one-off microsite, and the render QA of any HTML deck or microsite | Self-contained HTML/CSS the user can open by double-clicking |
 | `existing-product` | A screen or flow inside a shipping application | Code in the product's own framework and conventions |
 
 In `existing-product` mode, before Step 1: read the repository's agent instructions,
@@ -76,7 +76,7 @@ and record the choice in `STATUS.md`.
 | `style-knowledge` | Use its style/palette/font library as raw material for Step 4 | Style axes in `references/direction-gate.md` |
 | `codegen` | Use it to build directions and the implementation | Write the HTML/framework code directly |
 | `taste-canon` | Use it as the anti-generic authority for Step 5 | `references/taste-calibration.md` |
-| `visual-reviewer` | Use it to drive the Step 7 fix loop | `references/uat-report-schema.md`; for a deck or microsite this lane built, also `references/static-artifact-qa.md` |
+| `visual-reviewer` | Use it to drive the Step 7 fix loop | `references/uat-report-schema.md`; for an HTML deck or microsite, also `references/static-artifact-qa.md` |
 | `static-lint` | Run it as a mechanical pre-pass in Step 7 | Skip; the manual checklist still applies |
 | `browser` | Screenshot and interact for every render step | Renders cannot be verified — mark the affected checks `unverified`, hold the gate at `pending`, and say so |
 
@@ -218,8 +218,8 @@ Mode: static-artifact | existing-product · Updated: YYYY-MM-DD
 
 Designing a new deck, report, or infographic as a whole surface is in scope — it runs in
 `static-artifact` mode like any other one-off artifact, and so is the render check and fix
-loop for an HTML deck or microsite this lane built (`references/static-artifact-qa.md`).
-Polishing one that already exists, such as a PowerPoint file, is not.
+loop for any HTML deck or microsite, whoever built it (`references/static-artifact-qa.md`).
+Restyling a deck that is not HTML, such as a PowerPoint file, is not.
 
 This process is for designing an interface. It is not a way to run a whole product
 discovery, and it does not replace engineering review of the code it produces. When the

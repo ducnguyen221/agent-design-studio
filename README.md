@@ -175,7 +175,7 @@ converting an approved design to HTML, picking a palette, drawing charts, or edi
 PowerPoint or other non-HTML deck. Those have better-suited tools, and this process would
 be overkill. Designing a new deck, report, or infographic as a whole surface is a different
 matter: that is in scope, and runs in static-artifact mode, as is the render check and fix
-loop for an HTML deck or microsite that lane built.
+loop for any HTML deck or microsite.
 
 ## What's inside
 
