@@ -86,6 +86,40 @@ Partition the catalog by output form, not by topic: interactive pages, slide dec
 data-led single images are different grammars, and a style from the wrong partition
 requires contorting to fit.
 
+#### Industry cautions
+
+Starting points for sectors where a wrong look costs trust or safety, condensed from the
+rule library at catalog source 76 (link only). Use a row to filter the three directions,
+not to pick one. The rows do not decide light or dark, and the brief and the real content
+outrank any row.
+
+| Sector | Each direction needs | Each direction avoids |
+| --- | --- | --- |
+| Healthcare app | The strongest contrast and keyboard path you can reach; alert color kept for medication or risk | Neon palettes, heavy motion |
+| Fintech / crypto | Security signals visible beside any money action | Hiding security cues |
+| Government / public service | Plain direct layout, full keyboard operation, high contrast | Ornament, low-contrast text, decorative motion |
+| Retail banking | Security stated up front, fees and terms stated plainly | Playful tone, unclear fees |
+| Wellness / mental health | Privacy stated early, calm pacing; breathing motion only for a meditation product | Neon, motion overload |
+| SaaS dashboard | Fresh or live data, a plan for very large datasets | Ornament that slows rendering |
+| B2B enterprise SaaS | Case studies and a return-on-investment argument | Playful tone, hidden features |
+| Peer marketplace | Seller profiles and a secure-payment explanation before commitment | Thin trust signals, confusing layout |
+| Senior care | Large text, simple navigation, a path for family or carers | Small text, deep menus |
+| Medical clinic | Appointment booking and insurance information within two screens | Dated interface, convoluted booking |
+| Pharmacy | Prescription handling and drug-interaction warnings made obvious | Confusing layout, vague privacy |
+| Legal services | Case results and credentials shown plainly | Dated design, buried credentials |
+| Financial dashboard | High-contrast figures, live updates | Slow rendering |
+| Analytics dashboard | Filters and export; long lists virtualized | Ornament, data that cannot be filtered |
+| Sustainability / ESG | Data transparency and certification evidence | Greenwashing imagery without data |
+| Dating | Profile cards and visible safety features | Generic profiles, no safety path |
+| Luxury / premium | High-quality imagery, a story told in sequence | Cheap visuals, hurried animation |
+| Insurance | Quote calculator and policy comparison, explicit pricing | Opaque pricing, no trust signals |
+| Traditional finance | Security-first flows and accessibility | Playful design, weak security UX |
+| Non-profit | Impact stories and where donations go | No impact data, hidden financials |
+| Cybersecurity | Real-time monitoring and a clear threat display | Poor data visualization |
+| Biotech / life sciences | Accurate data in a clean presentation | Cluttered data, weak credibility |
+| Biohacking / longevity | Data privacy stated, scientific credibility | Generic health look, no privacy |
+| Climate / sustainable energy | Data transparency and visualized impact | Greenwashing, no real data |
+
 ### B — Dissect a real, verified exemplar
 
 Pick one real, existing, genuinely excellent piece of design closely related to this
