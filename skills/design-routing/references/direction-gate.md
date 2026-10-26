@@ -124,6 +124,12 @@ option, and merging two into one is the failure mode to watch for.
 - **The layout skeletons must differ.** At least one structural difference in
   navigation, composition, or content-region architecture. Two versions of one skeleton
   with different colors will be recognized as a reskin and rejected.
+- **Axis spread.** Beside the skeleton, give each direction a reading on three comparison
+  axes: layout variance (symmetric to asymmetric), motion (static to choreographed), and
+  density (airy to dense). They are a ruler for telling the three apart, not dials to turn
+  and not defaults: take each reading from the direction's own logic, never from a fixed
+  baseline or a table keyed on the brief's mood. The three directions should differ
+  clearly on at least two axes.
 - The quality floor from the router holds in every direction: body ≥14px, labels ≥12px,
   text contrast ≥4.5:1, works at all three viewports.
 - **White space must be composition, not absence.** A quiet direction still needs a
@@ -214,6 +220,7 @@ and the grant that permitted deciding without a person.
 
 ## Carried forward into Step 5
 - Layout skeleton: <…>
+- Axis reading: <variance · motion · density, for the chosen direction>
 - Type roles: <…>
 - Color starting point: <…>  (Step 5 derives the real values — do not fix hex here)
 - Signature element: <the one thing this page will be remembered by>
