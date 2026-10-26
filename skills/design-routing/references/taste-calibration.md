@@ -262,3 +262,118 @@ navigating this.
 
 Placeholder copy makes a design feel as templated as placeholder layout does. When the
 brief has no real content, writing the copy is part of the design work.
+
+## Layout discipline
+
+Concrete composition checks for marketing surfaces: landing pages, portfolios, event and
+product sites. Every number in this section is a **starting point for persuasion pages,
+not an accessibility rule**: exceed one on purpose and say why in the plan. Where this
+overlaps *the hero is a thesis* above, the subject decides what the hero says and this
+section only limits how much text and furniture gets packed into it. Dense product UI
+does not use this section (see *Posture*).
+
+### Composition
+
+- **Do not center by reflex.** When the chosen direction is asymmetric, avoid defaulting
+  to a centered hero and centered headings: use a split, a left-weighted layout, or
+  deliberate empty space. Centering stays right for a manifesto, an editorial piece, or a
+  launch where the message is the design.
+- **Do not repeat a layout family.** A family (a row of image cards, a full-width quote, a
+  text-and-image split) appears once per page; a page of eight sections wants at least
+  four distinct families. Two text-and-image splits in a row is the limit. The next
+  section breaks the pattern with a full-width block, a vertical stack, a bento, or
+  another family.
+- **Stack section headers by default.** A big headline on the left with a small explainer
+  paragraph floating on the right is a template tell. Put the body under the headline at a
+  readable measure, and split only when the second column carries a real visual or
+  control.
+- **Grids match their content.** Cell count equals item count: three items are one plus
+  two, never a row of three with a blank tile. Give two or three cells of a multi-cell
+  grid real variation (an image, a brand tint, a pattern) so the page is not a wall of
+  identical white cards.
+
+### The hero
+
+- **It fits the first screenful.** At desktop: a headline of two lines or fewer,
+  supporting text of about 20 words or fewer, and the primary action visible without
+  scrolling. If it does not fit, cut copy or reduce the scale before cutting the image.
+- **Plan the type with the asset.** A four-line headline is a size error; reserve the
+  largest display sizes for very short headlines.
+- **At most four text elements:** an optional eyebrow or brand strip, the headline, the
+  supporting text, and the actions (one primary, at most one secondary). A tagline under
+  the buttons, a trust strip, a pricing teaser, feature bullets, and an avatar row belong
+  in the sections below.
+- **Top padding is not breathing room.** Around 96px above the hero at desktop is a
+  ceiling; more air comes from larger type or a larger asset.
+- **A logo wall sits under the hero**, never in the same row as the hero copy, and holds
+  logos only, with no category labels beneath them.
+- **A hero needs a real visual.** Copy over a gradient blob is a placeholder.
+- **Navigation stays on one line at desktop**, at most about 80px tall. Condense labels,
+  drop secondary items, or collapse to a menu before it wraps.
+
+### Eyebrows and labels
+
+- Count the small tracked uppercase labels above headlines mechanically: at most one per
+  three sections, and the hero counts. Past that, delete the label and let the headline
+  carry the section.
+- Numbered markers, tile pagination, date-range labels, and version tags on a hero are
+  decoration unless the page really is a sequence or a launch (see *Structure is
+  information*).
+
+### Cards, depth, and shape
+
+- **A card needs a reason.** Use one only when elevation communicates hierarchy; otherwise
+  group with a rule, a divider, or space.
+- **Tint shadows toward the background hue.** A pure-black drop shadow on a light surface
+  looks pasted on.
+- **Lists past five items** are not a default bullet list with a rule under every row.
+  Group them into two columns, a card grid, tabs, a disclosure, or a scroll-snap strip. A
+  specification table of ten ruled rows is the weakest layout for specs: feature three or
+  four values and put the full table behind a link.
+- **Do not draw a rule above and below every row.** Pick one and use it sparingly. A
+  comparison bar with a filled track behind it adds noise: show the number, or a bar with
+  no track.
+
+### Content density
+
+- A section's default shape is a headline of about eight words or fewer, a supporting
+  line of about 25 words or fewer, and one visual or one action. More has to be justified
+  by that section's job.
+- Do not dump data on a persuasion page. Show the three to five strongest rows and link to
+  the rest, or give the data its own page when the data is the product.
+
+### Decoration that says nothing
+
+Cut these unless they carry real information: tags or pills laid over images (put a
+caption below instead); photo credits used as ornament; version or build stamps in a
+marketing footer; a text strip at the hero's foot that links nowhere; scroll cues and
+animated mouse icons; status dots that report no real status; clock, weather, or locale
+strips; vertical rotated text; poetic section names where a plain one works (a plain
+name for testimonials beats a coined phrase); generic numbered step labels where a verb
+and a noun would do; and middle dots used as punctuation more than once per metadata
+line.
+
+### Locks
+
+Choose each of these once per project and hold it everywhere. A late exception is a defect
+unless a written rule allows it.
+
+- **One theme per page.** A dark page is dark in every section; a warm-paper band in the
+  middle of a dark scroll looks broken. Tints within one family are fine. One deliberate
+  full switch is allowed only when the brief calls for it.
+- **One accent color**, applied across the whole page.
+- **One corner-radius scale:** all sharp, all softly rounded, or all pill. A mixed set is
+  acceptable only with a stated rule (for example, buttons pill, cards one radius, inputs
+  a smaller one) that is followed everywhere.
+- **One icon family and one stroke weight** (see [library-selection.md](library-selection.md)).
+- **One design system per project.**
+
+### Quotes and testimonials
+
+- A quote fits in a glance: about three lines or fewer. Cut or excerpt longer ones.
+- Attribute it with a name and a role, and the organization when there is one. A name
+  alone is not evidence.
+- Use real typographic quotation marks or none, never straight ASCII marks as display
+  quotes.
+- Real people only. If the page has no genuine testimonial yet, use the honest placeholder
+  from *Restraint*, never an invented endorsement.
