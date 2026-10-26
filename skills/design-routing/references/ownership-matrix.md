@@ -63,38 +63,37 @@ Never generate a new design system at intake. Record what exists; decide later.
 
 ### Redesigning something that already runs
 
-If the request is to redesign a live page or product, name which of three cases it is
-before anything else; mistaking one for another is the biggest source of bad redesigns.
-When the case is unclear, add one question to the batch above: *keep the existing brand,
-or start visually from scratch?*
+A redesign of a live page or product starts by naming the case, because treating one case
+as another derails the whole job. If the case is unclear, add one question to the batch
+above: *keep the existing brand, or start visually from scratch?*
 
 | Case | What it means |
 | --- | --- |
-| **Evolve** | Modernize without breaking the brand: audit first, extract the tokens, change gradually |
-| **Overhaul** | A new visual language; content, information architecture, and URLs are preserved |
+| **Evolve** | Refresh while the brand stays recognizable: audit first, pull out the existing tokens, change in steps |
+| **Overhaul** | A new visual language over the same content, information architecture, and URLs |
 | **Rebrand** | The brand itself changes; treat it as a new build |
 
-**Audit before touching anything:** brand tokens (color, type, logo, radii); information
-architecture and conversion paths; which content works and which is filler; patterns to
-keep and to retire; and the **search baseline** (indexed URLs, titles, headings,
-redirects), because lost search traffic is the most common redesign casualty.
+**Audit before changing anything:** the tokens (color, type, logo, radii); the information
+architecture and the conversion paths; which content earns its place and which is filler;
+what to keep and what to retire; and the **search baseline** (indexed URLs, titles,
+headings, redirects), since lost search traffic is the usual price of a careless redesign.
 
-**Keep stable unless asked:** the information architecture, URLs, anchor ids, navigation
-labels, and the names that analytics track; the brand color, extracted before any color
-rule is applied (a purple brand stays purple); the copy voice; and every accessibility
-gain.
+**Hold steady unless told otherwise:** the information structure, URLs, anchors, navigation
+labels, and the identifiers analytics depend on; the brand color, sampled before any color
+rule runs so the redesign does not repaint it; the copy voice; and the accessibility
+already achieved.
 
-**Change in this order, and stop when the brief is met:** typography, spacing and rhythm,
-color recalibration, motion on existing components, recomposing the hero and key
-sections, and only last replacing a block that cannot be salvaged. When structure,
-content, and search position are sound, targeted evolution through the first four steps
-captures most of the value for a fraction of the risk. Reserve a full redesign for
-structural debt (a broken information architecture, no system, a broken mobile layout),
-and carry every piece of content through it.
+**Work through these levers in order, and stop once the brief is satisfied:** typography,
+then spacing and rhythm, then color tuning, then motion on components that already exist,
+then recomposing the hero and key sections, and last, replacing a block that cannot be
+saved. When structure, content, and search position are healthy, the first four levers
+deliver most of the benefit at a fraction of the risk. A full redesign is for structural
+debt (a broken information architecture, no system, a broken mobile layout), with all
+content carried over.
 
-**Never change silently; record the approval in the brief:** URL structure and slugs,
-primary navigation labels, form field names and order (analytics and autofill depend on
-them), the logo or wordmark, and legal, consent, and cookie copy.
+**Needs explicit approval, recorded in the brief:** any change to URL structure or slugs,
+primary navigation labels, form field names or their order (analytics and autofill rely on
+them), the logo or wordmark, and legal, consent, or cookie text.
 
 ### Verify facts before designing them
 
