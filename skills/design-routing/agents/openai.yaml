@@ -6,6 +6,6 @@ interface:
 policy:
   # Implicit invocation is intentionally ENABLED. This skill is the entrance for
   # whole-interface design; the pack's second skill, design-system, has its own adapter
-  # and its own triggers. The sixteen references of this skill (twenty in the pack) are
+  # and its own triggers. The eighteen references of this skill (twenty-two in the pack) are
   # loaded per step and deliberately not exposed as skills, so no third door needs a guard.
   allow_implicit_invocation: true

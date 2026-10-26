@@ -124,6 +124,12 @@ option, and merging two into one is the failure mode to watch for.
 - **The layout skeletons must differ.** At least one structural difference in
   navigation, composition, or content-region architecture. Two versions of one skeleton
   with different colors will be recognized as a reskin and rejected.
+- **Axis spread.** Beside the skeleton, give each direction a reading on three comparison
+  axes: layout variance (symmetric to asymmetric), motion (static to choreographed), and
+  density (airy to dense). They are a ruler for telling the three apart, not dials to turn
+  and not defaults: take each reading from the direction's own logic, never from a fixed
+  baseline or a table keyed on the brief's mood. The three directions should differ
+  clearly on at least two axes.
 - The quality floor from the router holds in every direction: body ≥14px, labels ≥12px,
   text contrast ≥4.5:1, works at all three viewports.
 - **White space must be composition, not absence.** A quiet direction still needs a
@@ -144,6 +150,41 @@ option, and merging two into one is the failure mode to watch for.
   with **static keyframes** (before/after frames), the user benefit, reference
   observation, and an effect explicitly refused. Do not select engine, dependency,
   timings, or live animation here. The person chooses a direction, not a runtime.
+
+#### Industry cautions
+
+Applies to all three directions, whichever way they were found. Starting points for
+sectors where a wrong look costs trust or safety, condensed from the rule library at
+catalog source 76 (link only). Use a row to filter the three directions, not to pick
+one. The rows do not decide light or dark, and the brief and the real content outrank
+any row.
+
+| Sector | Each direction needs | Each direction avoids |
+| --- | --- | --- |
+| Healthcare app | The strongest contrast and keyboard path you can reach; alert color kept for medication or risk | Neon palettes, heavy motion |
+| Fintech / crypto | Security signals visible beside any money action | Hiding security cues |
+| Government / public service | Plain direct layout, full keyboard operation, high contrast | Ornament, low-contrast text, decorative motion |
+| Retail banking | Security stated up front, fees and terms stated plainly | Playful tone, unclear fees |
+| Wellness / mental health | Privacy stated early, calm pacing; breathing motion only for a meditation product | Neon, motion overload |
+| SaaS dashboard | Fresh or live data, a plan for very large datasets | Ornament that slows rendering |
+| B2B enterprise SaaS | Case studies and a return-on-investment argument | Playful tone, hidden features |
+| Peer marketplace | Seller profiles and a secure-payment explanation before commitment | Thin trust signals, confusing layout |
+| Senior care | Large text, simple navigation, a path for family or carers | Small text, deep menus |
+| Medical clinic | Appointment booking and insurance information within two screens | Dated interface, convoluted booking |
+| Pharmacy | Prescription handling and drug-interaction warnings made obvious | Confusing layout, vague privacy |
+| Legal services | Case results and credentials shown plainly | Dated design, buried credentials |
+| Financial dashboard | High-contrast figures, live updates | Slow rendering |
+| Analytics dashboard | Filters and export; long lists virtualized | Ornament, data that cannot be filtered |
+| Sustainability / ESG | Data transparency and certification evidence | Greenwashing imagery without data |
+| Dating | Profile cards and visible safety features | Generic profiles, no safety path |
+| Luxury / premium | High-quality imagery, a story told in sequence | Cheap visuals, hurried animation |
+| Insurance | Quote calculator and policy comparison, explicit pricing | Opaque pricing, no trust signals |
+| Traditional finance | Security-first flows and accessibility | Playful design, weak security UX |
+| Non-profit | Impact stories and where donations go | No impact data, hidden financials |
+| Cybersecurity | Real-time monitoring and a clear threat display | Poor data visualization |
+| Biotech / life sciences | Accurate data in a clean presentation | Cluttered data, weak credibility |
+| Biohacking / longevity | Data privacy stated, scientific credibility | Generic health look, no privacy |
+| Climate / sustainable energy | Data transparency and visualized impact | Greenwashing, no real data |
 
 ## The compare board
 
@@ -214,6 +255,7 @@ and the grant that permitted deciding without a person.
 
 ## Carried forward into Step 5
 - Layout skeleton: <…>
+- Axis reading: <variance · motion · density, for the chosen direction>
 - Type roles: <…>
 - Color starting point: <…>  (Step 5 derives the real values — do not fix hex here)
 - Signature element: <the one thing this page will be remembered by>

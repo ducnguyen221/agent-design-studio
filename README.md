@@ -23,10 +23,10 @@ in the request forced a choice. There was no brief, no alternative to reject, no
 clear, and no reviewer.
 
 This pack supplies all four through two skills. `design-routing` is the UI workflow and its
-sixteen references carry the craft — decision orders, thresholds, curve values, colour
+eighteen references carry the craft — decision orders, thresholds, curve values, colour
 maths, and the parts that tell the agent to stop and build nothing. `design-system` owns
 reusable system work across products and codebases and has four references of its own,
-so the pack holds twenty.
+so the pack holds twenty-two.
 
 **Every capability is a slot.** If your setup has a stronger specialist for a step, the
 router uses it; if not, the built-in playbook runs. The two skills have separate jobs:
@@ -128,7 +128,7 @@ font shortlists, starting sizes and checks for real glyphs, loading and text res
 
 For outside UI/UX examples, start with links in your brief and then use the
 [resource index](skills/design-routing/references/resource-index.md). It routes to a
-75-source [JSON catalog](skills/design-routing/resources/uiux-catalog.json). Shortlist
+76-source [JSON catalog](skills/design-routing/resources/uiux-catalog.json). Shortlist
 two or three fitting sources, inspect relevant samples when needed, and choose a
 direction together at Step 4. The catalog is link-only: entry pages do not establish
 observed demos, runtime results, or permission to reuse code and assets. Optional local
@@ -171,10 +171,13 @@ artifact tool before any skill is considered; see
 [Using with design:design-system](#using-with-designdesign-system).
 
 It deliberately stays out of other narrow single-step work — critiquing an existing page,
-converting an approved design to HTML, picking a palette, drawing charts, or tuning the
-layout of an existing deck. Those have better-suited tools, and this process would be
-overkill. Designing a new deck, report, or infographic as a whole surface is a different
-matter: that is in scope, and runs in static-artifact mode.
+converting an approved design to HTML, picking a palette, drawing charts, or editing a
+PowerPoint or other non-HTML deck. Those have better-suited tools, and this process would
+be overkill. Designing a new deck, report, or infographic as a whole surface is a different
+matter: that is in scope, and runs in static-artifact mode, as is the visual layout check and
+fix loop (render, look, fix) for any HTML deck or microsite, which is not functional or
+browser-flow testing. A critique-only pass over an existing page, with no
+fixing, stays out.
 
 ## What's inside
 
@@ -197,6 +200,8 @@ skills/design-routing/
     ├── resource-index.md       source shortlist by task; catalog loads only on demand
     ├── reference-distill.md    supplied sample to Markdown design reference
     ├── library-selection.md    choosing a dependency, or not adding one
+    ├── static-artifact-build.md building decks and microsites as one self-contained file
+    ├── static-artifact-qa.md   render, look and fix loop for any HTML deck or microsite
     └── uat-report-schema.md    the scored review and the hard floor
 └── templates/
     ├── 06-motion-spec.md        traceable motion decision template
@@ -224,9 +229,9 @@ skills/design-system/
 └── tests/fixture/              anonymous full-profile package used by the verifier
 ```
 
-`design-routing` keeps its sixteen references and its UI build/reference-only scope.
+`design-routing` keeps its eighteen references and its UI build/reference-only scope.
 `design-system` is a separate entrypoint for product-owned, reusable system work, with four
-references: twenty in the pack. Each skill loads only the references for its current task,
+references: twenty-two in the pack. Each skill loads only the references for its current task,
 so context stays lean.
 
 ## Verify a Design System contract
@@ -342,9 +347,11 @@ installed. Four things to know:
 
 ## Acknowledgments
 
-This process distils ideas from four open projects. The reasoning was re-expressed in our
-own words rather than copied; the specific thresholds and values we learned from them are
-used with gratitude. The debt is real and specific.
+This process distils ideas from eight open projects: the four in the table below, and
+four more recorded in [NOTICE](NOTICE) with their licenses and exact revisions. The
+reasoning was re-expressed in our own words; the specific thresholds and values we learned
+from them are used with gratitude, and where a passage follows a source more closely,
+NOTICE says so. The debt is real and specific.
 
 The new motion recipes also use [React Bits Animated Content](https://reactbits.dev/c/animations/animated-content)
 as a live visual reference and [GSAP's demo/docs](https://demos.gsap.com/) and
@@ -361,8 +368,8 @@ is separate from the MIT license of its [official agent skills](https://github.c
 | [plannotator/effective-html](https://github.com/plannotator/effective-html) | MIT | Choosing fidelity first, wireframes kept deliberately unfinished, prototypes that model real states, and the one-entrance routing shape |
 | [alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design) | MIT | The three-direction gate, the brand asset protocol, the colour derivation method, and the scored critique |
 
-The Design System skill also follows two published shapes, re-expressed in our own words with
-no text copied: Google Labs' [Design Markdown](https://github.com/google-labs-code/design.md)
+The Design System skill also follows two published shapes, re-expressed in our own words:
+Google Labs' [Design Markdown](https://github.com/google-labs-code/design.md)
 (Apache-2.0, spec `alpha`, read 22 Oct 2026) for the section and key names of `DESIGN.md`, and
 Anthropic's `design:design-system` skill for the idea of audit, document and extend modes.
 
@@ -377,6 +384,8 @@ Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducn
 ## License
 
 [MIT](LICENSE) © 2026 Nguyễn Quang Đức
+
+Third-party credits and license texts: [NOTICE](NOTICE) and [LICENSES/](LICENSES/).
 
 ## 🤝 ACD Ecosystem Integration
 

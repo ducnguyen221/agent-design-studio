@@ -45,6 +45,7 @@ Identify the category, not the library the user happened to name.
 | State management | Only when prop-passing has genuinely failed. Prefer the smallest thing that works |
 | Conditional class names | Trivial and boring; take the smallest one, or the variant-typed one if the component has real variants |
 | Theme switching | Must set the theme before first paint, or every reload flashes |
+| Icons | One family and one stroke weight per project, and never hand-drawn paths. Lucide is the first look and Phosphor the alternative when several weights matter (see [resource-index.md](resource-index.md)). Compose a missing glyph from the family's own shapes; add a second family only with a stated reason |
 
 **5. Evaluate the candidate.**
 
@@ -71,6 +72,11 @@ and [official agent skills](https://github.com/greensock/gsap-skills) for lifecy
 scroll/pin/scrub and framework guidance. Its runtime license is separate from that
 skills repository's MIT license. Do not install either by default.
 
+Never run a specialist scroll or canvas engine (a timeline library, a 3D renderer) in the
+same component tree as the general UI animation library; they contend for frames. Isolate
+the specialist in leaf components with explicit cleanup, and keep everything else on the
+one animation tool already chosen.
+
 **6. Recommend one.** State what it is for in one sentence and wire it up. Do not present
 a menu when there is a clear answer — a menu just moves the decision to someone with less
 context.
@@ -87,6 +93,50 @@ from general knowledge, and be clear that you have left familiar ground.
 - A web of per-component state and prop-drilling standing in for shared state.
 - Template-literal class-name ternaries three conditions deep.
 - A motion library installed for a hover fade.
+
+## When the brief names an established design system
+
+Applies to `existing-product` mode. `static-artifact` keeps its no-dependency default
+(see the end of this file). Package names, licenses, and maintenance status below were
+read from the package registries and repositories on 2026-10-26; re-check them before you
+install.
+
+| The brief reads as | Official package | License read | Check before choosing |
+| --- | --- | --- | --- |
+| Microsoft or enterprise SaaS, dense dashboards | `@fluentui/react-components`, `@fluentui/web-components` | MIT | Take the one that matches the product's framework |
+| Google or Material product | `@material/web` | Apache-2.0 | The repository states it is in maintenance mode pending new maintainers: confirm that is acceptable before building on it |
+| IBM-style enterprise and analytics | `@carbon/react`, `@carbon/styles` | Apache-2.0 | |
+| Atlassian-style product | `@atlaskit/tokens` plus the matching `@atlaskit/*` components | Apache-2.0 | Add components one at a time and read each package's own license field |
+| GitHub-style devtool or community | `@primer/css`; `@primer/react-brand` for marketing pages | MIT | |
+| UK government service | `govuk-frontend` | MIT | For services where its patterns are expected |
+| US government service | `@uswds/uswds` (the older `uswds` package has not been updated since 2023) | GSA changes under CC0, with bundled Apache-2.0 and OFL assets | Keep the bundled asset notices when you redistribute fonts or icons |
+| Fast local-business or agency MVP | `bootstrap` 5.3 | MIT | Override the tokens; stock Bootstrap is instantly recognizable |
+| Accessible React foundation | `@radix-ui/themes` | MIT | Check its release cadence before committing |
+| Owned components on a utility-CSS base | `shadcn` CLI with `tailwindcss` v4 | MIT | Never ship the generated defaults: set radius, color, shadow, and type to the project |
+
+- Take the **official package** as shipped. Rebuilding its styles by hand is wrong, and so
+  is pulling in its tokens only to overwrite most of them. If the brief merely echoes a
+  system's look, treat it as a look to build natively (below), not as a system to adopt.
+- **One system per project.** No second system next to the one the repository already
+  uses, and no owned-component kit inside another system's theme.
+- Use the project's own framework and styling toolchain from the manifest. A
+  server-component framework or a utility-CSS toolchain is the project's choice, not a
+  default to bring along.
+- Before any third-party import, look for the package in the manifest. When it is absent,
+  write down the install command first; a library is never presumed to be there.
+
+### When the brief names a look, not a system
+
+Build it natively and say so in a comment. No package is needed.
+
+| Aesthetic | Honest implementation |
+| --- | --- |
+| Frosted glass | `backdrop-filter`, following the glass rules in [color-protocol.md](color-protocol.md) |
+| Bento tiles | CSS Grid with mixed cell sizes |
+| Brutalism | Native CSS, monospace type, raw borders |
+| Editorial or magazine | An asymmetric grid and generous space; a serif display only if the brief earns it (see [taste-calibration.md](taste-calibration.md)) |
+| Kinetic type | Native CSS with scroll-driven animation; a specialist engine only if the evaluation above chooses one |
+| Native "liquid glass" | There is no official web package for it. Imitate it with the glass rules in [color-protocol.md](color-protocol.md) and say in a comment that it is an imitation |
 
 ## Record it
 

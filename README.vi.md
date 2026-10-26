@@ -23,11 +23,11 @@ kiểu nó làm cho tất cả mọi người. Không phải vì mô hình thi�
 yêu cầu buộc nó phải *chọn*. Không brief, không phương án để loại bỏ, không sàn chất lượng
 để vượt, và không ai rà soát.
 
-Bộ này cung cấp cả bốn qua hai skill. `design-routing` là quy trình UI; mười sáu tài liệu
+Bộ này cung cấp cả bốn qua hai skill. `design-routing` là quy trình UI; mười tám tài liệu
 tham chiếu của nó mang phần nghề thật sự — thứ tự ra quyết định, các ngưỡng cụ thể, giá
 trị đường cong, phép tính màu, và cả những phần bảo agent dừng lại. `design-system` phụ
 trách công việc hệ thống có thể dùng lại giữa các sản phẩm và codebase, có bốn tài liệu
-tham chiếu riêng, nên cả bộ có hai mươi.
+tham chiếu riêng, nên cả bộ có hai mươi hai.
 
 **Mỗi năng lực là một "slot".** Nếu máy bạn đã có công cụ mạnh hơn cho một bước, router sẽ
 dùng nó; nếu không, playbook có sẵn sẽ chạy. Hai skill có phạm vi riêng: router xử lý việc
@@ -129,7 +129,7 @@ font theo từng việc, cỡ chữ khởi đầu và cách kiểm dấu, tải 
 
 Khi cần mẫu UI/UX bên ngoài, xem link trong brief trước rồi mở
 [chỉ mục nguồn](skills/design-routing/references/resource-index.md). Chỉ mục trỏ đến
-[catalog JSON 75 nguồn](skills/design-routing/resources/uiux-catalog.json); lọc theo việc,
+[catalog JSON 76 nguồn](skills/design-routing/resources/uiux-catalog.json); lọc theo việc,
 đưa hai hoặc ba nguồn phù hợp, chỉ mở mẫu cụ thể khi cần, rồi cùng người dùng chốt hướng
 ở Bước 4. Catalog chỉ để mở link: trang đầu không chứng minh demo đã quan sát, runtime
 đã chạy hay quyền dùng lại mã và asset. Có thể lọc local bằng
@@ -170,10 +170,13 @@ công cụ artifact có sẵn trước khi cân nhắc bất kỳ skill nào; xe
 [Dùng cùng design:design-system](#dùng-cùng-designdesign-system).
 
 Nó cố ý đứng ngoài các việc lẻ một bước khác — phê bình một trang có sẵn, chuyển một thiết kế đã
-duyệt thành HTML, chọn bảng màu, vẽ biểu đồ, hay chỉnh bố cục một bộ slide đã có. Những
-việc đó có công cụ phù hợp hơn, và quy trình này sẽ là quá nặng. Thiết kế mới một bộ slide,
-một báo cáo hay một infographic như nguyên một sản phẩm thì lại khác: việc đó nằm trong
-phạm vi, và chạy ở chế độ static-artifact.
+duyệt thành HTML, chọn bảng màu, vẽ biểu đồ, hay sửa một bộ slide PowerPoint (hoặc bộ slide
+không phải HTML) đã có. Những việc đó có công cụ phù hợp hơn, và quy trình này sẽ là quá
+nặng. Thiết kế mới một bộ slide, một báo cáo hay một infographic như nguyên một sản phẩm thì
+lại khác: việc đó nằm trong phạm vi, và chạy ở chế độ static-artifact; vòng chụp-nhìn-sửa bố cục
+và thị giác cho bất kỳ bộ slide HTML hay microsite nào cũng vậy (không phải kiểm thử chức năng
+hay luồng thao tác). Chỉ phê bình một trang có sẵn mà không sửa
+thì vẫn nằm ngoài.
 
 ## Bên trong có gì
 
@@ -196,6 +199,8 @@ skills/design-routing/
     ├── resource-index.md       shortlist nguồn theo việc; catalog chỉ nạp khi cần
     ├── reference-distill.md    chắt mẫu được cung cấp thành Markdown thiết kế
     ├── library-selection.md    chọn thư viện, hoặc không thêm thư viện nào
+    ├── static-artifact-build.md dựng deck và microsite thành một file tự chứa
+    ├── static-artifact-qa.md   vòng chụp-nhìn-sửa cho mọi deck HTML hoặc microsite
     └── uat-report-schema.md    bản rà soát có chấm điểm và sàn cứng
 └── templates/
     ├── 06-motion-spec.md        mẫu quyết định motion có đường lần ngược
@@ -223,9 +228,9 @@ skills/design-system/
 └── tests/fixture/              gói hồ sơ full hư cấu để verifier dùng
 ```
 
-`design-routing` giữ nguyên mười sáu tài liệu tham chiếu và phạm vi dựng UI/phân tích
+`design-routing` giữ nguyên mười tám tài liệu tham chiếu và phạm vi dựng UI/phân tích
 reference. `design-system` là điểm vào riêng cho hệ thống tái dùng do sản phẩm sở hữu, có
-bốn tài liệu tham chiếu: cả bộ có hai mươi. Mỗi skill chỉ nạp tài liệu cần cho việc hiện
+bốn tài liệu tham chiếu: cả bộ có hai mươi hai. Mỗi skill chỉ nạp tài liệu cần cho việc hiện
 tại để context luôn gọn.
 
 ## Kiểm hợp đồng Design System
@@ -337,9 +342,11 @@ cần biết:
 
 ## Ghi nhận
 
-Quy trình này chắt lọc ý tưởng từ bốn dự án mở. Phần lập luận đã được diễn đạt lại bằng
-ngôn ngữ của chúng tôi chứ không sao chép; những ngưỡng và giá trị cụ thể học được từ họ
-thì được dùng với lòng biết ơn. Món nợ là thật và cụ thể.
+Quy trình này chắt lọc ý tưởng từ tám dự án mở: bốn dự án trong bảng dưới đây, và bốn dự án
+khác được ghi trong [NOTICE](NOTICE) kèm giấy phép và bản sửa đổi chính xác. Phần lập luận
+đã được diễn đạt lại bằng ngôn ngữ của chúng tôi; những ngưỡng và giá trị cụ thể học được từ
+họ thì được dùng với lòng biết ơn, và chỗ nào một đoạn bám nguồn sát hơn thì NOTICE ghi rõ.
+Món nợ là thật và cụ thể.
 
 Các recipe motion mới còn dùng [React Bits Animated Content](https://reactbits.dev/c/animations/animated-content)
 làm tham khảo trực quan, cùng [demo/tài liệu GSAP](https://demos.gsap.com/) và
@@ -355,8 +362,8 @@ khác với MIT của [skill GSAP chính thức](https://github.com/greensock/gs
 | [plannotator/effective-html](https://github.com/plannotator/effective-html) | MIT | Chọn mức hoàn thiện trước tiên, wireframe cố ý để dở, prototype mô hình hoá trạng thái thật, và kiến trúc một-cửa-vào |
 | [alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design) | MIT | Cổng ba hướng, giao thức tài sản thương hiệu, phương pháp suy ra màu, và bản phê bình có chấm điểm |
 
-Skill Design System còn theo hai khuôn đã công bố, diễn đạt lại bằng lời của mình và không
-chép chữ nào: [Design Markdown](https://github.com/google-labs-code/design.md) của Google Labs
+Skill Design System còn theo hai khuôn đã công bố, diễn đạt lại bằng lời của mình:
+[Design Markdown](https://github.com/google-labs-code/design.md) của Google Labs
 (Apache-2.0, spec `alpha`, đọc ngày 22/10/2026) cho tên mục và tên khoá của `DESIGN.md`, và skill
 `design:design-system` của Anthropic cho ý tưởng các mode audit, document và extend.
 
@@ -371,3 +378,5 @@ Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducn
 ## Giấy phép
 
 [MIT](LICENSE) © 2026 Nguyễn Quang Đức
+
+Ghi công bên thứ ba và văn bản giấy phép: [NOTICE](NOTICE) và [LICENSES/](LICENSES/).

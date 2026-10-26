@@ -1,6 +1,6 @@
 ---
 name: design-routing
-description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Also use to distill a user-supplied UI image, URL, or sample content into a reusable Markdown design reference before building. Not for other narrow single-step asks: critiquing an existing page, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, tuning the layout of an existing deck, or generating standalone images."
+description: "Use when a user interface must be designed and built as a whole — a new page, screen, app view, dashboard, or site from a brief, or a full redesign of something already shipping — and the visual direction is not yet settled, so going straight to code would be guessing. Also use when asked to run a design process, to see real options before committing, or to take a UI from brief through build to review. Also use to distill a user-supplied UI image, URL, or sample content into a reusable Markdown design reference before building. Also use to run a visual layout QA loop (render, look, fix what it finds) on any HTML deck or microsite. Not for other narrow single-step asks: only critiquing an existing page without fixing it, converting an approved design to HTML, picking only a palette or font, drawing charts or data visualizations, functional or browser-flow testing, editing a PowerPoint or other non-HTML deck, decks made of generated slide images, or generating standalone images."
 ---
 
 # Design Routing
@@ -11,6 +11,8 @@ step's references. The substance lives in `references/`.
 
 **Core rule: no step starts before the one before it produced its artifact.** Skipping
 forward is how interfaces end up beautiful and wrong, or correct and forgettable.
+The one exception is an artifact the user hands over already made: an HTML deck or
+microsite to check is a valid starting artifact for Step 7 (see the QA row below).
 
 ## Choose the output before the seven steps
 
@@ -29,6 +31,7 @@ is not approval and does not authorize invented brand rules.
 | Design System from source code | Declare repo/commit/dirty baseline, allowed scope and a run output directory; use `agent-design-studio:design-system` `extract`. Keep source and approved DS unchanged. No screen directions or build. |
 | Audit or extend an existing Design System | Use `agent-design-studio:design-system` `audit` or `extend` according to the requested change. |
 | New screen or flow | Continue Step 0 and the seven steps below. |
+| Render QA of an existing HTML deck or microsite, whoever built it | Skip Steps 1–6 and Gate 1. Go straight to Step 7: load `references/static-artifact-qa.md` and `references/uat-report-schema.md`, fix what the render shows, write `07-uat-report.md`. Gate 2 rules still apply. |
 
 The Design System skill owns its long-lived contract and canonical map. This router
 owns the timing and gates of a UI build; it does not write a second canonical system.
@@ -51,13 +54,16 @@ steps — it changes what "done" means for all seven.
 
 | Mode | When | Deliverable |
 | --- | --- | --- |
-| `static-artifact` | Landing page, deck, report, demo, one-off microsite | Self-contained HTML/CSS the user can open by double-clicking |
+| `static-artifact` | Landing page, deck, report, demo, one-off microsite, and the render QA of any HTML deck or microsite | Self-contained HTML/CSS the user can open by double-clicking |
 | `existing-product` | A screen or flow inside a shipping application | Code in the product's own framework and conventions |
 
 In `existing-product` mode, before Step 1: read the repository's agent instructions,
 component library, design tokens, routing, and test conventions. HTML here is a
 *prototype for review only* — never the deliverable. Never introduce a second design
 system next to the one the repo already has.
+
+Redesigning something already live, in either mode, adds the redesign block of
+`references/ownership-matrix.md` ("Redesigning something that already runs") to Step 1.
 
 State the chosen mode in one line and continue.
 
@@ -73,7 +79,7 @@ and record the choice in `STATUS.md`.
 | `style-knowledge` | Use its style/palette/font library as raw material for Step 4 | Style axes in `references/direction-gate.md` |
 | `codegen` | Use it to build directions and the implementation | Write the HTML/framework code directly |
 | `taste-canon` | Use it as the anti-generic authority for Step 5 | `references/taste-calibration.md` |
-| `visual-reviewer` | Use it to drive the Step 7 fix loop | `references/uat-report-schema.md` |
+| `visual-reviewer` | Use it to drive the Step 7 fix loop | `references/uat-report-schema.md`; for an HTML deck or microsite, also `references/static-artifact-qa.md` |
 | `static-lint` | Run it as a mechanical pre-pass in Step 7 | Skip; the manual checklist still applies |
 | `browser` | Screenshot and interact for every render step | Renders cannot be verified — mark the affected checks `unverified`, hold the gate at `pending`, and say so |
 
@@ -98,9 +104,9 @@ which for one reference below is earlier than the step that writes its artifact.
 | 2 | Fidelity — how finished this needs to be, and why | `choosing-fidelity.md`, then `image-sourcing.md` if images are content | `01-fidelity.md` |
 | 3 | Wireframe — structure only, deliberately unfinished | `wireframe-playbook.md` | `02-wireframe.html` + `.png` |
 | 4 | Direction gate — three genuinely different real renders, each with up to two static motion hypotheses | `direction-gate.md`; `typography-en-vi.md` when EN/VI type is a direction decision | `03-directions/{a,b,c}.html` + `.png`, `03-compare.html`, `03-direction-decision.md` |
-| 5 | Design System delta + static build, confirmed in a browser before animation | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md`; `typography-en-vi.md` for EN/VI font and scale choices; `agent-design-studio:design-system` `create/extend` for the system contract | `04-design-system/` v3 package delta and canonical pointer, `05-implementation.md` |
+| 5 | Design System delta + static build, confirmed in a browser before animation | `brand-asset-protocol.md`, then `color-protocol.md`, then `taste-calibration.md`; `static-artifact-build.md` when building a deck, report or microsite; `typography-en-vi.md` for EN/VI font and scale choices; `agent-design-studio:design-system` `create/extend` for the system contract | `04-design-system/` v3 package delta and canonical pointer, `05-implementation.md` |
 | 6 | Motion pass — decide and implement only after the static page works | `motion-playbook.md`, then `references/motion-patterns.md` and `templates/06-motion-spec.md` | `06-motion-spec.md` |
-| 7 | Review loop | `uat-report-schema.md`; `typography-en-vi.md` for EN/VI type verification | `07-uat-report.md` |
+| 7 | Review loop | `uat-report-schema.md`; `static-artifact-qa.md` for a deck or microsite; `typography-en-vi.md` for EN/VI type verification | `07-uat-report.md` |
 
 Step 2 may route to `prototype-playbook.md` instead of a wireframe when the open question
 is behavior rather than structure; Step 3's artifact is then `02-prototype.html` + `.png`,
@@ -143,6 +149,26 @@ UI run artifacts live in `<project>/design/<YYYY-MM-DD>-<slug>/`. A reusable Des
 System lives at the product's declared canonical location, normally
 `<project>/design-system/` for a new product. The run holds proposals and pointers;
 it never silently replaces the canonical source.
+
+## Questions mid-pipeline — where the rule lives
+
+When a question comes up between steps, or a user asks one while a design is in
+progress, open the file named here at that moment. It is an index, not a second copy of
+the rules.
+
+| Question | Where the rule lives |
+| --- | --- |
+| What counts as generic; the anti-generic canon; the words on the page | `references/taste-calibration.md` |
+| Type, once a page is being built: fonts, scale, English and Vietnamese marks | `references/typography-en-vi.md` |
+| Colour, light and dark | `references/color-protocol.md`; checked at review in `references/uat-report-schema.md` |
+| Layout, composition, hero, density | `references/taste-calibration.md`, section "Layout discipline" |
+| Motion and scroll effects | `references/motion-playbook.md`, then `references/motion-patterns.md` |
+| Forms, touch targets, z-index, calls to action | `references/uat-report-schema.md`, section "Interaction, structure and forms — checked, not a floor" |
+| Which direction fits; cautions for a regulated or sensitive field | `references/direction-gate.md`, section "Shared rules for all three" |
+| Icon, UI or motion libraries | `references/library-selection.md` |
+| Redesigning something already live | `references/ownership-matrix.md`, section "Redesigning something that already runs" |
+| HTML deck or microsite: build, or render QA | `references/static-artifact-build.md`, `references/static-artifact-qa.md` |
+| Images, brand logos | `references/image-sourcing.md`, `references/brand-asset-protocol.md` |
 
 ## The two gates
 
@@ -214,8 +240,11 @@ Mode: static-artifact | existing-product · Updated: YYYY-MM-DD
 ## Scope
 
 Designing a new deck, report, or infographic as a whole surface is in scope — it runs in
-`static-artifact` mode like any other one-off artifact. Polishing one that already exists
-is not.
+`static-artifact` mode like any other one-off artifact, and so is the visual layout check and
+fix loop (render, look, fix) for any HTML deck or microsite, whoever built it
+(`references/static-artifact-qa.md`). Functional and browser-flow testing is not.
+Restyling a deck that is not HTML, such as a PowerPoint file, is not, and neither is a
+critique-only pass over an existing page, with no fixing.
 
 This process is for designing an interface. It is not a way to run a whole product
 discovery, and it does not replace engineering review of the code it produces. When the

@@ -20,9 +20,10 @@ generate color, or both rewrite the same component. The rule:
 | Visual taste / anti-generic | `taste-calibration.md`, or the host's `taste-canon` | A style-knowledge library | Two taste authorities in one project |
 | New palette candidates and brand assets for a UI build | `brand-asset-protocol.md` + `color-protocol.md` | `design-system` checks token authority | Any other step inventing a hex value |
 | Reusable tokens / Design System contract | `agent-design-studio:design-system`; Step 5 owns the timing after Gate 1 | Existing product token/component source read at intake | Creating a second canonical source or promoting a proposal before owner/reviewer checks |
-| Implementation | The host's `codegen`, or direct authorship; in `existing-product` mode the product's own codebase | A library-selection reference | Two agents writing the same component in one pass |
+| Implementation | The host's `codegen`, or direct authorship (decks and microsites: `static-artifact-build.md`); in `existing-product` mode the product's own codebase | A library-selection reference | Two agents writing the same component in one pass |
 | Motion | `motion-playbook.md` | — | Motion added during implementation without the motion step |
 | Review and fixes | `uat-report-schema.md`, or the host's `visual-reviewer` | A static linter; a motion-only reviewer | A second reviewer editing files in parallel |
+| Charts and React render performance | Outside this pack: a chart skill such as `dataviz`; the `react` skill of `agent-agile-team` for render and bundle rules | `library-selection.md`, for the dependency choice only | Writing chart or React-performance rules into the design pass |
 
 **Checker etiquette.** A checker reports `file:line`, the problem, and the fix. It does
 not commit. If a checker and the owner disagree, the owner's call stands and the
@@ -60,6 +61,40 @@ the answer to "what does this look like" is already in the repo, and inventing a
 parallel answer is the most expensive mistake available at this stage.
 
 Never generate a new design system at intake. Record what exists; decide later.
+
+### Redesigning something that already runs
+
+A redesign of a live page or product starts by naming the case, because treating one case
+as another derails the whole job. If the case is unclear, add one question to the batch
+above: *keep the current brand and evolve it, or redo the look from nothing?*
+
+| Case | What it means |
+| --- | --- |
+| **Evolve** | Refresh while the brand stays recognizable: audit first, pull out the existing tokens, change in steps |
+| **Overhaul** | A new visual language over the same content, information architecture, and URLs |
+| **Rebrand** | The brand itself changes; treat it as a new build |
+
+**Audit before changing anything:** the tokens (color, type, logo, radii); the information
+architecture and the conversion paths; which content earns its place and which is filler;
+what to keep and what to retire; and the **search baseline** (indexed URLs, titles,
+headings, redirects), since lost search traffic is the usual price of a careless redesign.
+
+**Hold steady unless told otherwise:** the information structure, URLs, anchors, navigation
+labels, and the identifiers analytics depend on; the brand color, sampled before any color
+rule runs so the redesign does not repaint it; the copy voice; and the accessibility
+already achieved.
+
+**Work through these levers in order, and stop once the brief is satisfied:** typography,
+then spacing and rhythm, then color tuning, then motion on components that already exist,
+then recomposing the hero and key sections, and last, replacing a block that cannot be
+saved. When structure, content, and search position are healthy, the first four levers
+deliver most of the benefit at a fraction of the risk. A full redesign is for structural
+debt (a broken information architecture, no system, a broken mobile layout), with all
+content carried over.
+
+**Needs explicit approval, recorded in the brief:** any change to URL structure or slugs,
+primary navigation labels, form field names or their order (analytics and autofill rely on
+them), the logo or wordmark, and legal, consent, or cookie text.
 
 ### Verify facts before designing them
 

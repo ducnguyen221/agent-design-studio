@@ -45,6 +45,13 @@ Choose the smallest flow that can answer the question. Then make it real:
   playbook before adding any).
 - **No dead buttons.** If an action belongs to the real system, explain the boundary
   instead of pretending it completed.
+- Loading shows a placeholder shaped like the content it stands in for, not a generic
+  spinner, whenever the content has a known shape. An empty state is composed and says how
+  to fill it.
+- Pressed controls give a small tactile response. Call-to-action labels are short, and one
+  label stands for one intent everywhere it appears.
+- Forms put each label above (or beside) its input, never the placeholder alone; helper
+  text exists in the markup; an error appears next to the field it belongs to.
 
 Depth in one flow beats breadth across a fake product.
 
